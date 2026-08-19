@@ -6,6 +6,20 @@ import (
 	"testing"
 )
 
+func normalizeIntGroups(groups [][]int) [][]int {
+	for _, group := range groups {
+		sort.Ints(group)
+	}
+	sort.Slice(groups, func(i, j int) bool {
+		for k := 0; k < len(groups[i]) && k < len(groups[j]); k++ {
+			if groups[i][k] != groups[j][k] {
+				return groups[i][k] < groups[j][k]
+			}
+		}
+		return len(groups[i]) < len(groups[j])
+	})
+	return groups
+}
 func TestTwoSum(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -115,6 +129,75 @@ func TestIntersection(t *testing.T) {
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Fatalf("intersection(%v, %v) = %v, want %v", tt.nums1, tt.nums2, got, tt.want)
+			}
+		})
+	}
+}
+func TestThreeSum(t *testing.T) {
+	tests := []struct {
+		name string
+		nums []int
+		want [][]int
+	}{
+		{name: "example with duplicates", nums: []int{-1, 0, 1, 2, -1, -4}, want: [][]int{{-1, -1, 2}, {-1, 0, 1}}},
+		{name: "all zeros deduplicated", nums: []int{0, 0, 0, 0}, want: [][]int{{0, 0, 0}}},
+		{name: "no triplet", nums: []int{1, 2, -2, -1}, want: [][]int{}},
+		{name: "less than three numbers", nums: []int{0, 1}, want: [][]int{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := normalizeIntGroups(threeSum(append([]int(nil), tt.nums...)))
+			want := normalizeIntGroups(tt.want)
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("threeSum(%v) = %v, want %v", tt.nums, got, want)
+			}
+		})
+	}
+}
+
+func TestFourSum(t *testing.T) {
+	tests := []struct {
+		name   string
+		nums   []int
+		target int
+		want   [][]int
+	}{
+		{name: "example", nums: []int{1, 0, -1, 0, -2, 2}, target: 0, want: [][]int{{-2, -1, 1, 2}, {-2, 0, 0, 2}, {-1, 0, 0, 1}}},
+		{name: "all same values deduplicated", nums: []int{2, 2, 2, 2, 2}, target: 8, want: [][]int{{2, 2, 2, 2}}},
+		{name: "negative target", nums: []int{-3, -1, 0, 2, 4, 5}, target: 2, want: [][]int{{-3, -1, 2, 4}}},
+		{name: "no quadruplet", nums: []int{1, 2, 3}, target: 6, want: [][]int{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := normalizeIntGroups(fourSum(append([]int(nil), tt.nums...), tt.target))
+			want := normalizeIntGroups(tt.want)
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("fourSum(%v, %d) = %v, want %v", tt.nums, tt.target, got, want)
+			}
+		})
+	}
+}
+
+func TestFourSumCount(t *testing.T) {
+	tests := []struct {
+		name string
+		a    []int
+		b    []int
+		c    []int
+		d    []int
+		want int
+	}{
+		{name: "example", a: []int{1, 2}, b: []int{-2, -1}, c: []int{-1, 2}, d: []int{0, 2}, want: 2},
+		{name: "all zeros", a: []int{0, 0}, b: []int{0}, c: []int{0}, d: []int{0, 0}, want: 4},
+		{name: "no tuples", a: []int{1}, b: []int{1}, c: []int{1}, d: []int{1}, want: 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := fourSumCount(tt.a, tt.b, tt.c, tt.d); got != tt.want {
+				t.Fatalf("fourSumCount(%v, %v, %v, %v) = %d, want %d", tt.a, tt.b, tt.c, tt.d, got, tt.want)
 			}
 		})
 	}
