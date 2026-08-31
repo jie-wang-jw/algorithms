@@ -2,37 +2,54 @@ package _3_hash
 
 import "sort"
 
-/*排序 + 固定一个数 + 双指针
-Sort + fix one number + two pointers
-sort the array first.
+/*
+Sort + fix one number + two pointers.
+排序 + 固定一个数 + 双指针。
+
+Sort the array first.
+先排序，使相同数字相邻，并让指针移动具有明确的增减方向。
+
 Then I fix one number and use two pointers on the remaining range.
+固定第一个数 a，再在右侧剩余区间使用 left 和 right 找另外两个数。
+
 If the sum is too small, I move the left pointer to increase it.
+如果总和太小，left 右移，让总和变大。
+
 If the sum is too large, I move the right pointer to decrease it.
+如果总和太大，right 左移，让总和变小。
+
 I also skip duplicate values to avoid returning the same triplet multiple times.
+跳过重复值，避免返回相同的三元组。
 */
 
 func threeSum(nums []int) [][]int {
-	/*先排序。排序以后，相同数字会挨在一起，也方便双指针移动。*/
+	// Sorting puts duplicates together and gives pointer movement a direction.
+	// 排序后相同数字会相邻，也方便根据总和大小移动双指针。
 	sort.Ints(nums)
 
 	res := [][]int{}
 
-	/*i 是固定第一个数 a 的位置。
-	为什么是 len(nums)-2？
-	因为后面还要留两个位置给 left 和 right*/
+	/*
+		i fixes the first number a. Stop before the last two positions because left and right still need one position each.
+		i 固定第一个数 a。i 最多到倒数第三个位置，因为后面还要给 left 和 right 各留一个位置。
+	*/
 	for i := 0; i < len(nums)-2; i++ {
 		a := nums[i]
 
-		/*如果 a 已经大于 0，后面的数也只会更大。*/
+		// If a is positive, all later values are also positive, so the sum cannot be 0.
+		// 如果 a 已经大于 0，后面的数字只会更大，总和不可能再等于 0。
 		if a > 0 {
 			break
 		}
 
-		/*这是给 a 去重 如果当前 a 和前一个 a 一样，就跳过。*/
+		// Skip a duplicate a because it would generate the same triplets again.
+		// 当前 a 和前一个 a 相同时跳过，否则会重复生成相同三元组。
 		if i > 0 && a == nums[i-1] {
 			continue
 		}
 
+		// Search for b and c in the sorted range to the right of i.
+		// 在 i 右侧的有序区间中寻找 b 和 c。
 		left, right := i+1, len(nums)-1
 
 		for left < right {
@@ -40,9 +57,12 @@ func threeSum(nums []int) [][]int {
 			sum := a + b + c
 
 			if sum == 0 {
+				// A valid triplet has been found.
+				// 找到一个满足 a+b+c=0 的三元组。
 				res = append(res, []int{a, b, c})
 
-				/*跳过重复的 b c*/
+				// Skip every copy of b and c because this value combination is already recorded.
+				// 当前 b、c 组合已经记录，跳过它们的所有重复值以避免重复答案。
 				for left < right && nums[left] == b {
 					left++
 				}
@@ -51,8 +71,12 @@ func threeSum(nums []int) [][]int {
 					right--
 				}
 			} else if sum > 0 {
+				// The sum is too large; move right leftward to use a smaller c.
+				// 总和太大，right 左移，换一个更小的 c。
 				right--
 			} else {
+				// The sum is too small; move left rightward to use a larger b.
+				// 总和太小，left 右移，换一个更大的 b。
 				left++
 			}
 		}

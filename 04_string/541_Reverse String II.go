@@ -1,0 +1,54 @@
+package _4_string
+
+/*
+I convert the string to a byte slice because strings are immutable in Go.
+Go 的 string 不能原地修改，所以先转换成 []byte。
+
+Then I process the string in chunks of 2k characters.
+每次处理长度为 2k 的一组字符。
+
+For each chunk, I reverse only the first k characters.
+每组只反转前 k 个字符。
+
+If fewer than k characters remain, I reverse all remaining characters.
+如果剩余字符少于 k 个，就把剩余字符全部反转。
+*/
+
+func reverseStr(s string, k int) string {
+	// bytes allows in-place character swaps.
+	// bytes 允许我们原地交换字符。
+	bytes := []byte(s)
+
+	// start jumps by 2k because only the first k characters of each 2k block change.
+	// start 每次跳过 2k，因为每个 2k 分组只需要处理前 k 个字符。
+	for start := 0; start < len(bytes); start += 2 * k {
+		// The intended reverse range is [start, start+k-1].
+		// 计划反转的闭区间是 [start, start+k-1]。
+		left := start
+		right := start + k - 1
+
+		/*
+			If fewer than k characters remain, clamp right to the last valid index.
+			如果剩余字符不足 k 个，就把 right 限制在最后一个有效下标。
+
+			例如：
+			s = "abc", k = 5
+			right = start + k - 1 = 4，但数组最后一个下标是 2。
+		*/
+		if right >= len(bytes) {
+			right = len(bytes) - 1
+		}
+
+		// Reverse the selected range by swapping from both ends.
+		// 从区间两端向中间交换，完成这一段的反转。
+		for left < right {
+			bytes[left], bytes[right] = bytes[right], bytes[left]
+			left++
+			right--
+		}
+	}
+
+	// Convert the modified byte slice back to a string.
+	// 把修改后的字节切片转换回字符串。
+	return string(bytes)
+}

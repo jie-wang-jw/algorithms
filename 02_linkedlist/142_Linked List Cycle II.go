@@ -1,11 +1,14 @@
 package _2_linkedlist
 
 /*
-141: 判断有没有环
-142: 如果有环，找到入环点
+141: Check whether a cycle exists. / 判断有没有环。
+142: If a cycle exists, find its entrance. / 如果有环，找到入环点。
 
-第一阶段：fast 每次比 slow 多走一步，所以有环一定会追上。
-第二阶段：p1 和 p2 每次同速前进，所以会在入环点相遇。
+Phase 1: fast gains one node on slow each round, so they must meet inside a cycle.
+第一阶段：fast 每轮比 slow 多走一步，所以有环时一定会追上 slow。
+
+Phase 2: p1 and p2 move at the same speed and meet at the cycle entrance.
+第二阶段：p1 和 p2 同速前进，并在入环点相遇。
 
 After slow and fast meet inside the cycle, one pointer starts from head and the other starts from the meeting point.
 If both move one step at a time, they meet at the cycle entrance.
@@ -20,15 +23,21 @@ If fast reaches nil, there is no cycle.
 */
 
 func detectCycle(head *ListNode) *ListNode {
+	// Both pointers start at head; slow moves 1 step and fast moves 2 steps.
+	// 两个指针都从 head 出发；slow 每次走 1 步，fast 每次走 2 步。
 	slow, fast := head, head
 
+	// fast and fast.Next must both exist before fast can move two steps.
+	// fast 连走两步前，必须确保 fast 和 fast.Next 都不为 nil。
 	for fast != nil && fast.Next != nil {
 		slow = slow.Next
 		fast = fast.Next.Next
 
+		// Pointer equality means both variables point to the exact same node.
+		// 指针相等表示 slow 和 fast 指向内存中的同一个节点，而不只是节点值相同。
 		if slow == fast {
-			//slow = 快慢指针在环里的相遇点
-			//slow = the meeting point inside the cycle
+			// slow is the first meeting point inside the cycle, not necessarily the entrance.
+			// slow 是快慢指针在环内的第一次相遇点，但它不一定是入环点。
 			p1, p2 := head, slow
 
 			/*
@@ -38,15 +47,21 @@ func detectCycle(head *ListNode) *ListNode {
 				Second meeting: finds the cycle entrance.
 			*/
 			for p1 != p2 {
+				// Move both one step; the distance formula guarantees they meet at the entrance.
+				// 两者每次各走一步；根据距离关系，它们会在入环点相遇。
 				p1 = p1.Next
 				p2 = p2.Next
 			}
 
-			/*We return p1 because after the loop, p1 has moved from head to the cycle entrance.
-			It is no longer necessarily the original head.*/
+			/*
+				Return p1 because after the loop both p1 and p2 point to the cycle entrance.
+				返回 p1，因为循环结束后 p1 和 p2 都已经指向入环点；此时 p1 不一定还是原来的 head。
+			*/
 			return p1
 		}
 	}
 
+	// Reaching nil means the list ends, so no cycle exists.
+	// fast 能走到 nil，说明链表存在终点，因此没有环。
 	return nil
 }

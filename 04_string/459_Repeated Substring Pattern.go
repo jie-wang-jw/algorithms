@@ -1,0 +1,95 @@
+package _4_string
+
+import "strings"
+
+/*
+Check whether the string can be constructed by repeating one of its substrings.
+判断字符串能否由它的某个非空子串重复多次构成。
+*/
+
+// Enumeration: try every possible pattern length. / 枚举法：尝试每种可能的重复单元长度。
+func repeatedSubstringPattern(s string) bool {
+	n := len(s)
+
+	// Try every possible substring length.
+	// 尝试每一种可能的子串长度。
+	for length := 1; length <= n/2; length++ {
+		// The substring length must divide the whole string length.
+		// 子串长度必须能整除整个字符串长度。
+		if n%length != 0 {
+			continue
+		}
+
+		// pattern is the candidate repeated substring.
+		// pattern 是候选的重复子串。
+		pattern := s[:length]
+
+		// Check whether every block equals pattern.
+		// 检查每一段是否都等于 pattern。
+		ok := true
+		for start := length; start < n; start += length {
+			if s[start:start+length] != pattern {
+				ok = false
+				break
+			}
+		}
+
+		if ok {
+			// Every block matched the candidate pattern.
+			// 每一段都与候选 pattern 相同，说明字符串可由它重复构成。
+			return true
+		}
+	}
+
+	return false
+}
+
+/*
+If s is made of a repeated substring, s appears inside (s+s) after removing the first and last characters.
+如果 s 由重复子串组成，那么在 (s+s) 去掉首尾字符后，仍然能找到完整的 s。
+*/
+func repeatedSubstringPattern2(s string) bool {
+	// Doubling contains every rotation of s.
+	// s+s 包含 s 的所有循环位移结果。
+	doubled := s + s
+	// Remove both ends so the two trivial copies of s cannot be matched directly.
+	// 去掉首尾字符，避免直接匹配原本位于两端的完整 s。
+	middle := doubled[1 : len(doubled)-1]
+	return strings.Contains(middle, s)
+}
+
+/*
+KMP
+The longer the equal prefix and suffix, the more the string overlaps with itself.
+最长相等前后缀越长，说明字符串前后重叠越多。
+
+Pattern length = n - next[n-1]. / 重复单元长度 = n - next[n-1]。
+If n is divisible by that length, the pattern repeats exactly. / 如果 n 能整除该长度，就是重复子串。
+*/
+func repeatedSubstringPattern3(s string) bool {
+	n := len(s)
+
+	// Build the prefix table for s.
+	// 给 s 构造前缀表。
+	next := make([]int, n)
+	getNext(next, s)
+
+	// longestPrefixSuffix is the longest prefix length that is also a suffix.
+	// longestPrefixSuffix 是整个字符串的最长相等前后缀长度。
+	// 之所以取最后一个，只因为最后一个位置代表的范围是整个字符串。
+	longestPrefixSuffix := next[n-1]
+
+	// If there is no repeated prefix/suffix, it cannot be built by repetition.
+	// 如果没有相等前后缀，就不可能由重复子串组成。
+	if longestPrefixSuffix == 0 {
+		return false
+	}
+
+	// patternLength is the smallest possible repeated block length.
+	// patternLength 是可能的最小重复单元长度。
+	patternLength := n - longestPrefixSuffix
+
+	// If n can be divided by patternLength, s is repeated by that block.
+	// 如果总长度能被 patternLength 整除，说明可以完整重复。
+	return n%patternLength == 0
+}
