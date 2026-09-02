@@ -1,5 +1,15 @@
 package _1_array
 
+/*
+题目描述 / Problem Description
+给定一个整数数组 nums 和一个整数 val，原地删除所有等于 val 的元素，并返回剩余元素的数量。返回后，nums 的前 k 个位置应保存所有未删除元素。
+Given an integer array nums and an integer val, remove every occurrence of val in place and return the number of remaining elements. Afterward, the first k positions of nums must contain the retained elements.
+
+解题思路 / Solution Approach
+文件提供两种方法：暴力法在删除时移动后续元素；双指针法让 fast 查找有效元素，让 slow 指向下一个写入位置，从而一次遍历完成原地覆盖。
+This file provides two methods: brute force shifts later elements after a removal, while the two-pointer method lets fast find retained values and slow mark the next write position.
+*/
+
 func removeElementBruteForce(nums []int, val int) int {
 	// size is the length of the current valid part of nums.
 	// size 表示 nums 当前仍然有效的区间长度。

@@ -1,6 +1,16 @@
 package _2_linkedlist
 
 /*
+题目描述 / Problem Description
+给定一个链表的头节点 head 和整数 n，删除链表的倒数第 n 个节点，并返回删除后的头节点。
+Given the head of a linked list and an integer n, remove the nth node from the end and return the resulting head.
+
+解题思路 / Solution Approach
+建立虚拟头节点，并让 fast 先前进 n 步。随后 slow 和 fast 同时移动，保持固定距离；当 fast 到达末尾时，slow 正好位于待删除节点之前。
+Create a dummy head and move fast n steps ahead. Then move slow and fast together; when fast reaches the end, slow is immediately before the node to remove.
+*/
+
+/*
 This is a linked-list two-pointer problem.
 这是一个链表双指针问题。
 I use a dummy node because the head might be removed.

@@ -127,6 +127,30 @@ func TestRemoveDuplicates(t *testing.T) {
 	}
 }
 
+func TestEvalRPN(t *testing.T) {
+	// Cover nested operations, operand order, and division truncation toward zero.
+	// 覆盖嵌套运算、操作数顺序以及除法向零截断。
+	tests := []struct {
+		name   string
+		tokens []string
+		want   int
+	}{
+		{name: "addition then multiplication", tokens: []string{"2", "1", "+", "3", "*"}, want: 9},
+		{name: "division then addition", tokens: []string{"4", "13", "5", "/", "+"}, want: 6},
+		{name: "complex expression", tokens: []string{"10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"}, want: 22},
+		{name: "subtraction operand order", tokens: []string{"8", "3", "-"}, want: 5},
+		{name: "negative division truncates toward zero", tokens: []string{"7", "-3", "/"}, want: -2},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := evalRPN(tt.tokens); got != tt.want {
+				t.Fatalf("evalRPN(%v) = %d, want %d", tt.tokens, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestMaxSlidingWindow(t *testing.T) {
 	// Cover the standard case, boundary window sizes, decreasing input,
 	// and duplicate maximum values.

@@ -1,6 +1,16 @@
 package _2_linkedlist
 
 /*
+题目描述 / Problem Description
+给定一个链表的头节点 head，如果链表中存在环，返回环的入口节点；如果不存在环，则返回 nil。不能修改链表。
+Given the head of a linked list, return the node where a cycle begins, or nil if the list has no cycle. The list must not be modified.
+
+解题思路 / Solution Approach
+使用 Floyd 快慢指针。slow 每次走一步，fast 每次走两步；如果相遇则存在环。随后一个指针回到 head，两个指针同速前进，再次相遇的位置就是环入口。
+Use Floyd's slow and fast pointers. If they meet, a cycle exists. Move one pointer back to head, advance both one step at a time, and their next meeting point is the cycle entrance.
+*/
+
+/*
 141: Check whether a cycle exists. / 判断有没有环。
 142: If a cycle exists, find its entrance. / 如果有环，找到入环点。
 

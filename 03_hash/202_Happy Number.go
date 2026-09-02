@@ -1,6 +1,16 @@
 package _3_hash
 
 /*
+题目描述 / Problem Description
+将正整数 n 反复替换为其各位数字的平方和。如果最终得到 1，则 n 是快乐数；如果进入不包含 1 的循环，则不是。判断 n 是否为快乐数。
+Repeatedly replace a positive integer n with the sum of the squares of its digits. Return whether this process eventually reaches 1 rather than entering a cycle.
+
+解题思路 / Solution Approach
+使用哈希集合记录所有出现过的中间结果。结果变成 1 时返回 true；某个结果重复出现时说明进入循环，返回 false。
+Store every intermediate value in a hash set. Return true upon reaching 1; if a value repeats, the process has entered a cycle, so return false.
+*/
+
+/*
 I repeatedly replace the number with the sum of the squares of its digits.
 不断把数字替换成“各位数字的平方和”。
 

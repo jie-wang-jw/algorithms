@@ -1,5 +1,15 @@
 package _4_string
 
+/*
+题目描述 / Problem Description
+给定字符串 haystack 和 needle，返回 needle 在 haystack 中第一次出现的起始下标；如果不存在则返回 -1。
+Given strings haystack and needle, return the starting index of the first occurrence of needle in haystack, or -1 if it does not occur.
+
+解题思路 / Solution Approach
+文件提供暴力匹配和 KMP。暴力法尝试每个可能起点；KMP 使用前缀表，在失配时复用已经匹配的信息，避免回退主串指针。
+The file provides brute-force and KMP solutions. Brute force tries every starting position, while KMP uses a prefix table to reuse matched information without moving the text pointer backward.
+*/
+
 func strStr(haystack string, needle string) int {
 	// If needle is empty, return 0 by convention.
 	// 按题目约定，needle 为空时返回 0。
@@ -119,11 +129,11 @@ func getNext(next []int, s string) {
 	next[0] = 0
 
 	/*
-		i is the position whose next value we are computing; j is the reusable prefix length.
-		i 是当前要计算 next[i] 的位置；j 是目前可以复用的前缀长度。
+			i is the position whose next value we are computing; j is the reusable prefix length.
+			i 是当前要计算 next[i] 的位置；j 是目前可以复用的前缀长度。
 
-	s[i] is the new character, and s[j] is the next character expected by the old prefix.
-		s[i] 是新加入的字符，s[j] 是旧前缀接下来期待匹配的字符。
+		s[i] is the new character, and s[j] is the next character expected by the old prefix.
+			s[i] 是新加入的字符，s[j] 是旧前缀接下来期待匹配的字符。
 	*/
 	for i := 1; i < len(s); i++ {
 		/*

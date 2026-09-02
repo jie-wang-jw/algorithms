@@ -1,5 +1,15 @@
 package _1_array
 
+/*
+题目描述 / Problem Description
+给定正整数 n，生成一个 n x n 矩阵，按照顺时针螺旋顺序填入从 1 到 n² 的所有整数。
+Given a positive integer n, generate an n x n matrix filled with the integers from 1 to n² in clockwise spiral order.
+
+解题思路 / Solution Approach
+维护上、下、左、右四条未填充边界。每轮依次填充上边、右边、下边和左边，然后将四条边界向内收缩。
+Maintain top, bottom, left, and right boundaries for the unfilled area. Fill the four sides clockwise, then move all boundaries inward.
+*/
+
 func generateMatrix(n int) [][]int {
 	// Create an n by n matrix initialized with zeros.
 	// 创建一个 n x n 的二维数组，初始值都为 0。

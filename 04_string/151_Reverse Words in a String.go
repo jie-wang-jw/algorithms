@@ -1,5 +1,15 @@
 package _4_string
 
+/*
+题目描述 / Problem Description
+给定字符串 s，反转其中单词的顺序。单词之间可能有多个空格，结果中单词之间只保留一个空格，且首尾不能有空格。
+Given a string s, reverse the order of its words. The input may contain extra spaces; the result must use one space between words and have no leading or trailing spaces.
+
+解题思路 / Solution Approach
+使用 strings.Fields 提取所有非空单词并自动忽略多余空白，再用双指针反转单词切片，最后以单个空格连接。
+Use strings.Fields to extract words while discarding extra whitespace, reverse the word slice with two pointers, and join it with single spaces.
+*/
+
 import "strings"
 
 func reverseWords(s string) string {

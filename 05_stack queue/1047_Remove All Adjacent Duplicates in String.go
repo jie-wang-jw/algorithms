@@ -1,6 +1,16 @@
 package _5_stack_queue
 
 /*
+题目描述 / Problem Description
+给定一个只包含小写英文字母的字符串 s，不断删除两个相邻且相同的字符，直到无法继续删除，并返回最终字符串。
+Given a string s containing only lowercase English letters, repeatedly remove adjacent equal character pairs until no more removals are possible, and return the final string.
+
+解题思路 / Solution Approach
+使用字节切片模拟栈。当前字符与栈顶相同时弹出栈顶，否则将当前字符入栈；栈顶始终是最近保留的字符，因此可以自然处理连锁删除。
+Use a byte slice as a stack. Pop when the current character matches the top; otherwise push it. The top is always the most recently retained character, so chain reactions are handled naturally.
+*/
+
+/*
 Use a byte slice as a stack to store characters that have not been removed.
 使用字节切片作为栈，保存尚未被删除的字符。
 

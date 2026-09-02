@@ -1,6 +1,16 @@
 package _3_hash
 
 /*
+题目描述 / Problem Description
+给定四个整数数组 nums1、nums2、nums3 和 nums4，统计满足 nums1[i] + nums2[j] + nums3[k] + nums4[l] = 0 的下标四元组数量。
+Given four integer arrays nums1, nums2, nums3, and nums4, count index tuples satisfying nums1[i] + nums2[j] + nums3[k] + nums4[l] = 0.
+
+解题思路 / Solution Approach
+将四个数组分成两组。用哈希表统计前两个数组所有两数和的出现次数，再遍历后两个数组的两数和，累加其相反数在哈希表中的频次。
+Split the arrays into two pairs. Count every sum from the first pair in a hash map, then scan sums from the second pair and add the frequency of each opposite sum.
+*/
+
+/*
 Split the four arrays into two pairs.
 把四个数组分成两组处理。
 

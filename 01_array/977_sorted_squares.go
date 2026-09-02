@@ -1,5 +1,15 @@
 package _1_array
 
+/*
+题目描述 / Problem Description
+给定一个按非递减顺序排列的整数数组 nums，返回每个元素平方后仍按非递减顺序排列的新数组。
+Given an integer array nums sorted in nondecreasing order, return a new array containing each value's square, also sorted in nondecreasing order.
+
+解题思路 / Solution Approach
+文件提供排序法和双指针法。双指针比较数组两端的平方值，将较大值从结果数组末尾向前写入，可在线性时间内完成。
+The file provides sorting and two-pointer solutions. The two-pointer method compares squared values at both ends and writes the larger one from the end of the result array.
+*/
+
 import (
 	"sort"
 )

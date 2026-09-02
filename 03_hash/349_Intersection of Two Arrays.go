@@ -1,6 +1,16 @@
 package _3_hash
 
 /*
+题目描述 / Problem Description
+给定两个整数数组 nums1 和 nums2，返回它们的交集。结果中的每个元素必须唯一，返回顺序不限。
+Given two integer arrays nums1 and nums2, return their intersection. Every result value must be unique, and the order does not matter.
+
+解题思路 / Solution Approach
+先把 nums1 的元素放入哈希集合，再遍历 nums2。命中集合时加入结果并从集合删除，确保相同数字只加入一次。
+Put all values from nums1 into a hash set, then scan nums2. When a value is found, append it and remove it from the set so it can appear only once.
+*/
+
+/*
 I use a hash set to store all numbers from the first array.
 我使用哈希集合保存第一个数组中的所有数字。
 Then I iterate through the second array.

@@ -1,6 +1,16 @@
 package _3_hash
 
 /*
+题目描述 / Problem Description
+给定整数数组 nums 和整数 target，找出两个和为 target 的不同元素下标并返回。题目保证恰好存在一个答案。
+Given an integer array nums and an integer target, return the indices of two distinct elements whose sum equals target. Exactly one answer is guaranteed.
+
+解题思路 / Solution Approach
+遍历数组并用哈希表保存已经见过的数字及其下标。对当前数字 num，检查 target-num 是否已经出现；如果出现即可返回两个下标。
+Scan the array while storing previously seen values and indices in a hash map. For each num, check whether target-num has already appeared and return the two indices when found.
+*/
+
+/*
 Use a hash map to store numbers I have already seen and their indices.
 使用哈希表保存已经见过的数字及其下标。
 

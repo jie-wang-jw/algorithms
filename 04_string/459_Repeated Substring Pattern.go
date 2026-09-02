@@ -1,5 +1,15 @@
 package _4_string
 
+/*
+题目描述 / Problem Description
+给定非空字符串 s，判断它能否由某个非空子串重复多次构成。
+Given a nonempty string s, determine whether it can be constructed by repeating one of its nonempty substrings multiple times.
+
+解题思路 / Solution Approach
+文件提供三种方法：枚举可能的重复单元、在 (s+s)[1:2n-1] 中查找 s，以及利用 KMP 最长相等前后缀判断字符串长度能否被重复周期整除。
+The file provides enumeration, doubled-string matching, and KMP solutions. KMP derives a possible period from the longest equal prefix and suffix and checks whether it divides the string length.
+*/
+
 import "strings"
 
 /*

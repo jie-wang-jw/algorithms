@@ -1,6 +1,16 @@
 package _5_stack_queue
 
 /*
+题目描述 / Problem Description
+只使用栈的标准操作实现一个先进先出的队列，支持 Push、Pop、Peek 和 Empty。
+Implement a first-in-first-out queue using only standard stack operations, supporting Push, Pop, Peek, and Empty.
+
+解题思路 / Solution Approach
+使用 inStack 接收入队元素，使用 outStack 提供队首。当 outStack 为空时才把 inStack 的所有元素倒入其中，使最早入队的元素来到栈顶。
+Use inStack for incoming elements and outStack for the queue front. Only when outStack is empty, transfer all elements from inStack so the oldest element becomes its top.
+*/
+
+/*
 Use two stacks to simulate a FIFO queue.
 使用两个栈模拟先进先出的队列。
 

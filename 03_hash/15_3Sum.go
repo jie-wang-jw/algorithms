@@ -1,5 +1,15 @@
 package _3_hash
 
+/*
+题目描述 / Problem Description
+给定整数数组 nums，找出所有和为 0 的不重复三元组。每个三元组必须使用三个不同下标的元素。
+Given an integer array nums, return all unique triplets whose sum is zero. Each triplet must use elements at three distinct indices.
+
+解题思路 / Solution Approach
+先排序数组，再固定第一个数，并用左右指针寻找另外两个数。根据三数之和移动指针，同时跳过重复值以避免重复三元组。
+Sort the array, fix the first value, and use two pointers to find the other two. Move pointers according to the sum and skip duplicate values to avoid duplicate triplets.
+*/
+
 import "sort"
 
 /*

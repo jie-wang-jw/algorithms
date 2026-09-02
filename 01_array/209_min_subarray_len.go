@@ -1,5 +1,15 @@
 package _1_array
 
+/*
+题目描述 / Problem Description
+给定一个正整数 target 和一个由正整数组成的数组 nums，找出总和大于或等于 target 的最短连续子数组，并返回其长度；如果不存在则返回 0。
+Given a positive integer target and an array nums of positive integers, return the minimum length of a contiguous subarray whose sum is at least target; return 0 if none exists.
+
+解题思路 / Solution Approach
+使用滑动窗口。右指针不断扩大窗口并累加元素；当窗口和达到 target 时，持续移动左指针缩小窗口，同时更新最短长度。
+Use a sliding window. Expand the right boundary and add values; whenever the sum reaches target, repeatedly shrink the left boundary while updating the minimum length.
+*/
+
 func minSubArrayLen(target int, nums []int) int {
 	// i is the left boundary of the current sliding window.
 	// i 是当前滑动窗口的左边界。

@@ -1,5 +1,15 @@
 package _1_array
 
+/*
+题目描述 / Problem Description
+给定一个整数数组和多组闭区间查询 [left, right]，对每组查询输出该区间内所有元素的总和。
+Given an integer array and multiple inclusive range queries [left, right], output the sum of all elements in each queried range.
+
+解题思路 / Solution Approach
+预先构造前缀和 prefix，其中 prefix[i] 表示前 i 个元素之和。每个区间和可用 prefix[right+1] - prefix[left] 在 O(1) 时间内得到。
+Build a prefix-sum array where prefix[i] is the sum of the first i elements. Each range sum is then prefix[right+1] - prefix[left] in O(1) time.
+*/
+
 import (
 	"bufio"
 	"fmt"

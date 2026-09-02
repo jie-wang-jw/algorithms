@@ -1,6 +1,16 @@
 package _2_linkedlist
 
 /*
+题目描述 / Problem Description
+给定单链表的头节点 head，反转链表并返回反转后的新头节点。
+Given the head of a singly linked list, reverse the list and return its new head.
+
+解题思路 / Solution Approach
+迭代法使用 prev 和 cur，先保存下一个节点，再令 cur.Next 指向 prev。递归法先反转后半段，再把当前节点接到反转后链表的末尾。
+The iterative method uses prev and cur, saving the next node before reversing cur.Next. The recursive method reverses the suffix first and then attaches the current node at its end.
+*/
+
+/*
 This is a linked-list pointer reversal problem.
 这是一个修改链表指针方向的问题。
 

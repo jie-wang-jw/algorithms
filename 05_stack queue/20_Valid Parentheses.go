@@ -1,6 +1,16 @@
 package _5_stack_queue
 
 /*
+题目描述 / Problem Description
+给定一个只包含圆括号、方括号和花括号的字符串 s，判断所有括号是否类型匹配、闭合顺序正确，并且每个右括号都有对应的左括号。
+Given a string s containing only parentheses, square brackets, and braces, determine whether every bracket has the correct type, closing order, and matching partner.
+
+解题思路 / Solution Approach
+使用栈保存每个左括号所期待的右括号。遇到右括号时，它必须等于栈顶；如果栈为空、类型不匹配，或遍历结束后栈不为空，则字符串无效。
+Use a stack to store the closing bracket expected for each opening bracket. A closing bracket must match the top; an empty stack, mismatch, or leftover stack makes the string invalid.
+*/
+
+/*
 Use a stack to track the expected closing brackets.
 使用栈记录接下来期待出现的右括号。
 

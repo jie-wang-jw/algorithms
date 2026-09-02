@@ -1,5 +1,15 @@
 package _4_string
 
+/*
+题目描述 / Problem Description
+给定字符数组 s，原地反转数组中的字符。要求使用 O(1) 额外空间完成。
+Given a character array s, reverse its characters in place using O(1) extra space.
+
+解题思路 / Solution Approach
+使用左右双指针，从数组两端向中间移动，每轮交换两个指针指向的字符，直到指针相遇或交错。
+Use two pointers starting at both ends. Swap their characters and move inward until the pointers meet or cross.
+*/
+
 // Reverse the byte slice in place with two pointers.
 // 使用左右双指针原地反转字节切片。
 func reverseString(s []byte) {

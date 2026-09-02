@@ -1,6 +1,16 @@
 package _5_stack_queue
 
 /*
+题目描述 / Problem Description
+只使用队列的标准操作实现一个后进先出的栈，支持 Push、Pop、Top 和 Empty。
+Implement a last-in-first-out stack using only standard queue operations, supporting Push, Pop, Top, and Empty.
+
+解题思路 / Solution Approach
+使用一个队列。每次 Push 新元素后，把之前的所有元素从队首移动到队尾，使新元素来到队首；这样 Pop 和 Top 都可以直接操作队首。
+Use one queue. After each Push, rotate all older elements from the front to the back so the new element becomes the front; Pop and Top can then use the front directly.
+*/
+
+/*
 Use one queue to simulate a LIFO stack.
 使用一个队列模拟后进先出的栈。
 

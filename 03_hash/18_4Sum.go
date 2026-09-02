@@ -1,5 +1,15 @@
 package _3_hash
 
+/*
+题目描述 / Problem Description
+给定整数数组 nums 和整数 target，找出所有和为 target 的不重复四元组。每个四元组必须使用四个不同下标的元素。
+Given an integer array nums and an integer target, return all unique quadruplets whose sum equals target, using four distinct indices.
+
+解题思路 / Solution Approach
+先排序，使用两层循环固定前两个数，再在剩余区间使用左右指针寻找另外两个数。各层都跳过重复值，并用较宽整数类型计算总和以避免溢出。
+Sort first, fix two values with nested loops, and use two pointers for the remaining pair. Skip duplicates at every level and use a wider integer type for sums to avoid overflow.
+*/
+
 import "sort"
 
 /*
