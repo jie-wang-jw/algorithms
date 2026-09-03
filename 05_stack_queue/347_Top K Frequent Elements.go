@@ -1,0 +1,138 @@
+package _5_stack_queue
+
+import "container/heap"
+
+/*
+题目描述 / Problem Description
+
+给定整数数组 nums 和整数 k，返回出现频率最高的 k 个元素。
+答案可以按照任意顺序返回。
+
+Given an integer array nums and an integer k, return the k most
+frequent elements. The answer may be returned in any order.
+
+解题思路 / Solution Approach
+
+首先使用哈希表统计每个数字的出现频率。
+First, use a hash map to count the frequency of each value.
+
+然后维护一个大小为 k 的小顶堆。
+Then maintain a min-heap of size k.
+
+当堆的大小超过 k 时，删除频率最低的堆顶元素。
+Whenever the heap size exceeds k, remove the least frequent root.
+
+最后堆中保留的就是频率最高的 k 个元素。
+The heap finally contains the k most frequent elements.
+
+为什么使用小顶堆？ / Why Use a Min-Heap?
+堆中只保留当前频率最高的 k 个元素。
+The heap stores only the current top k frequent elements.
+小顶堆的堆顶是这 k 个元素中频率最低的元素。
+The root of the min-heap is the least frequent among those k elements.
+每次加入新的数字和频率后：
+After inserting a new value-frequency pair:
+- 如果堆的大小不超过 k，继续保留。
+  If the heap size does not exceed k, keep all elements.
+- 如果堆的大小超过 k，删除堆顶。
+  If the heap size exceeds k, remove the root.
+这样每次删除的都是当前候选中频率最低的元素。
+This always removes the least frequent current candidate.
+遍历结束后，堆中剩下的就是频率最高的 k 个元素。
+After processing all frequencies, the heap contains exactly the top k frequent elements.
+*/
+
+// frequencyHeap is a min-heap ordered by frequency.
+// frequencyHeap 是按照出现频率排序的小顶堆。
+//
+// Each item stores [number, frequency].
+// 每个元素保存 [数字, 出现频率]。
+type frequencyHeap [][2]int
+
+// Len returns the number of elements in the heap.
+// Len 返回堆中的元素数量。
+func (h frequencyHeap) Len() int {
+	return len(h)
+}
+
+// Less places the lower-frequency element closer to the root.
+// Less 让出现频率较低的元素更接近堆顶。
+func (h frequencyHeap) Less(i, j int) bool {
+	return h[i][1] < h[j][1]
+}
+
+// Swap exchanges two heap elements.
+// Swap 交换堆中的两个元素。
+func (h frequencyHeap) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+}
+
+// Push adds a new element to the end of the underlying slice.
+// Push 将新元素加入底层切片末尾。
+func (h *frequencyHeap) Push(value interface{}) {
+	item := value.([2]int)
+	*h = append(*h, item)
+}
+
+// Pop removes and returns the last element of the underlying slice.
+// container/heap moves the root to the end before calling this method.
+// Pop 删除并返回底层切片末尾的元素。
+// container/heap 调用此方法前，会先把原堆顶移动到切片末尾。
+func (h *frequencyHeap) Pop() interface{} {
+	oldHeap := *h
+	lastIndex := len(oldHeap) - 1
+
+	// Save the element that will be returned.
+	// 保存即将返回的元素。
+	item := oldHeap[lastIndex]
+
+	// Remove the last element from the slice.
+	// 从切片中删除最后一个元素。
+	*h = oldHeap[:lastIndex]
+
+	return item
+}
+
+func topKFrequent(nums []int, k int) []int {
+	// frequency maps each number to its occurrence count.
+	// frequency 记录每个数字的出现次数。
+	frequency := make(map[int]int)
+
+	for _, number := range nums {
+		frequency[number]++
+	}
+
+	// minHeap stores at most k value-frequency pairs.
+	// minHeap 最多保存 k 个“数字-频率”对。
+	minHeap := &frequencyHeap{}
+	heap.Init(minHeap)
+
+	for number, count := range frequency {
+		// Store the number and its frequency together.
+		// 将数字和它的出现频率一起加入堆中。
+		heap.Push(minHeap, [2]int{number, count})
+
+		// If the heap contains more than k candidates,
+		// remove the candidate with the lowest frequency.
+		// 如果堆中候选元素超过 k 个，
+		// 就删除出现频率最低的候选元素。
+		if minHeap.Len() > k {
+			heap.Pop(minHeap)
+		}
+	}
+
+	// The heap now contains exactly the top k frequent values.
+	// 此时堆中正好保存频率最高的 k 个数字。
+	result := make([]int, k)
+
+	// Pop from the min-heap and write from right to left.
+	// The result is therefore ordered from higher to lower frequency.
+	// 依次弹出小顶堆，并从结果数组右侧向左写入。
+	// 因此结果大致按照频率从高到低排列。
+	for i := k - 1; i >= 0; i-- {
+		item := heap.Pop(minHeap).([2]int)
+		result[i] = item[0]
+	}
+
+	return result
+}

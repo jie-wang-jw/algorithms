@@ -1,7 +1,9 @@
 package _5_stack_queue
 
 import (
+	"container/heap"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -172,6 +174,61 @@ func TestMaxSlidingWindow(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := maxSlidingWindow(tt.nums, tt.k); !reflect.DeepEqual(got, tt.want) {
 				t.Fatalf("maxSlidingWindow(%v, %d) = %v, want %v", tt.nums, tt.k, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFrequencyHeap(t *testing.T) {
+	// Push frequencies in an unsorted order and verify that heap.Pop
+	// returns them from lowest to highest frequency.
+	// 按无序频率入堆，并验证 heap.Pop 会按频率从低到高弹出。
+	minHeap := &frequencyHeap{}
+	heap.Init(minHeap)
+
+	heap.Push(minHeap, [2]int{1, 3})
+	heap.Push(minHeap, [2]int{2, 1})
+	heap.Push(minHeap, [2]int{3, 2})
+
+	wantFrequencies := []int{1, 2, 3}
+	for i, want := range wantFrequencies {
+		item := heap.Pop(minHeap).([2]int)
+		if got := item[1]; got != want {
+			t.Fatalf("pop %d returned frequency %d, want %d", i+1, got, want)
+		}
+	}
+}
+
+func TestTopKFrequent(t *testing.T) {
+	// Result order is not part of the contract, so each result and expected
+	// slice is sorted before comparison.
+	// 题目不要求结果顺序，因此比较前分别对实际结果和预期结果排序。
+	tests := []struct {
+		name string
+		nums []int
+		k    int
+		want []int
+	}{
+		{name: "standard example", nums: []int{1, 1, 1, 2, 2, 3}, k: 2, want: []int{1, 2}},
+		{name: "single element", nums: []int{1}, k: 1, want: []int{1}},
+		{name: "negative numbers", nums: []int{-1, -1, -1, -2, -2, -3}, k: 2, want: []int{-1, -2}},
+		{name: "one most frequent value", nums: []int{5, 5, 5, 1, 2, 3}, k: 1, want: []int{5}},
+		{name: "two equal top frequencies", nums: []int{4, 1, -1, 2, -1, 2, 3}, k: 2, want: []int{-1, 2}},
+		{name: "k equals distinct count", nums: []int{4, 4, 5, 6}, k: 3, want: []int{4, 5, 6}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := topKFrequent(tt.nums, tt.k)
+			sort.Ints(got)
+
+			// Copy want so sorting does not modify the table entry.
+			// 复制 want，避免排序修改表格中的原始测试数据。
+			want := append([]int(nil), tt.want...)
+			sort.Ints(want)
+
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("topKFrequent(%v, %d) = %v, want %v", tt.nums, tt.k, got, want)
 			}
 		})
 	}
