@@ -45,6 +45,15 @@ which is the number of nodes in the current level.
 
 While processing the current level, enqueue its children so they
 can be processed in the next round.
+
+// Ordinary tree:
+	// 普通二叉树：
+	//
+	//          1
+	//        /   \
+	//       2     3
+	//      / \     \
+	//     4   5     6
 */
 
 func levelOrder(root *TreeNode) [][]int {
@@ -58,5 +67,51 @@ func levelOrder(root *TreeNode) [][]int {
 	// result 保存所有已经处理完成的层。
 	result := make([][]int, 0)
 
+	// Start BFS by adding the root to the queue.
+	// 将根节点加入队列，开始广度优先搜索。
+	queue := []*TreeNode{root}
+
+	// Continue until every node has been processed.
+	// 持续处理，直到队列中没有节点。
+	for len(queue) > 0 {
+		// Save the current queue length before adding any children.
+		// 添加子节点之前，先保存当前层的节点数量。
+		levelSize := len(queue)
+
+		// level stores the values in the current level.
+		// level 保存当前层的所有节点值。
+		level := make([]int, 0, levelSize)
+
+		// Process exactly the nodes belonging to the current level.
+		// 只处理属于当前层的 levelSize 个节点。
+		for range levelSize {
+			// Remove the node at the front of the queue.
+			// 取出并删除队首节点。
+			node := queue[0]
+			queue = queue[1:]
+
+			// Save the current node's value.
+			// 保存当前节点的值。
+			level = append(level, node.Val)
+
+			// Add the left child for the next level.
+			// 将左子节点加入队列，等待下一层处理。
+			if node.Left != nil {
+				queue = append(queue, node.Left)
+			}
+
+			// Add the right child for the next level.
+			// 将右子节点加入队列，等待下一层处理。
+			if node.Right != nil {
+				queue = append(queue, node.Right)
+			}
+		}
+
+		// The current level is complete.
+		// 当前层已经处理完成。
+		result = append(result, level)
+	}
+
+	//fmt.Println(result)
 	return result
 }
