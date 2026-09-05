@@ -20,7 +20,7 @@ func minSubArrayLen(target int, nums []int) int {
 
 	// j expands the right boundary one element at a time.
 	// j 每次向右移动一位，扩张窗口右边界。
-	for j := 0; j < l; j++ {
+	for j := range l {
 		sum += nums[j]
 		// Once the sum reaches target, shrink from the left as much as possible.
 		// 当窗口和达到 target 后，尽可能从左侧收缩窗口。

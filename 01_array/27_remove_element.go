@@ -6,8 +6,38 @@ package _1_array
 Given an integer array nums and an integer val, remove every occurrence of val in place and return the number of remaining elements. Afterward, the first k positions of nums must contain the retained elements.
 
 解题思路 / Solution Approach
-文件提供两种方法：暴力法在删除时移动后续元素；双指针法让 fast 查找有效元素，让 slow 指向下一个写入位置，从而一次遍历完成原地覆盖。
-This file provides two methods: brute force shifts later elements after a removal, while the two-pointer method lets fast find retained values and slow mark the next write position.
+本文件提供三种解法。题目允许改变元素顺序，只检查返回长度 k 和 nums[:k]，不要求真正缩短切片或清空尾部。
+This file provides three solutions. Element order may change; only the returned length k and nums[:k] matter. The slice need not be shortened or its trailing values cleared.
+
+1. 暴力移位法 / Brute-force shifting — removeElementBruteForce
+遇到 val 时，将有效区间内后续元素全部左移一位，并将有效长度减一。
+When val is found, shift all later elements in the valid range one position left and reduce the valid length by one.
+移位后必须重新检查当前位置，因为补过来的元素仍可能等于 val；遍历边界也必须使用更新后的有效长度。
+Recheck the same position because its replacement may also equal val; the loop must use the updated valid length as its boundary.
+时间 O(n²)，额外空间 O(1)，保留未删除元素的相对顺序。
+Time O(n²), extra space O(1); preserves the relative order of retained elements.
+
+2. 快慢指针法 / Fast and slow pointers — removeElementFastSlow
+fast 扫描所有元素，slow 指向下一个写入位置。遇到非 val 元素时，将其写入 nums[slow]，然后 slow 加一。
+fast scans every element, while slow marks the next write position. Copy each non-val element to nums[slow], then increment slow.
+扫描结束后，nums[:slow] 保存所有有效元素，返回 slow。
+After the scan, nums[:slow] contains all retained elements; return slow.
+时间 O(n)，额外空间 O(1)，保留未删除元素的相对顺序。
+Time O(n), extra space O(1); preserves the relative order of retained elements.
+
+3. 左右双指针法 / Left and right pointers — removeElementTwoPointers
+left 从左侧寻找 val，right 从右侧寻找非 val 元素；右侧的 val 可以直接跳过。
+left searches from the front for val, while right searches from the back for a non-val element; trailing val elements can be skipped directly.
+当 left < right 时，用 nums[right] 覆盖 nums[left]，然后两个指针向内移动。结束后返回 left，有效结果为 nums[:left]。
+When left < right, overwrite nums[left] with nums[right] and move both pointers inward. Return left when finished; the valid result is nums[:left].
+时间 O(n)，额外空间 O(1)，可能改变未删除元素的相对顺序；仅在需要填补左侧待删除位置时写入。
+Time O(n), extra space O(1); may change the relative order of retained elements and writes only when filling a removal position on the left.
+
+示例 / Example: nums = [3, 2, 2, 3, 4], val = 3
+暴力法和快慢指针法：k = 3，有效前缀为 [2, 2, 4]。
+Brute-force shifting and fast/slow pointers: k = 3, valid prefix [2, 2, 4].
+左右双指针法：k = 3，有效前缀为 [4, 2, 2]。两种排列都符合题意。
+Left/right pointers: k = 3, valid prefix [4, 2, 2]. Both orderings satisfy the problem.
 */
 
 func removeElementBruteForce(nums []int, val int) int {
@@ -40,7 +70,7 @@ func removeElementFastSlow(nums []int, val int) int {
 
 	// fast scans every element; slow moves only when an element is kept.
 	// fast 扫描每个元素；只有保留元素时 slow 才向前移动。
-	for fast := 0; fast < len(nums); fast++ {
+	for fast := range nums {
 		if nums[fast] != val {
 			// Copy the kept value to the front valid part of the slice.
 			// 把需要保留的值写到切片前面的有效区域。
@@ -73,6 +103,7 @@ func removeElementTwoPointers(nums []int, val int) int {
 		// Replace the left-side val with a right-side value that should be kept.
 		// 找到后，用右侧的非 val 覆盖左侧的 val。
 		if left < right {
+			//用右边需要保留的数字，覆盖左边需要删除的数字
 			nums[left] = nums[right]
 			left++
 			right--

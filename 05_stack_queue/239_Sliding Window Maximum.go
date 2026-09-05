@@ -73,7 +73,7 @@ func maxSlidingWindow(nums []int, k int) []int {
 
 	// i is the right boundary of the current window.
 	// i 是当前窗口的右边界。
-	for i := 0; i < len(nums); i++ {
+	for i := range nums {
 		// Step 1: remove indices that have left the window.
 		// 第一步：删除已经离开当前窗口的下标。
 		//

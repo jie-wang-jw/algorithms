@@ -53,7 +53,7 @@ func (s *MyStack) Push(x int) {
 
 	// Move all older elements from the front to the back.
 	// 将所有旧元素从队首依次移动到队尾。
-	for i := 0; i < size; i++ {
+	for range size {
 		// Read the front element.
 		// 读取队首元素。
 		front := s.queue[0]

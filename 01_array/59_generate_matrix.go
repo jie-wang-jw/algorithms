@@ -14,7 +14,7 @@ func generateMatrix(n int) [][]int {
 	// Create an n by n matrix initialized with zeros.
 	// 创建一个 n x n 的二维数组，初始值都为 0。
 	ans := make([][]int, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		ans[i] = make([]int, n)
 	}
 
