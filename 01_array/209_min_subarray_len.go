@@ -8,6 +8,10 @@ Given a positive integer target and an array nums of positive integers, return t
 解题思路 / Solution Approach
 使用滑动窗口。右指针不断扩大窗口并累加元素；当窗口和达到 target 时，持续移动左指针缩小窗口，同时更新最短长度。
 Use a sliding window. Expand the right boundary and add values; whenever the sum reaches target, repeatedly shrink the left boundary while updating the minimum length.
+
+时间与空间复杂度 / Time and Space Complexity
+n = len(nums)。时间 O(n)：左右边界各最多前进 n 次，嵌套循环不是 O(n²)。辅助空间 O(1)，只维护窗口和与下标。
+n = len(nums). Time O(n): each boundary advances at most n times, so the nested loops are not quadratic. Auxiliary space O(1) for the sum and indices.
 */
 
 func minSubArrayLen(target int, nums []int) int {

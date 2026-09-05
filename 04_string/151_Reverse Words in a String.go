@@ -8,6 +8,10 @@ Given a string s, reverse the order of its words. The input may contain extra sp
 解题思路 / Solution Approach
 使用 strings.Fields 提取所有非空单词并自动忽略多余空白，再用双指针反转单词切片，最后以单个空格连接。
 Use strings.Fields to extract words while discarding extra whitespace, reverse the word slice with two pointers, and join it with single spaces.
+
+时间与空间复杂度 / Time and Space Complexity
+n 为字符串字节数，w 为单词数。reverseWords：时间 O(n)，Fields 扫描、反转单词、Join 总计线性；辅助空间 O(w) 保存单词切片，输出 O(n)。reverseWords2：清理空格和两次反转总时间 O(n)，Go 的 []byte(s) 副本占 O(n) 辅助空间；仅反转步骤为 O(1) 空间。两者包含输出均为 O(n)。
+For n bytes and w words, reverseWords takes O(n) time, O(w) auxiliary space for word slices, and O(n) output space. reverseWords2 takes O(n) time for normalization and reversals; its []byte(s) copy uses O(n) auxiliary space, though the reversal steps alone use O(1). Total space including output is O(n) for both.
 */
 
 import "strings"

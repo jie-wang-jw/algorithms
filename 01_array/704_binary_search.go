@@ -8,6 +8,10 @@ Given an integer array nums sorted in ascending order and a target value, return
 解题思路 / Solution Approach
 使用二分查找，每次比较中间元素并排除一半搜索区间。文件分别演示左闭右闭区间和左闭右开区间两种写法。
 Use binary search, comparing the middle element and discarding half of the search range each time. The file demonstrates both closed and half-open interval conventions.
+
+时间与空间复杂度 / Time and Space Complexity
+n = len(nums)。search1 和 search2 最坏时间均为 O(log n)，每轮搜索区间减半；辅助空间 O(1)，迭代实现只保存边界和中点。
+n = len(nums). Both search1 and search2 take O(log n) worst-case time because the interval halves each round, and O(1) auxiliary space for boundaries and midpoint.
 */
 
 // Time: O(log n), Space: O(1).

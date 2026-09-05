@@ -8,6 +8,10 @@ Given four integer arrays nums1, nums2, nums3, and nums4, count index tuples sat
 解题思路 / Solution Approach
 将四个数组分成两组。用哈希表统计前两个数组所有两数和的出现次数，再遍历后两个数组的两数和，累加其相反数在哈希表中的频次。
 Split the arrays into two pairs. Count every sum from the first pair in a hash map, then scan sums from the second pair and add the frequency of each opposite sum.
+
+时间与空间复杂度 / Time and Space Complexity
+四个数组等长 n 时，平均时间 O(n²)，前两组配对各遍历 n² 次；辅助空间 O(n²)，保存不同两数和及频次。若长度分别为 a,b,c,d，则时间 O(ab+cd)，空间 O(ab)。
+For four arrays of length n, average time is O(n²) and auxiliary space O(n²) for pair-sum frequencies. With lengths a,b,c,d, time is O(ab+cd) and space O(ab).
 */
 
 /*

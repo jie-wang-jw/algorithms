@@ -8,6 +8,10 @@ Given an integer array nums and an integer target, return all unique quadruplets
 解题思路 / Solution Approach
 先排序，使用两层循环固定前两个数，再在剩余区间使用左右指针寻找另外两个数。各层都跳过重复值，并用较宽整数类型计算总和以避免溢出。
 Sort first, fix two values with nested loops, and use two pointers for the remaining pair. Skip duplicates at every level and use a wider integer type for sums to avoid overflow.
+
+时间与空间复杂度 / Time and Space Complexity
+n = len(nums)，r 为结果四元组数量。时间 O(n³)：固定两项的组合数为 O(n²)，每组双指针扫描 O(n)。排序 O(n log n) 不改变总阶。辅助空间 O(log n) 包括 Go 排序栈，结果 O(r)，总额外空间 O(log n+r)。
+For n values and r output quadruplets, time is O(n³): O(n²) fixed pairs each require an O(n) scan. Sorting adds O(n log n). Auxiliary space is O(log n) for the Go sorting stack; output O(r), total extra space O(log n+r).
 */
 
 import "sort"

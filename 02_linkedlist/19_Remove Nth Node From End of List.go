@@ -8,6 +8,10 @@ Given the head of a linked list and an integer n, remove the nth node from the e
 解题思路 / Solution Approach
 建立虚拟头节点，并让 fast 先前进 n 步。随后 slow 和 fast 同时移动，保持固定距离；当 fast 到达末尾时，slow 正好位于待删除节点之前。
 Create a dummy head and move fast n steps ahead. Then move slow and fast together; when fast reaches the end, slow is immediately before the node to remove.
+
+时间与空间复杂度 / Time and Space Complexity
+L 为链表长度，题目参数 n 为倒数位置。时间 O(L)，fast 总共沿链表前进一次，slow 随后跟进。辅助空间 O(1)，虚拟头节点和指针数量固定。
+L is the list length; parameter n is the position from the end. Time O(L), with fast traversing the list once and slow following. Auxiliary space O(1) for a dummy node and pointers.
 */
 
 /*

@@ -8,6 +8,10 @@ Implement a last-in-first-out stack using only standard queue operations, suppor
 解题思路 / Solution Approach
 使用一个队列。每次 Push 新元素后，把之前的所有元素从队首移动到队尾，使新元素来到队首；这样 Pop 和 Top 都可以直接操作队首。
 Use one queue. After each Push, rotate all older elements from the front to the back so the new element becomes the front; Pop and Top can then use the front directly.
+
+时间与空间复杂度 / Time and Space Complexity
+n 为当前栈内元素数。Push 时间 O(n)，旋转所有旧元素；Pop、Top、Empty 时间 O(1)。存储空间 O(n)。Go append 的扩容成本按均摊分析计入。
+n is the current element count. Push takes O(n) time to rotate older elements; Pop, Top, and Empty take O(1). Storage is O(n). Go append growth costs are accounted for using amortized analysis.
 */
 
 /*

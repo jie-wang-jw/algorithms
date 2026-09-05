@@ -40,6 +40,10 @@ After inserting a new value-frequency pair:
 This always removes the least frequent current candidate.
 遍历结束后，堆中剩下的就是频率最高的 k 个元素。
 After processing all frequencies, the heap contains exactly the top k frequent elements.
+
+时间与空间复杂度 / Time and Space Complexity
+n 为输入长度，m 为不同数字数量。平均时间 O(n + m log(k+1))：统计 O(n)，维护堆 O(m log(k+1))，最后弹出 k 次 O(k log(k+1))，且 k<=m。用 log(k+1) 可正确涵盖 k=1。辅助空间 O(m+k)，返回结果 O(k)；堆在弹出前可短暂达到 k+1 个元素。
+For n inputs and m distinct values, average time is O(n + m log(k+1)): counting O(n), heap maintenance O(m log(k+1)), and extraction O(k log(k+1)), with k<=m. log(k+1) includes k=1 correctly. Auxiliary space O(m+k), output O(k); the heap temporarily reaches k+1 items.
 */
 
 // frequencyHeap is a min-heap ordered by frequency.

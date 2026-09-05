@@ -8,6 +8,10 @@ Given two integer arrays nums1 and nums2, return their intersection. Every resul
 解题思路 / Solution Approach
 先把 nums1 的元素放入哈希集合，再遍历 nums2。命中集合时加入结果并从集合删除，确保相同数字只加入一次。
 Put all values from nums1 into a hash set, then scan nums2. When a value is found, append it and remove it from the set so it can appear only once.
+
+时间与空间复杂度 / Time and Space Complexity
+n、m 为两个数组长度，r 为交集大小。平均时间 O(n+m)，分别扫描一次；辅助空间 O(n)，集合保存第一个数组的不同数字。结果占 O(r)，r <= min(n,m)，总额外空间仍为 O(n)。
+For input lengths n and m and intersection size r, average time is O(n+m) for two scans. Auxiliary space O(n) stores distinct values from the first array. Output takes O(r), where r <= min(n,m), so total extra space remains O(n).
 */
 
 /*

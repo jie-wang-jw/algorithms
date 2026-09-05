@@ -8,6 +8,10 @@ Given a linked list, swap every two adjacent nodes and return the resulting head
 解题思路 / Solution Approach
 使用虚拟头节点统一处理第一对节点。每轮保存一对节点及后续链表，重新连接三条指针，然后移动到下一对；不足两个节点时停止。
 Use a dummy head to handle the first pair uniformly. For each pair, save both nodes and the remaining list, reconnect three links, and advance to the next pair.
+
+时间与空间复杂度 / Time and Space Complexity
+n 为节点数。时间 O(n)，每对节点进行固定次数的指针重连。辅助空间 O(1)，只增加虚拟头节点和几个临时指针。
+n is the node count. Time O(n), with a constant number of link changes per pair. Auxiliary space O(1) for the dummy node and temporary pointers.
 */
 
 /*

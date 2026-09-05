@@ -8,6 +8,10 @@ Given a positive integer n, generate an n x n matrix filled with the integers fr
 解题思路 / Solution Approach
 维护上、下、左、右四条未填充边界。每轮依次填充上边、右边、下边和左边，然后将四条边界向内收缩。
 Maintain top, bottom, left, and right boundaries for the unfilled area. Fill the four sides clockwise, then move all boundaries inward.
+
+时间与空间复杂度 / Time and Space Complexity
+n 为矩阵边长。时间 O(n²)，每个格子填入一次。除返回矩阵外辅助空间 O(1)；返回矩阵占 O(n²)，包含结果的总空间为 O(n²)。
+n is the matrix side length. Time O(n²), filling each cell once. Auxiliary space excluding the output is O(1); the returned matrix and total space take O(n²).
 */
 
 func generateMatrix(n int) [][]int {

@@ -8,6 +8,10 @@ Given a character array s, reverse its characters in place using O(1) extra spac
 解题思路 / Solution Approach
 使用左右双指针，从数组两端向中间移动，每轮交换两个指针指向的字符，直到指针相遇或交错。
 Use two pointers starting at both ends. Swap their characters and move inward until the pointers meet or cross.
+
+时间与空间复杂度 / Time and Space Complexity
+n = len(s)。时间 O(n)，交换约 n/2 对字符。辅助空间 O(1)，直接修改输入切片。
+n = len(s). Time O(n), swapping about n/2 character pairs. Auxiliary space O(1), modifying the input slice directly.
 */
 
 // Reverse the byte slice in place with two pointers.

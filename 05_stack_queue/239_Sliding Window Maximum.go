@@ -8,6 +8,10 @@ Given an integer array nums and a window size k, move the window one position at
 解题思路 / Solution Approach
 使用保存下标的单调递减队列。每轮删除队首过期下标，再删除队尾所有不大于当前值的下标并加入当前下标；队首始终对应当前窗口最大值。
 Use a decreasing monotonic deque of indices. Remove expired indices from the front, remove values no greater than the current value from the back, then append the current index; the front is always the maximum.
+
+时间与空间复杂度 / Time and Space Complexity
+n = len(nums)，k 为窗口长度。时间 O(n)，每个下标最多入队、出队一次；两个内层循环的总工作量是线性的。辅助队列空间 O(k)，返回结果 O(n-k+1)，包含结果总空间 O(n)。切片 append 的分配与复制按均摊计算。
+For n values and window size k, time is O(n): each index enters and leaves the deque at most once, so the inner loops have linear aggregate work. Auxiliary deque space O(k), output O(n-k+1), total O(n). Slice allocation and copying are amortized.
 */
 
 /*滑动窗口 + 单调队列

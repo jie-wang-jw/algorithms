@@ -38,6 +38,10 @@ Time O(n), extra space O(1); may change the relative order of retained elements 
 Brute-force shifting and fast/slow pointers: k = 3, valid prefix [2, 2, 4].
 左右双指针法：k = 3，有效前缀为 [4, 2, 2]。两种排列都符合题意。
 Left/right pointers: k = 3, valid prefix [4, 2, 2]. Both orderings satisfy the problem.
+
+时间与空间复杂度 / Time and Space Complexity
+n = len(nums)。暴力法最坏时间 O(n²)，多次移位的总成本可达 n+(n-1)+...+1；快慢指针和左右双指针均为 O(n)，每个指针只单向移动。三种解法辅助空间均为 O(1)，修改输入并返回整数长度。
+n = len(nums). Brute force takes O(n²) worst-case time due to repeated shifts; both pointer solutions take O(n) because pointers move only forward or inward. All three use O(1) auxiliary space and return an integer length.
 */
 
 func removeElementBruteForce(nums []int, val int) int {

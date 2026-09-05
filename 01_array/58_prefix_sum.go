@@ -8,6 +8,10 @@ Given an integer array and multiple inclusive range queries [left, right], outpu
 解题思路 / Solution Approach
 预先构造前缀和 prefix，其中 prefix[i] 表示前 i 个元素之和。每个区间和可用 prefix[right+1] - prefix[left] 在 O(1) 时间内得到。
 Build a prefix-sum array where prefix[i] is the sum of the first i elements. Each range sum is then prefix[right+1] - prefix[left] in O(1) time.
+
+时间与空间复杂度 / Time and Space Complexity
+n 为元素数，q 为查询数。预处理 O(n)，每次查询 O(1)，总时间 O(n+q)，按整数读写为常数成本计。辅助空间 O(n)，当前实现保存 nums 和 prefix；输出逐条打印，不累计保存。
+For n values and q queries, preprocessing takes O(n), each query O(1), and total time O(n+q), treating integer I/O as constant cost. Auxiliary space O(n) stores nums and prefix; answers are printed without accumulation.
 */
 
 import (

@@ -8,6 +8,10 @@ Given a nonempty string s, determine whether it can be constructed by repeating 
 解题思路 / Solution Approach
 文件提供三种方法：枚举可能的重复单元、在 (s+s)[1:2n-1] 中查找 s，以及利用 KMP 最长相等前后缀判断字符串长度能否被重复周期整除。
 The file provides enumeration, doubled-string matching, and KMP solutions. KMP derives a possible period from the longest equal prefix and suffix and checks whether it divides the string length.
+
+时间与空间复杂度 / Time and Space Complexity
+n = len(s)。枚举法 repeatedSubstringPattern：保守时间上界 O(n²)，枚举 O(n) 个长度，候选长度最多比较 O(n) 字节；辅助空间 O(1)，子串切片不复制内容。双倍字符串法 repeatedSubstringPattern2：构造 O(n) 时间和空间，总时间 O(n + 子串搜索成本)，不能仅因调用 Contains 就断言最坏 O(n)；朴素搜索分析的保守上界为 O(n²)。KMP 法 repeatedSubstringPattern3：时间 O(n)，辅助空间 O(n) 保存前缀表。
+n = len(s). Enumeration has a conservative O(n²) time bound and O(1) auxiliary space; substring slices do not copy bytes. The doubled-string version uses O(n) construction time and space, plus substring-search time; calling Contains alone does not prove worst-case linear time, and naive-search analysis gives a conservative O(n²) bound. The KMP version takes O(n) time and O(n) auxiliary space for the prefix table.
 */
 
 import "strings"

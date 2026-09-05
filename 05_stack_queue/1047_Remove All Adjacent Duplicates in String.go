@@ -8,6 +8,10 @@ Given a string s containing only lowercase English letters, repeatedly remove ad
 解题思路 / Solution Approach
 使用字节切片模拟栈。当前字符与栈顶相同时弹出栈顶，否则将当前字符入栈；栈顶始终是最近保留的字符，因此可以自然处理连锁删除。
 Use a byte slice as a stack. Pop when the current character matches the top; otherwise push it. The top is always the most recently retained character, so chain reactions are handled naturally.
+
+时间与空间复杂度 / Time and Space Complexity
+n = len(s)。时间 O(n)，每个字符最多入栈、出栈各一次，最后转换字符串也是 O(n) 上界。辅助空间 O(n) 保存栈；结果最多 O(n)，总空间仍为 O(n)。
+n = len(s). Time O(n), pushing and popping each character at most once; final string conversion is also at most O(n). Auxiliary stack space and output space are each O(n), so total space is O(n).
 */
 
 /*
