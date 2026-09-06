@@ -31,6 +31,7 @@ func minSubArrayLen(target int, nums []int) int {
 		for sum >= target {
 			// Both i and j are included, so the length is j - i + 1.
 			// i 和 j 都包含在窗口内，因此长度是 j - i + 1。
+			//result = min(result, j-i+1)
 			subLength := j - i + 1
 			if subLength < result {
 				result = subLength

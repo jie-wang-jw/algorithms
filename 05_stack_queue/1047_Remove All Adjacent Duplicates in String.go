@@ -2,16 +2,25 @@ package _5_stack_queue
 
 /*
 题目描述 / Problem Description
-给定一个只包含小写英文字母的字符串 s，不断删除两个相邻且相同的字符，直到无法继续删除，并返回最终字符串。
-Given a string s containing only lowercase English letters, repeatedly remove adjacent equal character pairs until no more removals are possible, and return the final string.
+给定一个只包含小写英文字母的字符串 s，不断删除两个相邻且相同的字符，
+直到无法继续删除，并返回最终字符串。
+Given a string s containing only lowercase English letters,
+repeatedly remove adjacent equal character pairs until no
+more removals are possible, and return the final string.
 
 解题思路 / Solution Approach
-使用字节切片模拟栈。当前字符与栈顶相同时弹出栈顶，否则将当前字符入栈；栈顶始终是最近保留的字符，因此可以自然处理连锁删除。
-Use a byte slice as a stack. Pop when the current character matches the top; otherwise push it. The top is always the most recently retained character, so chain reactions are handled naturally.
+使用字节切片模拟栈。当前字符与栈顶相同时弹出栈顶，否则将当前字符入栈；
+栈顶始终是最近保留的字符，因此可以自然处理连锁删除。
+Use a byte slice as a stack. Pop when the current character matches the top;
+otherwise push it. The top is always the most recently retained character,
+so chain reactions are handled naturally.
 
 时间与空间复杂度 / Time and Space Complexity
-n = len(s)。时间 O(n)，每个字符最多入栈、出栈各一次，最后转换字符串也是 O(n) 上界。辅助空间 O(n) 保存栈；结果最多 O(n)，总空间仍为 O(n)。
-n = len(s). Time O(n), pushing and popping each character at most once; final string conversion is also at most O(n). Auxiliary stack space and output space are each O(n), so total space is O(n).
+n = len(s)。时间 O(n)，每个字符最多入栈、出栈各一次，最后转换字符串也是 O(n) 上界。
+辅助空间 O(n) 保存栈；结果最多 O(n)，总空间仍为 O(n)。
+n = len(s). Time O(n), pushing and popping each character at most once;
+final string conversion is also at most O(n).
+Auxiliary stack space and output space are each O(n), so total space is O(n).
 */
 
 /*

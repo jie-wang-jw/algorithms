@@ -6,12 +6,17 @@ package _2_linkedlist
 Given the head of a singly linked list, reverse the list and return its new head.
 
 解题思路 / Solution Approach
-迭代法使用 prev 和 cur，先保存下一个节点，再令 cur.Next 指向 prev。递归法先反转后半段，再把当前节点接到反转后链表的末尾。
-The iterative method uses prev and cur, saving the next node before reversing cur.Next. The recursive method reverses the suffix first and then attaches the current node at its end.
+迭代法使用 prev 和 cur，先保存下一个节点，再令 cur.Next 指向 prev。
+递归法先反转后半段，再把当前节点接到反转后链表的末尾。
+The iterative method uses prev and cur, saving the next node before reversing cur.Next.
+The recursive method reverses the suffix first and then attaches the current node at its end.
 
 时间与空间复杂度 / Time and Space Complexity
-n 为节点数。reverseList：时间 O(n)，每条指针改向一次，辅助空间 O(1)。reverseList2：时间 O(n)，递归深度为 n，调用栈占 O(n) 辅助空间。两者均复用原节点。
-n is the node count. reverseList takes O(n) time and O(1) auxiliary space. reverseList2 takes O(n) time and O(n) call-stack space due to recursion depth n. Both reuse the original nodes.
+n 为节点数。reverseList：时间 O(n)，每条指针改向一次，辅助空间 O(1)。
+reverseList2：时间 O(n)，递归深度为 n，调用栈占 O(n) 辅助空间。两者均复用原节点。
+n is the node count. reverseList takes O(n) time and O(1) auxiliary space.
+reverseList2 takes O(n) time and O(n) call-stack space due to recursion depth n.
+Both reuse the original nodes.
 */
 
 /*

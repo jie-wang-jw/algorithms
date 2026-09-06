@@ -24,8 +24,15 @@ After popping a node:
 Because the stack is LIFO, the left child is processed first.
 
 时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高。前序、中序、后序的递归和迭代共六种实现，时间均为 O(n)；后序迭代额外反转 O(n)，总阶不变。辅助空间均为 O(h)，包括显式栈或递归调用栈；平衡树 h=O(log n)，最坏 h=n。显式栈可保存路径上的待访问兄弟节点，并非只保存一条路径本身。每种解法返回结果占 O(n)，包含结果的总空间 O(n)。
-For n nodes and height h, all six recursive/iterative preorder, inorder, and postorder implementations take O(n) time; reversing iterative postorder adds O(n) without changing the bound. Auxiliary space O(h) includes explicit or recursive stacks; h=O(log n) for a balanced tree and up to n otherwise. Explicit stacks may hold pending siblings along a path. Each output and total space take O(n).
+n 为节点数，h 为树高。前序、中序、后序的递归和迭代共六种实现，时间均为 O(n)；
+后序迭代额外反转 O(n)，总阶不变。辅助空间均为 O(h)，包括显式栈或递归调用栈；
+平衡树 h=O(log n)，最坏 h=n。显式栈可保存路径上的待访问兄弟节点，
+并非只保存一条路径本身。每种解法返回结果占 O(n)，包含结果的总空间 O(n)。
+For n nodes and height h, all six recursive/iterative preorder, inorder,
+and postorder implementations take O(n) time; reversing iterative postorder
+adds O(n) without changing the bound. Auxiliary space O(h) includes explicit
+or recursive stacks; h=O(log n) for a balanced tree and up to n otherwise.
+Explicit stacks may hold pending siblings along a path. Each output and total space take O(n).
 */
 
 /*

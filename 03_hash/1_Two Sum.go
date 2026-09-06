@@ -2,16 +2,22 @@ package _3_hash
 
 /*
 题目描述 / Problem Description
-给定整数数组 nums 和整数 target，找出两个和为 target 的不同元素下标并返回。题目保证恰好存在一个答案。
-Given an integer array nums and an integer target, return the indices of two distinct elements whose sum equals target. Exactly one answer is guaranteed.
+给定整数数组 nums 和整数 target，找出两个和为 target 的不同元素下标并返回。
+题目保证恰好存在一个答案。
+Given an integer array nums and an integer target, return the indices of two distinct elements whose sum equals target.
+Exactly one answer is guaranteed.
 
 解题思路 / Solution Approach
-遍历数组并用哈希表保存已经见过的数字及其下标。对当前数字 num，检查 target-num 是否已经出现；如果出现即可返回两个下标。
-Scan the array while storing previously seen values and indices in a hash map. For each num, check whether target-num has already appeared and return the two indices when found.
+遍历数组并用哈希表保存已经见过的数字及其下标。对当前数字 num，
+检查 target-num 是否已经出现；如果出现即可返回两个下标。
+Scan the array while storing previously seen values and indices in a hash map. For each num,
+check whether target-num has already appeared and return the two indices when found.
 
 时间与空间复杂度 / Time and Space Complexity
-n = len(nums)。在哈希表查询和写入平均 O(1) 的假设下，总时间 O(n)。辅助空间 O(n)，最坏保存几乎全部数字及下标；返回两个下标只占 O(1)。
-n = len(nums). Assuming average O(1) hash lookup and insertion, time is O(n). Auxiliary space O(n) stores seen values and indices; the two-index output takes O(1).
+n = len(nums)。在哈希表查询和写入平均 O(1) 的假设下，总时间 O(n)。辅助空间 O(n)，
+最坏保存几乎全部数字及下标；返回两个下标只占 O(1)。
+n = len(nums). Assuming average O(1) hash lookup and insertion, time is O(n).
+Auxiliary space O(n) stores seen values and indices; the two-index output takes O(1).
 */
 
 /*

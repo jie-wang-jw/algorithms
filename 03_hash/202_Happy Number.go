@@ -2,16 +2,24 @@ package _3_hash
 
 /*
 题目描述 / Problem Description
-将正整数 n 反复替换为其各位数字的平方和。如果最终得到 1，则 n 是快乐数；如果进入不包含 1 的循环，则不是。判断 n 是否为快乐数。
-Repeatedly replace a positive integer n with the sum of the squares of its digits. Return whether this process eventually reaches 1 rather than entering a cycle.
+将正整数 n 反复替换为其各位数字的平方和。如果最终得到 1，则 n 是快乐数；
+如果进入不包含 1 的循环，则不是。判断 n 是否为快乐数。
+Repeatedly replace a positive integer n with the sum of the squares of its digits.
+Return whether this process eventually reaches 1 rather than entering a cycle.
 
 解题思路 / Solution Approach
-使用哈希集合记录所有出现过的中间结果。结果变成 1 时返回 true；某个结果重复出现时说明进入循环，返回 false。
-Store every intermediate value in a hash set. Return true upon reaching 1; if a value repeats, the process has entered a cycle, so return false.
+使用哈希集合记录所有出现过的中间结果。结果变成 1 时返回 true；
+某个结果重复出现时说明进入循环，返回 false。
+Store every intermediate value in a hash set. Return true upon reaching 1;
+if a value repeats, the process has entered a cycle, so return false.
 
 时间与空间复杂度 / Time and Space Complexity
-d 为初始数字的十进制位数。首次平方和计算 O(d)，之后数值至多 81d 并继续快速缩小到固定范围，因此时间 O(d)，即 O(log(n+1))。哈希集合空间可保守记为 O(d)，不是 O(n)。单次 getNext(x) 时间与 x 的位数成正比，辅助空间 O(1)。哈希操作按平均 O(1) 计。
-Let d be the initial decimal digit count. The first digit-square sum costs O(d); the value then becomes at most 81d and rapidly shrinks to a fixed range, giving O(d), or O(log(n+1)), time. A conservative hash-set space bound is O(d), not O(n). getNext(x) takes time proportional to its digit count and O(1) auxiliary space. Hash operations are average O(1).
+d 为初始数字的十进制位数。首次平方和计算 O(d)，之后数值至多 81d 并继续快速缩小到固定范围，因此时间 O(d)，即 O(log(n+1))。
+哈希集合空间可保守记为 O(d)，不是 O(n)。单次 getNext(x) 时间与 x 的位数成正比，辅助空间 O(1)。哈希操作按平均 O(1) 计。
+Let d be the initial decimal digit count. The first digit-square sum costs O(d);
+the value then becomes at most 81d and rapidly shrinks to a fixed range, giving O(d), or O(log(n+1)), time.
+A conservative hash-set space bound is O(d), not O(n). getNext(x) takes time proportional to its digit count
+and O(1) auxiliary space. Hash operations are average O(1).
 */
 
 /*

@@ -2,16 +2,22 @@ package _3_hash
 
 /*
 题目描述 / Problem Description
-给定四个整数数组 nums1、nums2、nums3 和 nums4，统计满足 nums1[i] + nums2[j] + nums3[k] + nums4[l] = 0 的下标四元组数量。
-Given four integer arrays nums1, nums2, nums3, and nums4, count index tuples satisfying nums1[i] + nums2[j] + nums3[k] + nums4[l] = 0.
+给定四个整数数组 nums1、nums2、nums3 和 nums4，
+统计满足 nums1[i] + nums2[j] + nums3[k] + nums4[l] = 0 的下标四元组数量。
+Given four integer arrays nums1, nums2, nums3, and nums4,
+count index tuples satisfying nums1[i] + nums2[j] + nums3[k] + nums4[l] = 0.
 
 解题思路 / Solution Approach
-将四个数组分成两组。用哈希表统计前两个数组所有两数和的出现次数，再遍历后两个数组的两数和，累加其相反数在哈希表中的频次。
-Split the arrays into two pairs. Count every sum from the first pair in a hash map, then scan sums from the second pair and add the frequency of each opposite sum.
+将四个数组分成两组。用哈希表统计前两个数组所有两数和的出现次数，
+再遍历后两个数组的两数和，累加其相反数在哈希表中的频次。
+Split the arrays into two pairs. Count every sum from the first pair in a hash map,
+then scan sums from the second pair and add the frequency of each opposite sum.
 
 时间与空间复杂度 / Time and Space Complexity
-四个数组等长 n 时，平均时间 O(n²)，前两组配对各遍历 n² 次；辅助空间 O(n²)，保存不同两数和及频次。若长度分别为 a,b,c,d，则时间 O(ab+cd)，空间 O(ab)。
-For four arrays of length n, average time is O(n²) and auxiliary space O(n²) for pair-sum frequencies. With lengths a,b,c,d, time is O(ab+cd) and space O(ab).
+四个数组等长 n 时，平均时间 O(n²)，前两组配对各遍历 n² 次；辅助空间 O(n²)，
+保存不同两数和及频次。若长度分别为 a,b,c,d，则时间 O(ab+cd)，空间 O(ab)。
+For four arrays of length n, average time is O(n²) and
+auxiliary space O(n²) for pair-sum frequencies. With lengths a,b,c,d, time is O(ab+cd) and space O(ab).
 */
 
 /*

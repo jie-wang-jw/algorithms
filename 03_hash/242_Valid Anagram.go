@@ -2,16 +2,22 @@ package _3_hash
 
 /*
 题目描述 / Problem Description
-给定两个只包含小写英文字母的字符串 s 和 t，判断 t 是否是 s 的字母异位词，即两者是否包含完全相同且数量相同的字符。
-Given two lowercase English strings s and t, determine whether t is an anagram of s, meaning both contain exactly the same characters with the same frequencies.
+给定两个只包含小写英文字母的字符串 s 和 t，判断 t 是否是 s 的字母异位词，
+即两者是否包含完全相同且数量相同的字符。
+Given two lowercase English strings s and t, determine whether t is an anagram of s,
+meaning both contain exactly the same characters with the same frequencies.
 
 解题思路 / Solution Approach
-使用长度为 26 的频次数组。遍历 s 时增加计数，遍历 t 时减少计数；最终所有计数均为 0 时，两者互为字母异位词。
-Use a frequency array of length 26. Increment counts for s and decrement them for t; the strings are anagrams exactly when every final count is zero.
+使用长度为 26 的频次数组。遍历 s 时增加计数，遍历 t 时减少计数；
+最终所有计数均为 0 时，两者互为字母异位词。
+Use a frequency array of length 26. Increment counts for s and decrement them for t;
+the strings are anagrams exactly when every final count is zero.
 
 时间与空间复杂度 / Time and Space Complexity
-n = len(s)，m = len(t)。isAnagram1 和 isAnagram2 均为 O(n+m) 时间上界，长度不同会 O(1) 提前返回。辅助空间 O(1)，字符范围固定为 26 个小写字母。
-For lengths n and m, both isAnagram1 and isAnagram2 have an O(n+m) time bound, with O(1) early return for unequal lengths. Auxiliary space O(1) uses a fixed 26-letter frequency array.
+n = len(s)，m = len(t)。isAnagram1 和 isAnagram2 均为 O(n+m) 时间上界，
+长度不同会 O(1) 提前返回。辅助空间 O(1)，字符范围固定为 26 个小写字母。
+For lengths n and m, both isAnagram1 and isAnagram2 have an O(n+m) time bound,
+with O(1) early return for unequal lengths. Auxiliary space O(1) uses a fixed 26-letter frequency array.
 */
 
 /*

@@ -2,8 +2,11 @@ package _5_stack_queue
 
 /*
 题目描述 / Problem Description
-给定一个字符串数组 tokens，它表示一个合法的逆波兰表达式，请计算并返回表达式的整数结果。
-Given a string array tokens representing a valid Reverse Polish Notation expression, evaluate it and return the integer result.
+给定一个字符串数组 tokens，它表示一个合法的逆波兰表达式，
+请计算并返回表达式的整数结果。
+Given a string array tokens representing a valid Reverse
+Polish Notation expression, evaluate it and return the integer result.
+
 表达式支持四种运算符：
 The expression supports four operators:
 +  -  *  /
@@ -19,12 +22,17 @@ Important details:
   Every input is a valid Reverse Polish Notation expression.
 
 解题思路 / Solution Approach
-使用栈保存操作数和中间结果。遇到数字时入栈；遇到运算符时先弹出右操作数，再弹出左操作数，计算 left operator right 后将结果压回栈。
-Use a stack for operands and intermediate results. Push numbers; for an operator, pop the right operand first and then the left operand, compute left operator right, and push the result back.
+使用栈保存操作数和中间结果。遇到数字时入栈；遇到运算符时先弹出右操作数，再弹出左操作数，
+计算 left operator right 后将结果压回栈。
+Use a stack for operands and intermediate results. Push numbers; for an operator,
+pop the right operand first and then the left operand, compute left operator right, and push the result back.
 
 时间与空间复杂度 / Time and Space Complexity
-n 为 token 数。题目整数长度有界时，时间 O(n)，每个 token 只处理一次；若考虑任意长度数字解析，则计入全部 token 字符数。辅助空间 O(n)，保存操作数与中间结果；返回整数 O(1)。
-n is the token count. Time O(n) under the problem's bounded integer-token lengths; for arbitrary-length tokens, include the total character count for parsing. Auxiliary space O(n) stores operands and intermediate results; the integer output uses O(1).
+n 为 token 数。题目整数长度有界时，时间 O(n)，每个 token 只处理一次；
+若考虑任意长度数字解析，则计入全部 token 字符数。辅助空间 O(n)，保存操作数与中间结果；返回整数 O(1)。
+n is the token count. Time O(n) under the problem's bounded integer-token lengths;
+for arbitrary-length tokens, include the total character count for parsing.
+Auxiliary space O(n) stores operands and intermediate results; the integer output uses O(1).
 */
 
 import "strconv"

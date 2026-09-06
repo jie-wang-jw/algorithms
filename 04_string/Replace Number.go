@@ -2,16 +2,25 @@ package _4_string
 
 /*
 题目描述 / Problem Description
-给定一个只包含小写字母和数字字符的字符串，将其中每个数字字符替换为字符串 "number"，并返回替换后的结果。
-Given a string containing only lowercase letters and digit characters, replace every digit character with the word "number" and return the resulting string.
+给定一个只包含小写字母和数字字符的字符串，将其中每个数字字符替换为字符串 "number"，
+并返回替换后的结果。
+Given a string containing only lowercase letters and digit characters,
+replace every digit character with the word "number" and return the resulting string.
 
 解题思路 / Solution Approach
-从左到右遍历字符串，使用 strings.Builder 构造结果。遇到 '0' 到 '9' 时写入 "number"，否则保留原字符。
-Scan the string from left to right and build the result with strings.Builder. Write "number" for digits from '0' to '9'; otherwise keep the original character.
+从左到右遍历字符串，使用 strings.Builder 构造结果。
+遇到 '0' 到 '9' 时写入 "number"，否则保留原字符。
+Scan the string from left to right and build the result
+with strings.Builder. Write "number" for digits from '0' to '9';
+otherwise keep the original character.
 
 时间与空间复杂度 / Time and Space Complexity
-n 为输入长度，d 为数字字符数量，输出长度为 n+5d，最多 6n。时间 O(n)，每个字符最多写入 6 个字节。Builder 的结果缓冲区占 O(n)，包含输出总空间 O(n)，除此以外仅用 O(1) 状态。
-For input length n and d digit characters, output length is n+5d, at most 6n. Time O(n), writing at most six bytes per input character. The Builder result buffer uses O(n) space; other state is O(1), so total space including output is O(n).
+n 为输入长度，d 为数字字符数量，输出长度为 n+5d，最多 6n。时间 O(n)，
+每个字符最多写入 6 个字节。Builder 的结果缓冲区占 O(n)，包含输出总空间 O(n)，
+除此以外仅用 O(1) 状态。
+For input length n and d digit characters, output length is n+5d,
+at most 6n. Time O(n), writing at most six bytes per input character.
+The Builder result buffer uses O(n) space; other state is O(1), so total space including output is O(n).
 */
 
 import (

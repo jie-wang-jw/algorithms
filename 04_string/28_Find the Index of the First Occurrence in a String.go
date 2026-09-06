@@ -2,16 +2,24 @@ package _4_string
 
 /*
 题目描述 / Problem Description
-给定字符串 haystack 和 needle，返回 needle 在 haystack 中第一次出现的起始下标；如果不存在则返回 -1。
-Given strings haystack and needle, return the starting index of the first occurrence of needle in haystack, or -1 if it does not occur.
+给定字符串 haystack 和 needle，返回 needle 在 haystack 中第一次出现的起始下标；
+如果不存在则返回 -1。
+Given strings haystack and needle, return the starting index of the first
+occurrence of needle in haystack, or -1 if it does not occur.
 
 解题思路 / Solution Approach
-文件提供暴力匹配和 KMP。暴力法尝试每个可能起点；KMP 使用前缀表，在失配时复用已经匹配的信息，避免回退主串指针。
-The file provides brute-force and KMP solutions. Brute force tries every starting position, while KMP uses a prefix table to reuse matched information without moving the text pointer backward.
+文件提供暴力匹配和 KMP。暴力法尝试每个可能起点；KMP 使用前缀表，
+在失配时复用已经匹配的信息，避免回退主串指针。
+The file provides brute-force and KMP solutions. Brute force tries every starting position,
+while KMP uses a prefix table to reuse matched information without moving the text pointer backward.
 
 时间与空间复杂度 / Time and Space Complexity
-n = len(haystack)，m = len(needle)。strStr 暴力法：m<=n 时最坏 O((n-m+1)m)，辅助空间 O(1)。strStr2 KMP：建表 O(m)、匹配 O(n)，总 O(n+m)，辅助空间 O(m) 保存 next。getNext 本身 O(m) 时间，除传入的 next 外 O(1) 空间。
-For text length n and pattern length m, strStr takes worst-case O((n-m+1)m) time when m<=n and O(1) auxiliary space. strStr2 takes O(n+m) time and O(m) auxiliary space for next. getNext takes O(m) time and O(1) extra space beyond the supplied table.
+n = len(haystack)，m = len(needle)。strStr 暴力法：m<=n 时最坏 O((n-m+1)m)，
+辅助空间 O(1)。strStr2 KMP：建表 O(m)、匹配 O(n)，总 O(n+m)，辅助空间 O(m)
+保存 next。getNext 本身 O(m) 时间，除传入的 next 外 O(1) 空间。
+For text length n and pattern length m, strStr takes worst-case O((n-m+1)m)
+time when m<=n and O(1) auxiliary space. strStr2 takes O(n+m) time and O(m)
+auxiliary space for next. getNext takes O(m) time and O(1) extra space beyond the supplied table.
 */
 
 func strStr(haystack string, needle string) int {

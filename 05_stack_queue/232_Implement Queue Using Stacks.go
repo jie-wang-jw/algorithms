@@ -3,15 +3,22 @@ package _5_stack_queue
 /*
 题目描述 / Problem Description
 只使用栈的标准操作实现一个先进先出的队列，支持 Push、Pop、Peek 和 Empty。
-Implement a first-in-first-out queue using only standard stack operations, supporting Push, Pop, Peek, and Empty.
+Implement a first-in-first-out queue using only standard stack operations,
+supporting Push, Pop, Peek, and Empty.
 
 解题思路 / Solution Approach
-使用 inStack 接收入队元素，使用 outStack 提供队首。当 outStack 为空时才把 inStack 的所有元素倒入其中，使最早入队的元素来到栈顶。
-Use inStack for incoming elements and outStack for the queue front. Only when outStack is empty, transfer all elements from inStack so the oldest element becomes its top.
+使用 inStack 接收入队元素，使用 outStack 提供队首。当 outStack 为空时才把
+inStack 的所有元素倒入其中，使最早入队的元素来到栈顶。
+Use inStack for incoming elements and outStack for the queue front.
+Only when outStack is empty, transfer all elements from inStack so the oldest element becomes its top.
 
 时间与空间复杂度 / Time and Space Complexity
-n 为当前队列元素数。Push 均摊 O(1)，Pop/Peek 均摊 O(1)、单次最坏 O(n)，Empty O(1)。每个元素最多从 inStack 转移到 outStack 一次，所以一串操作的总工作量是线性的。存储空间 O(n)；切片容量可保留到历史最大规模。
-n is the current queue size. Push is amortized O(1); Pop/Peek are amortized O(1), worst-case O(n) per call; Empty is O(1). Each element transfers from inStack to outStack at most once, making aggregate work linear. Storage is O(n); slice capacity may remain at the historical peak size.
+n 为当前队列元素数。Push 均摊 O(1)，Pop/Peek 均摊 O(1)、单次最坏 O(n)，Empty O(1)。
+每个元素最多从 inStack 转移到 outStack 一次，所以一串操作的总工作量是线性的。
+存储空间 O(n)；切片容量可保留到历史最大规模。
+n is the current queue size. Push is amortized O(1); Pop/Peek are amortized O(1),
+worst-case O(n) per call; Empty is O(1). Each element transfers from inStack to outStack
+at most once, making aggregate work linear. Storage is O(n); slice capacity may remain at the historical peak size.
 */
 
 /*

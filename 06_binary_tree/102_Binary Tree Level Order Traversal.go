@@ -3,7 +3,8 @@ package _6_binary_tree
 /*
 题目描述 / Problem Description
 给定二叉树的根节点 root，返回节点值的层序遍历结果，即从上到下、从左到右逐层访问所有节点。
-Given the root of a binary tree, return its level-order traversal: visit all nodes level by level, from left to right.
+Given the root of a binary tree, return its level-order traversal:
+visit all nodes level by level, from left to right.
 
 解题思路 / Solution Approach
 层序遍历本质上是广度优先搜索（BFS），需要使用队列。
@@ -22,8 +23,12 @@ Process:
    After finishing the current level, append it to result.
 
 时间与空间复杂度 / Time and Space Complexity
-n 为节点数，w 为最大层宽。时间 O(n)，每个节点入队、出队各一次。辅助空间 O(w)，处理过程中队列可以同时包含当前层剩余节点和下一层节点，但数量仍为 O(w)。返回结果 O(n)，包含结果的总空间 O(n)。
-For n nodes and maximum width w, time is O(n), enqueuing and dequeuing each node once. Auxiliary space O(w): the queue can mix remaining current-level nodes with next-level nodes but stays O(w). Output and total space are O(n).
+n 为节点数，w 为最大层宽。时间 O(n)，每个节点入队、出队各一次。辅助空间 O(w)，
+处理过程中队列可以同时包含当前层剩余节点和下一层节点，但数量仍为 O(w)。
+返回结果 O(n)，包含结果的总空间 O(n)。
+For n nodes and maximum width w, time is O(n), enqueuing and dequeuing each node once.
+Auxiliary space O(w): the queue can mix remaining current-level nodes with next-level
+nodes but stays O(w). Output and total space are O(n).
 */
 
 /*

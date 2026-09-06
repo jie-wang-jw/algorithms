@@ -3,15 +3,19 @@ package _3_hash
 /*
 题目描述 / Problem Description
 给定整数数组 nums，找出所有和为 0 的不重复三元组。每个三元组必须使用三个不同下标的元素。
-Given an integer array nums, return all unique triplets whose sum is zero. Each triplet must use elements at three distinct indices.
+Given an integer array nums, return all unique triplets whose sum is zero.
+Each triplet must use elements at three distinct indices.
 
 解题思路 / Solution Approach
 先排序数组，再固定第一个数，并用左右指针寻找另外两个数。根据三数之和移动指针，同时跳过重复值以避免重复三元组。
-Sort the array, fix the first value, and use two pointers to find the other two. Move pointers according to the sum and skip duplicate values to avoid duplicate triplets.
+Sort the array, fix the first value, and use two pointers to find the other two.
+Move pointers according to the sum and skip duplicate values to avoid duplicate triplets.
 
 时间与空间复杂度 / Time and Space Complexity
-n = len(nums)，r 为结果三元组数量。时间 O(n²)：排序 O(n log n)，固定一个数后每次双指针扫描 O(n)。辅助空间 O(log n)，计入 Go 排序调用栈；结果占 O(r)，总额外空间 O(log n+r)。排序会修改输入。
-For n values and r output triplets, time is O(n²): O(n log n) sorting plus linear scans for each fixed value. Auxiliary space O(log n) includes the Go sorting stack; output takes O(r), for O(log n+r) total extra space. Sorting modifies the input.
+n = len(nums)，r 为结果三元组数量。时间 O(n²)：排序 O(n log n)，固定一个数后每次双指针扫描 O(n)。
+辅助空间 O(log n)，计入 Go 排序调用栈；结果占 O(r)，总额外空间 O(log n+r)。排序会修改输入。
+For n values and r output triplets, time is O(n²): O(n log n) sorting plus linear scans for each fixed value.
+Auxiliary space O(log n) includes the Go sorting stack; output takes O(r), for O(log n+r) total extra space. Sorting modifies the input.
 */
 
 import "sort"

@@ -3,15 +3,19 @@ package _2_linkedlist
 /*
 题目描述 / Problem Description
 给定一个链表的头节点 head，如果链表中存在环，返回环的入口节点；如果不存在环，则返回 nil。不能修改链表。
-Given the head of a linked list, return the node where a cycle begins, or nil if the list has no cycle. The list must not be modified.
+Given the head of a linked list, return the node where a cycle begins, or nil if the list has no cycle.
+The list must not be modified.
 
 解题思路 / Solution Approach
-使用 Floyd 快慢指针。slow 每次走一步，fast 每次走两步；如果相遇则存在环。随后一个指针回到 head，两个指针同速前进，再次相遇的位置就是环入口。
-Use Floyd's slow and fast pointers. If they meet, a cycle exists. Move one pointer back to head, advance both one step at a time, and their next meeting point is the cycle entrance.
+使用 Floyd 快慢指针。slow 每次走一步，fast 每次走两步；如果相遇则存在环。
+随后一个指针回到 head，两个指针同速前进，再次相遇的位置就是环入口。
+Use Floyd's slow and fast pointers. If they meet, a cycle exists. Move one pointer back to head,
+advance both one step at a time, and their next meeting point is the cycle entrance.
 
 时间与空间复杂度 / Time and Space Complexity
 n 为不同节点数。时间 O(n)：快慢指针找相遇点、再找入口都只需线性步数。辅助空间 O(1)，仅保存几个节点指针。
-n is the number of distinct nodes. Time O(n): both finding the meeting point and locating the entrance take linear steps. Auxiliary space O(1) for a few node pointers.
+n is the number of distinct nodes. Time O(n): both finding the meeting point and locating the entrance take linear steps.
+Auxiliary space O(1) for a few node pointers.
 */
 
 /*

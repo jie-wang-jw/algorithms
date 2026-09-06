@@ -10,8 +10,10 @@ Given an integer array nums sorted in nondecreasing order, return a new array co
 The file provides sorting and two-pointer solutions. The two-pointer method compares squared values at both ends and writes the larger one from the end of the result array.
 
 时间与空间复杂度 / Time and Space Complexity
-n = len(nums)。sortedSquares：平方 O(n)，排序 O(n log n)，总时间 O(n log n)；Go 当前整数排序的调用栈占 O(log n) 辅助空间，返回切片复用输入。sortedSquares_TwoPointers：时间 O(n)，除结果外辅助空间 O(1)，新建结果占 O(n)。
-n = len(nums). sortedSquares takes O(n log n) time, including squaring and sorting; the current Go integer sort uses O(log n) stack space and the returned slice aliases the input. sortedSquares_TwoPointers takes O(n) time, O(1) auxiliary space excluding its O(n) output.
+n = len(nums)。sortedSquares：平方 O(n)，排序 O(n log n)，总时间 O(n log n)；Go 当前整数排序的调用栈占 O(log n) 辅助空间，返回切片复用输入。
+sortedSquares_TwoPointers：时间 O(n)，除结果外辅助空间 O(1)，新建结果占 O(n)。
+n = len(nums). sortedSquares takes O(n log n) time, including squaring and sorting; the current Go integer sort uses O(log n) stack space and the returned slice aliases the input.
+sortedSquares_TwoPointers takes O(n) time, O(1) auxiliary space excluding its O(n) output.
 */
 
 import (

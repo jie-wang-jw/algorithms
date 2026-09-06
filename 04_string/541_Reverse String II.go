@@ -2,16 +2,24 @@ package _4_string
 
 /*
 题目描述 / Problem Description
-给定字符串 s 和整数 k，从字符串开头起每计数 2k 个字符，就反转其中前 k 个字符。剩余少于 k 个时全部反转，介于 k 和 2k 之间时只反转前 k 个。
-Given a string s and integer k, reverse the first k characters for every block of 2k characters. Reverse all remaining characters if fewer than k remain, or only the first k otherwise.
+给定字符串 s 和整数 k，从字符串开头起每计数 2k 个字符，就反转其中前 k 个字符。
+剩余少于 k 个时全部反转，介于 k 和 2k 之间时只反转前 k 个。
+Given a string s and integer k, reverse the first k characters for every
+block of 2k characters. Reverse all remaining characters if fewer than k remain,
+or only the first k otherwise.
 
 解题思路 / Solution Approach
-先将字符串转换为可修改的字节切片，每次以 2k 为步长定位一个分组，用双指针反转该组前 min(k, 剩余长度) 个字符。
-Convert the string to a mutable byte slice, advance in steps of 2k, and use two pointers to reverse the first min(k, remaining length) characters of each block.
+先将字符串转换为可修改的字节切片，每次以 2k 为步长定位一个分组，
+用双指针反转该组前 min(k, 剩余长度) 个字符。
+Convert the string to a mutable byte slice, advance in steps of 2k,
+and use two pointers to reverse the first min(k, remaining length) characters of each block.
 
 时间与空间复杂度 / Time and Space Complexity
-n = len(s)。时间 O(n)，每个字符最多参与一次分组反转。辅助空间 O(n)，Go 字符串不可修改，需要 []byte 副本；返回字符串也占 O(n)。
-n = len(s). Time O(n), with each character participating in at most one block reversal. Auxiliary space O(n) is needed for the mutable byte copy; the returned string also takes O(n).
+n = len(s)。时间 O(n)，每个字符最多参与一次分组反转。辅助空间 O(n)，
+Go 字符串不可修改，需要 []byte 副本；返回字符串也占 O(n)。
+n = len(s). Time O(n), with each character participating in
+at most one block reversal. Auxiliary space O(n) is needed for
+the mutable byte copy; the returned string also takes O(n).
 */
 
 /*
