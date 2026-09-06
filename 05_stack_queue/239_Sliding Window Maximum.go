@@ -13,6 +13,16 @@ Use a decreasing monotonic deque of indices. Remove expired indices from the fro
 remove values no greater than the current value from the back, then append the current index;
 the front is always the maximum.
 
+关键逻辑：为什么这样做 / Why This Works
+队列同时保持两条性质：下标递增，所以过期元素只会在队首；对应值递减，所以有效候选中队首最大。
+删掉较小旧值不会漏答案：只要旧值仍在今后的窗口里，更大且更晚加入的新值一定也在，
+因此旧值永远不必胜出。相等时也保留更晚的下标，因为它能覆盖旧值剩下的全部有效窗口。
+i-k+1>=0 即 i>=k-1 时才形成完整窗口。
+The deque maintains increasing indices, so expiration occurs at the front, and decreasing values,
+so its first valid candidate is largest. Discarding a smaller older value is safe:
+every future window retaining it also retains the larger newer value. On equality keep the newer index,
+which remains valid at least as long. A full window exists when i-k+1>=0, equivalently i>=k-1.
+
 时间与空间复杂度 / Time and Space Complexity
 n = len(nums)，k 为窗口长度。时间 O(n)，每个下标最多入队、出队一次；两个内层循环的总工作量是线性的。
 辅助队列空间 O(k)，返回结果 O(n-k+1)，包含结果总空间 O(n)。切片 append 的分配与复制按均摊计算。
@@ -34,8 +44,8 @@ Sliding window + monotonic deque
 第二步：删除队尾所有不大于当前值的元素
 第三步：加入当前下标
 
-窗口数量约为 n
-每个窗口检查 k 个数字
+暴力法对每个窗口重新检查 k 个数字，时间 O((n-k+1)*k)；下面的单调队列复用候选，不会逐窗口重新扫描。
+Brute force scans k values per window in O((n-k+1)*k); the deque below reuses candidates instead of rescanning each window.
 
 每轮的三个步骤 / Three Steps per Iteration
 第一步：删除过期下标 / Remove Expired Indices

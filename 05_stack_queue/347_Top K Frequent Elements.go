@@ -41,6 +41,19 @@ This always removes the least frequent current candidate.
 遍历结束后，堆中剩下的就是频率最高的 k 个元素。
 After processing all frequencies, the heap contains exactly the top k frequent elements.
 
+关键逻辑：为什么这样做 / Why This Works
+处理一个新候选前，堆里已是此前候选的前 k 名（不足 k 个则全保留）。
+加入新候选后，从至多 k+1 个中删掉最小频率，就仍是前 k 名；以前淘汰的值不可能因新候选加入而挤进前 k，因此无需找回。
+堆不是整个切片排好序，只要求父节点频率不大于子节点，沿父子路径可知根最小。
+heap.Push 先调用自定义 Push 追加，再用 Less/Swap 上浮；
+heap.Pop 先把根移到末尾并调整剩余堆，再调用自定义 Pop 删除末尾，所以自定义 Pop 不需要自己找最小值。
+Before each candidate, the heap contains the best k seen so far, or all if fewer.
+Adding one and discarding the minimum of at most k+1 preserves that property.
+Previously discarded candidates cannot improve their rank when more candidates arrive.
+A heap is not a fully sorted slice: parent frequencies are no larger than children's,
+making the root minimal. heap.Push calls the custom Push to append, then uses Less/Swap to sift up.
+heap.Pop moves the root to the end, repairs the remaining heap, then calls the custom Pop to remove the last item.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为输入长度，m 为不同数字数量。平均时间 O(n + m log(k+1))：统计 O(n)，维护堆 O(m log(k+1))，
 最后弹出 k 次 O(k log(k+1))，且 k<=m。用 log(k+1) 可正确涵盖 k=1。辅助空间 O(m+k)，
@@ -52,7 +65,7 @@ the heap temporarily reaches k+1 items.
 */
 
 // frequencyHeap is a min-heap ordered by frequency.
-// frequencyHeap 是按照出现频率排序的小顶堆。
+// frequencyHeap 是按频率维护父子大小关系的小顶堆，不是完全有序的切片。
 //
 // Each item stores [number, frequency].
 // 每个元素保存 [数字, 出现频率]。
@@ -111,8 +124,8 @@ func topKFrequent(nums []int, k int) []int {
 		frequency[number]++
 	}
 
-	// minHeap stores at most k value-frequency pairs.
-	// minHeap 最多保存 k 个“数字-频率”对。
+	// Each completed iteration keeps at most k pairs; insertion may temporarily produce k+1.
+	// 每轮结束最多保留 k 对，插入后可暂时达到 k+1 对。
 	minHeap := &frequencyHeap{}
 	heap.Init(minHeap)
 
@@ -137,7 +150,7 @@ func topKFrequent(nums []int, k int) []int {
 	// Pop from the min-heap and write from right to left.
 	// The result is therefore ordered from higher to lower frequency.
 	// 依次弹出小顶堆，并从结果数组右侧向左写入。
-	// 因此结果大致按照频率从高到低排列。
+	// 因此结果按频率从高到低排列；相同频率之间的顺序不作保证。
 	for i := k - 1; i >= 0; i-- {
 		item := heap.Pop(minHeap).([2]int)
 		result[i] = item[0]

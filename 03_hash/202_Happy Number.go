@@ -13,6 +13,15 @@ Return whether this process eventually reaches 1 rather than entering a cycle.
 Store every intermediate value in a hash set. Return true upon reaching 1;
 if a value repeats, the process has entered a cycle, so return false.
 
+关键逻辑：为什么这样做 / Why This Works
+同一个数字经过 getNext 总会得到同一个结果，所以一旦重复出现，后面的整条变化路径也会重复，
+不可能突然走出循环到达 1。循环条件已经排除了 n=1，因此检测到的重复是非快乐循环。
+平方和把大数压到有限范围内，最终必然到达 1 或重复，不会无限产生不同数字。
+getNext is deterministic: the same number always has the same successor.
+Revisiting a number repeats the entire future path, so it cannot newly escape to 1.
+The loop condition already excludes 1, making any detected repetition a non-happy cycle.
+Digit-square sums eventually enter a bounded range, so the process must reach 1 or repeat.
+
 时间与空间复杂度 / Time and Space Complexity
 d 为初始数字的十进制位数。首次平方和计算 O(d)，之后数值至多 81d 并继续快速缩小到固定范围，因此时间 O(d)，即 O(log(n+1))。
 哈希集合空间可保守记为 O(d)，不是 O(n)。单次 getNext(x) 时间与 x 的位数成正比，辅助空间 O(1)。哈希操作按平均 O(1) 计。

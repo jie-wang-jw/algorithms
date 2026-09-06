@@ -9,9 +9,21 @@ return all unique quadruplets whose sum equals target, using four distinct indic
 
 解题思路 / Solution Approach
 先排序，使用两层循环固定前两个数，再在剩余区间使用左右指针寻找另外两个数。
-各层都跳过重复值，并用较宽整数类型计算总和以避免溢出。
+各层都跳过重复值。当前实现用 int 求和，没有显式转换为 int64；整数范围必须足以容纳四数之和。
 Sort first, fix two values with nested loops, and use two pointers for the remaining pair.
-Skip duplicates at every level and use a wider integer type for sums to avoid overflow.
+Skip duplicates at every level. This implementation sums with int, without an explicit int64 conversion;
+its range must accommodate the four-value sum.
+
+关键逻辑：为什么这样做 / Why This Works
+固定 i、j 后，剩下的是有序区间的两数和：和太小时，即使用最大的右值也不足，
+当前左值可排除；和太大时，即使用最小的左值也超出，当前右值可排除。
+j 的去重只针对同一个 i：j=i+1 是该组第一次选择，不能跳过，否则会漏掉 [2,2,2,2] 这类合法答案。
+i<j<left<right 保证四个下标互不相同。
+After fixing i and j, solve a sorted two-sum problem: a sum too small eliminates
+the current left value even with its largest partner; a sum too large eliminates
+the right value even with its smallest partner. Deduplicate j only within
+the current i group. j=i+1 is its first choice and must be allowed,
+including equal values such as [2,2,2,2]. i<j<left<right guarantees distinct indices.
 
 时间与空间复杂度 / Time and Space Complexity
 n = len(nums)，r 为结果四元组数量。时间 O(n³)：固定两项的组合数为 O(n²)，

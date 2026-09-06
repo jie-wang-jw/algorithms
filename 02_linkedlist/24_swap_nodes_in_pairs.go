@@ -11,6 +11,14 @@ Nodes themselves must be swapped rather than merely changing their values.
 Use a dummy head to handle the first pair uniformly. For each pair, save both nodes and the remaining list,
 reconnect three links, and advance to the next pair.
 
+关键逻辑：为什么这样做 / Why This Works
+目标连接是 cur -> second -> first -> 后续链表。先让 first.Next=second.Next 保存与后续链表的连接，再让 second.Next=first；
+如果先改 second.Next，再读取它就会读到 first，丢失原来的后续入口。交换后 first 是这一对的尾，也是下一对的前驱，
+所以 cur=first，而不是继续停在 second。
+The target is cur -> second -> first -> remaining list. Set first.Next=second.Next before second.Next=first;
+otherwise reading second.Next would give first instead of the original suffix. After the swap,
+first is the pair's tail and the next pair's predecessor, so set cur=first.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为节点数。时间 O(n)，每对节点进行固定次数的指针重连。辅助空间 O(1)，只增加虚拟头节点和几个临时指针。
 n is the node count. Time O(n), with a constant number of link changes per pair.

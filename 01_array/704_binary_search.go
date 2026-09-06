@@ -7,7 +7,18 @@ Given an integer array nums sorted in ascending order and a target value, return
 
 解题思路 / Solution Approach
 使用二分查找，每次比较中间元素并排除一半搜索区间。文件分别演示左闭右闭区间和左闭右开区间两种写法。
-Use binary search, comparing the middle element and discarding half of the search range each time. The file demonstrates both closed and half-open interval conventions.
+Use binary search, comparing the middle element and discarding half of the search range each time.
+The file demonstrates both closed and half-open interval conventions.
+
+关键逻辑：为什么这样做 / Why This Works
+为什么能排除一半？数组有序，若 nums[mid]>target，则 mid 及其右边都不可能是答案；小于时同理排除左半段。
+边界更新必须保持区间定义：[left,right] 排除 mid 后用 right=mid-1；[left,right) 的右边本来不包含，所以用 right=mid。
+每轮都排除已检查的 mid，区间严格缩小；只有候选区间为空才返回 -1。
+Sorted order makes every value at or right of mid too large when nums[mid]>target;
+the symmetric rule applies when it is too small. Preserve the interval convention:
+excluding mid requires right=mid-1 for [left,right], but right=mid for [left,right).
+Each unsuccessful round removes mid and strictly shrinks the candidates.
+Return -1 only when no candidates remain.
 
 时间与空间复杂度 / Time and Space Complexity
 n = len(nums)。search1 和 search2 最坏时间均为 O(log n)，每轮搜索区间减半；辅助空间 O(1)，迭代实现只保存边界和中点。

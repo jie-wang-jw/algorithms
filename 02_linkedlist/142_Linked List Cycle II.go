@@ -12,6 +12,18 @@ The list must not be modified.
 Use Floyd's slow and fast pointers. If they meet, a cycle exists. Move one pointer back to head,
 advance both one step at a time, and their next meeting point is the cycle entrance.
 
+关键逻辑：为什么这样做 / Why This Works
+为什么回到 head 后会在入口相遇？设 head 到入口距离为 a，入口沿环到相遇点距离为 b，环长为 c。
+相遇时 slow 走了 a+b+t*c 步，fast 是它的两倍；两者距离差又是整圈 k*c，因此 a+b+t*c=k*c，即 a+b 是 c 的倍数。
+于是相遇点再走 a 步，其环内位置是 (b+a) mod c=0，恰好回到入口；head 出发的指针走 a 步也恰到入口。
+在此之前，head 指针还在环外，不可能与环内指针相遇。如果 a=0，两个指针设置好时已经在入口相等，不必再走。
+Let a be the distance from head to the entrance, b the forward distance from entrance to meeting point,
+and c the cycle length. At the meeting, slow traveled a+b+t*c steps. Fast traveled twice as far,
+and their distance difference is k*c, so a+b is a multiple of c.
+Walking a more steps from the meeting point gives cycle position (b+a) mod c=0: the entrance.
+The pointer from head also reaches it after a steps. Before then it is outside the cycle and cannot meet the other pointer.
+If a=0, both are already equal at the entrance when reset.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为不同节点数。时间 O(n)：快慢指针找相遇点、再找入口都只需线性步数。辅助空间 O(1)，仅保存几个节点指针。
 n is the number of distinct nodes. Time O(n): both finding the meeting point and locating the entrance take linear steps.
@@ -65,8 +77,8 @@ func detectCycle(head *ListNode) *ListNode {
 				Second meeting: finds the cycle entrance.
 			*/
 			for p1 != p2 {
-				// Move both one step; the distance formula guarantees they meet at the entrance.
-				// 两者每次各走一步；根据距离关系，它们会在入环点相遇。
+				// After a steps, p1 reaches the entrance and p2 reaches cycle offset (b+a) mod c=0.
+				// 走 a 步后 p1 从头到入口，p2 的环内位置为 (b+a) mod c=0，也恰好到入口。
 				p1 = p1.Next
 				p2 = p2.Next
 			}

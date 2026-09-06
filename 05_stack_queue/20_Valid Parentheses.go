@@ -15,6 +15,15 @@ Use a stack to store the closing bracket expected for each opening bracket.
 A closing bracket must match the top; an empty stack, mismatch,
 or leftover stack makes the string invalid.
 
+关键逻辑：为什么这样做 / Why This Works
+最近打开且尚未闭合的括号必须最先闭合，否则就会交叉嵌套，所以使用后进先出的栈。例如 "([)]" 在读到 ')' 时，
+最近未闭合的是 '['，期待 ']'；即使两种括号数量都配对，也必须判错。结束后栈不空表示有左括号未闭合；
+中途栈空却遇到右括号表示没有可配对的左括号。
+The most recently opened unmatched bracket must close first; otherwise pairs cross.
+That requires LIFO order. In "([)]", ')' encounters an unmatched '[' expecting ']';
+balanced counts alone are insufficient. A nonempty final stack means unclosed openings;
+a closing bracket with an empty stack has no matching opening.
+
 时间与空间复杂度 / Time and Space Complexity
 n = len(s)。最坏时间 O(n)，每个字符检查一次；奇数长度可 O(1) 提前返回。
 辅助空间 O(n)，最坏情况下栈保存线性数量的期待右括号。

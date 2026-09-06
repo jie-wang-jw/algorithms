@@ -22,6 +22,13 @@ Process:
 5. 当前层处理完成后，将结果加入 result。
    After finishing the current level, append it to result.
 
+关键逻辑：为什么这样做 / Why This Works
+每轮开始时队列里恰好只有当前层，因此先保存的 levelSize 才是当前层数量。处理中孩子不断加入队尾，使队列混合两层；只弹出原来的 levelSize 个，
+剩下的就恰好是下一层。若每次用变化的 len(queue) 判断本层结束，会把层的边界弄错。父节点从左到右出队，每个父节点又先左后右入队，所以孩子也按从左到右排列。
+At each outer-loop start, the queue contains exactly one level, so its saved length is the level size. Enqueuing children mixes two levels;
+removing exactly the original levelSize nodes leaves precisely the next level. Using the changing queue length would lose that boundary.
+Parents leave left to right and enqueue left child before right, preserving the next level's left-to-right order.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为节点数，w 为最大层宽。时间 O(n)，每个节点入队、出队各一次。辅助空间 O(w)，
 处理过程中队列可以同时包含当前层剩余节点和下一层节点，但数量仍为 O(w)。
@@ -34,7 +41,7 @@ nodes but stays O(w). Output and total space are O(n).
 /*
 题目描述 / Problem Description
 
-给定二叉树的根节点 root，返回节点值的层序遍历结果，+
+给定二叉树的根节点 root，返回节点值的层序遍历结果，
 即从上到下、从左到右逐层访问节点。
 
 Given the root of a binary tree, return its level-order traversal,

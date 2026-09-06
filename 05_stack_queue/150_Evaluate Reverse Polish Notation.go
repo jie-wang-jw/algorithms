@@ -27,6 +27,15 @@ Important details:
 Use a stack for operands and intermediate results. Push numbers; for an operator,
 pop the right operand first and then the left operand, compute left operator right, and push the result back.
 
+关键逻辑：为什么这样做 / Why This Works
+逆波兰写法是“左表达式 右表达式 运算符”，所以右表达式的值最后入栈，在栈顶；左值位于它下面。
+遇到运算符，就是把这两个已经算好的子表达式合并成一个结果并压回栈。例如 ["5","2","-"] 必须算 5-2，而不是 2-5。
+合法二元表达式的数字数比运算符数多 1，每个运算把栈中两个值合为一个，所以结束恰好剩一个值。
+Postfix order is left-expression, right-expression, operator, so the right value is pushed later and sits above the left.
+An operator combines these completed subexpressions into one stack value. Thus ["5","2","-"] means 5-2, not 2-5.
+A valid binary expression has one more numeric token than operators; each operator combines two values into one,
+leaving exactly one final value.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为 token 数。题目整数长度有界时，时间 O(n)，每个 token 只处理一次；
 若考虑任意长度数字解析，则计入全部 token 字符数。辅助空间 O(n)，保存操作数与中间结果；返回整数 O(1)。
@@ -54,8 +63,10 @@ The only value remaining in the stack is the final answer.
 */
 
 func evalRPN(tokens []string) int {
-	// At most about half of the tokens are operands.
-	// 操作数最多约占 token 数量的一半。
+	// Each binary operator reduces the stack size by one; one final value means operands=operators+1.
+	// Thus (len(tokens)+1)/2 is the exact numeric-token count and an upper bound on stack size.
+	// 每个二元运算使栈大小减一，最终剩一个值，因此数字数=运算符数+1。
+	// 所以 (len(tokens)+1)/2 恰好是数字 token 数，也是栈大小的上界。
 	stack := make([]int, 0, (len(tokens)+1)/2)
 
 	for _, token := range tokens {

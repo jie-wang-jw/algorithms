@@ -12,6 +12,14 @@ inStack 的所有元素倒入其中，使最早入队的元素来到栈顶。
 Use inStack for incoming elements and outStack for the queue front.
 Only when outStack is empty, transfer all elements from inStack so the oldest element becomes its top.
 
+关键逻辑：为什么这样做 / Why This Works
+倒栈会反转先后顺序：按 1、2、3 入栈，依次弹出 3、2、1 再压入 outStack，
+顶部就是最早来的 1。必须等 outStack 空了才转移，因为它剩余的元素都比 inStack 的新元素早来；
+提前转移会把新元素压在旧元素上面，让后来者先出队，破坏先进先出。
+Transfer reverses order: pushing 1,2,3 then moving popped values 3,2,1 puts oldest value 1 on top of outStack.
+Transfer only when outStack is empty: its remaining items arrived before every item in inStack.
+An early transfer would put newer values above older ones and violate FIFO.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为当前队列元素数。Push 均摊 O(1)，Pop/Peek 均摊 O(1)、单次最坏 O(n)，Empty O(1)。
 每个元素最多从 inStack 转移到 outStack 一次，所以一串操作的总工作量是线性的。

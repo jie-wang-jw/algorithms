@@ -2,12 +2,23 @@ package _1_array
 
 /*
 题目描述 / Problem Description
-给定一个正整数 target 和一个由正整数组成的数组 nums，找出总和大于或等于 target 的最短连续子数组，并返回其长度；如果不存在则返回 0。
-Given a positive integer target and an array nums of positive integers, return the minimum length of a contiguous subarray whose sum is at least target; return 0 if none exists.
+给定一个正整数 target 和一个由正整数组成的数组 nums，找出总和大于或等于 target 的最短连续子数组，
+并返回其长度；如果不存在则返回 0。
+Given a positive integer target and an array nums of positive integers,
+return the minimum length of a contiguous subarray whose sum is at least target; return 0 if none exists.
 
 解题思路 / Solution Approach
 使用滑动窗口。右指针不断扩大窗口并累加元素；当窗口和达到 target 时，持续移动左指针缩小窗口，同时更新最短长度。
-Use a sliding window. Expand the right boundary and add values; whenever the sum reaches target, repeatedly shrink the left boundary while updating the minimum length.
+Use a sliding window. Expand the right boundary and add values; whenever the sum reaches target,
+repeatedly shrink the left boundary while updating the minimum length.
+
+关键逻辑：为什么这样做 / Why This Works
+为什么不会漏掉最短窗口？数组元素都是正数，所以右端扩张只会增大和，左端收缩只会减小和。固定右端 j 时，
+每次先记录合法窗口再收缩，直到不合法，便检查了当前仍可能改进答案的最短窗口。
+已经丢弃的左端曾经对应一个合法窗口，以后再扩张只会更长，不会改进最短长度；若允许负数，这个理由就不成立。
+Positive values make expansion increase the sum and shrinking decrease it. For each right endpoint,
+record valid windows before shrinking until invalid. A discarded left endpoint already yielded a valid, shorter window,
+so extending it later cannot improve the minimum. This reasoning does not hold with negative values.
 
 时间与空间复杂度 / Time and Space Complexity
 n = len(nums)。时间 O(n)：左右边界各最多前进 n 次，嵌套循环不是 O(n²)。辅助空间 O(1)，只维护窗口和与下标。

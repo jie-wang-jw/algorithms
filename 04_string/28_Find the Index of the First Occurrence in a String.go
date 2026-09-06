@@ -13,6 +13,21 @@ occurrence of needle in haystack, or -1 if it does not occur.
 The file provides brute-force and KMP solutions. Brute force tries every starting position,
 while KMP uses a prefix table to reuse matched information without moving the text pointer backward.
 
+关键逻辑：为什么这样做 / Why This Works
+KMP 比较前，j 表示已经匹配的长度，主串当前位置之前的 j 个字符等于 needle[:j]。
+若下一字符失配，next[j-1] 给出这段已匹配内容的最长相等真前后缀长度 L：
+末尾 L 个字符既然等于开头 L 个字符，就可以直接当作新一轮已经匹配的前缀，无需重新扫描主串。
+例如已匹配 "abab"，下一字符不是期待的 'a'，可先保留末尾 "ab"，令 j=2，再用同一个主串字符比较 needle[2]；
+仍失败就继续沿更短前后缀回退。建表 getNext 使用同样逻辑：寻找能接上新字符的最长旧前后缀。
+匹配完成时 i 是末尾下标，起点为 i-m+1。
+Before a KMP comparison, j characters immediately before the current text position equal needle[:j].
+On mismatch, L=next[j-1] is the longest equal proper prefix/suffix of that matched part.
+Its last L characters already equal the first L pattern characters, so reuse them as a matched prefix without rescanning the text.
+After matching "abab", a mismatch against the expected 'a' first retains suffix "ab", sets j=2,
+and compares the same text character with needle[2]. Further failures follow shorter borders.
+getNext applies this same rule to find the longest old border extendable by the new character.
+A full match ends at i, so its start is i-m+1.
+
 时间与空间复杂度 / Time and Space Complexity
 n = len(haystack)，m = len(needle)。strStr 暴力法：m<=n 时最坏 O((n-m+1)m)，
 辅助空间 O(1)。strStr2 KMP：建表 O(m)、匹配 O(n)，总 O(n+m)，辅助空间 O(m)
@@ -156,8 +171,8 @@ func getNext(next []int, s string) {
 			把 j 缩短到更短的可复用前缀，再继续尝试。
 		*/
 		for j > 0 && s[i] != s[j] {
-			// A matched length j ends at index j-1, so fall back with next[j-1].
-			// 已匹配长度为 j 时，最后位置是 j-1，因此使用 next[j-1] 回退。
+			// next[j-1] finds the longest border within the matched prefix; its suffix is reusable as a prefix.
+			// next[j-1] 找已匹配前缀内部的最长相等前后缀；末尾这段仍能当作开头使用，所以无需从零重试。
 			j = next[j-1]
 		}
 

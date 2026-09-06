@@ -13,6 +13,13 @@ count index tuples satisfying nums1[i] + nums2[j] + nums3[k] + nums4[l] = 0.
 Split the arrays into two pairs. Count every sum from the first pair in a hash map,
 then scan sums from the second pair and add the frequency of each opposite sum.
 
+关键逻辑：为什么这样做 / Why This Works
+对固定的 (c,d)，每一对满足 a+b=-(c+d) 的下标都能组成一个不同四元组，所以应加上频次，而不是只加 1。
+若某个所需和由前两数组产生 3 次，又被后两数组的 2 对下标需要，扫描时就累加 3+3=6；值相同但下标不同也要计数。
+For each fixed (c,d) index pair, every (a,b) index pair with sum -(c+d) creates a distinct tuple,
+so add its frequency rather than 1. If a needed sum occurs for 3 first-pair combinations and 2
+second-pair combinations, the scans add 3+3=6. Equal values at different indices still count separately.
+
 时间与空间复杂度 / Time and Space Complexity
 四个数组等长 n 时，平均时间 O(n²)，前两组配对各遍历 n² 次；辅助空间 O(n²)，
 保存不同两数和及频次。若长度分别为 a,b,c,d，则时间 O(ab+cd)，空间 O(ab)。

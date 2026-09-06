@@ -14,6 +14,19 @@ between words and have no leading or trailing spaces.
 Use strings.Fields to extract words while discarding extra whitespace,
 reverse the word slice with two pointers, and join it with single spaces.
 
+手写法 reverseWords2：先清理空格，再反转整个字节切片，最后反转每个单词，使单词内部恢复原顺序。
+The manual reverseWords2 normalizes spaces, reverses the entire byte slice, and reverses each word to restore its internal order.
+
+关键逻辑：为什么这样做 / Why This Works
+reverseWords2 的逻辑是两次反转作用在不同范围：整体反转同时颠倒单词顺序和每个单词的字母顺序；
+再单独反转每个单词，只恢复字母顺序，保留已经倒过来的单词顺序。例如 "the sky" -> "yks eht" -> "sky the"。
+清空格时仅在一个非首单词开始前补一个空格，所以不会有首尾空格，单词间恰好一个。
+扫描单词结束处用 i==len(b) 充当末尾分隔符，并把它放在 || 左侧，短路后不会访问越界的 b[i]。
+reverseWords2 reverses two different scopes: reversing the whole string reverses both word order and letter order;
+reversing each word restores only its letters, preserving reversed word order. Example: "the sky" -> "yks eht" -> "sky the".
+Space cleanup inserts one separator only before non-first words, preventing leading/trailing spaces and
+repeated separators. i==len(b) acts as the last word's delimiter; placing it first in || short-circuits the out-of-bounds b[i] access.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为字符串字节数，w 为单词数。reverseWords：时间 O(n)，Fields 扫描、
 反转单词、Join 总计线性；辅助空间 O(w) 保存单词切片，输出 O(n)。reverseWords2：

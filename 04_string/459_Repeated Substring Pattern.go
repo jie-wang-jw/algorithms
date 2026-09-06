@@ -13,6 +13,22 @@ The file provides enumeration, doubled-string matching,
 and KMP solutions. KMP derives a possible period from the longest
 equal prefix and suffix and checks whether it divides the string length.
 
+关键逻辑：为什么这样做 / Why This Works
+枚举法：重复至少两次，所以单元长度不超过 n/2；长度必须整除 n，否则最后剩下不足一个单元。
+双倍字符串法：从 s+s 的内部起点 p（1<=p<n）取长度 n，就是把 s 循环移动 p 位。若仍等于 s，
+按这个位移反复对应的字符都相等，字符串由长度 gcd(n,p) 的块重复组成；
+去首尾正是排除 p=0、n 这两个任何字符串都能匹配的情况。
+KMP 法：设最长相等真前后缀长度为 L，p=n-L。前后缀相等意味着 s[p:]=s[:n-p]，
+即每个位置与前面相距 p 的位置相等，p 就是最小周期；只有 L>0 且 n%p==0，
+才能把整串切成至少两个完整周期。例如 "ababa" 的 L=3、p=2，但 5%2!=0，最后半个周期不算完整重复。
+Enumeration: at least two copies require block length <=n/2, and the length must divide n.
+Doubling: a length-n match starting at internal offset p (1<=p<n) is a rotation by p.
+Equality forces characters in each repeated-shift orbit to agree, yielding repetition
+of blocks of length gcd(n,p). Removing both ends excludes trivial matches at offsets 0 and n.
+KMP: for longest proper border length L, let p=n-L. Border equality means s[p:]=s[:n-p],
+so characters p positions apart agree; p is the shortest period. L>0 and n%p==0 ensure
+at least two complete copies. For "ababa", L=3 and p=2, but 5%2!=0 leaves an incomplete copy.
+
 时间与空间复杂度 / Time and Space Complexity
 n = len(s)。枚举法 repeatedSubstringPattern：保守时间上界 O(n²)，枚举 O(n) 个长度，
 候选长度最多比较 O(n) 字节；辅助空间 O(1)，子串切片不复制内容。

@@ -13,6 +13,13 @@ Exactly one answer is guaranteed.
 Scan the array while storing previously seen values and indices in a hash map. For each num,
 check whether target-num has already appeared and return the two indices when found.
 
+关键逻辑：为什么这样做 / Why This Works
+查找时 seen 只保存下标小于 i 的元素，所以命中 j 后必有 j!=i，且 nums[j]=target-num，
+两个数之和必为 target。例如 [3,3]、target=6：第一个 3 先存入，第二个 3 才找到它；不会把一个 3 使用两次。
+At lookup time, seen contains only indices smaller than i.
+A match j is therefore distinct from i and satisfies nums[j]=target-num.
+With [3,3] and target=6, store the first 3, then match it when reading the second; no element is reused.
+
 时间与空间复杂度 / Time and Space Complexity
 n = len(nums)。在哈希表查询和写入平均 O(1) 的假设下，总时间 O(n)。辅助空间 O(n)，
 最坏保存几乎全部数字及下标；返回两个下标只占 O(1)。

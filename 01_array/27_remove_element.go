@@ -2,12 +2,15 @@ package _1_array
 
 /*
 题目描述 / Problem Description
-给定一个整数数组 nums 和一个整数 val，原地删除所有等于 val 的元素，并返回剩余元素的数量。返回后，nums 的前 k 个位置应保存所有未删除元素。
-Given an integer array nums and an integer val, remove every occurrence of val in place and return the number of remaining elements. Afterward, the first k positions of nums must contain the retained elements.
+给定一个整数数组 nums 和一个整数 val，原地删除所有等于 val 的元素，并返回剩余元素的数量。
+返回后，nums 的前 k 个位置应保存所有未删除元素。
+Given an integer array nums and an integer val, remove every occurrence of val in place and
+return the number of remaining elements. Afterward, the first k positions of nums must contain the retained elements.
 
 解题思路 / Solution Approach
 本文件提供三种解法。题目允许改变元素顺序，只检查返回长度 k 和 nums[:k]，不要求真正缩短切片或清空尾部。
-This file provides three solutions. Element order may change; only the returned length k and nums[:k] matter. The slice need not be shortened or its trailing values cleared.
+This file provides three solutions. Element order may change; only the returned length k and nums[:k] matter.
+The slice need not be shortened or its trailing values cleared.
 
 1. 暴力移位法 / Brute-force shifting — removeElementBruteForce
 遇到 val 时，将有效区间内后续元素全部左移一位，并将有效长度减一。
@@ -39,9 +42,23 @@ Brute-force shifting and fast/slow pointers: k = 3, valid prefix [2, 2, 4].
 左右双指针法：k = 3，有效前缀为 [4, 2, 2]。两种排列都符合题意。
 Left/right pointers: k = 3, valid prefix [4, 2, 2]. Both orderings satisfy the problem.
 
+关键逻辑：为什么这样做 / Why This Works
+快慢指针：处理 fast 前，nums[:slow] 是已扫描部分中所有保留值，因此 slow 既是数量也是下一个写入位置。
+始终 slow<=fast，写入只覆盖已处理位置或当前位置，不会破坏未来输入。
+左右指针：nums[:left] 已全部有效，[left,right] 尚未处理。找到左侧 val 和右侧非 val 后，复制就填好了左侧空缺，
+所以 left++；右侧值已搬入有效前缀，原位置应排除，所以 right--。指针交错时没有未处理元素，前缀长度 left 就是答案。这里是覆盖，不是交换。
+Fast/slow: before processing fast, nums[:slow] contains every retained value already scanned.
+Thus slow is both the count and next write index; slow<=fast prevents overwriting future input.
+Left/right: nums[:left] is valid and [left,right] remains unprocessed. Copying the right survivor
+fills the left removal slot, so advance left; its old right position must be excluded, so decrement right.
+Once pointers cross, left is the valid prefix length. This is replacement, not a swap.
+
 时间与空间复杂度 / Time and Space Complexity
-n = len(nums)。暴力法最坏时间 O(n²)，多次移位的总成本可达 n+(n-1)+...+1；快慢指针和左右双指针均为 O(n)，每个指针只单向移动。三种解法辅助空间均为 O(1)，修改输入并返回整数长度。
-n = len(nums). Brute force takes O(n²) worst-case time due to repeated shifts; both pointer solutions take O(n) because pointers move only forward or inward. All three use O(1) auxiliary space and return an integer length.
+n = len(nums)。暴力法最坏时间 O(n²)，多次移位的总成本可达 n+(n-1)+...+1；快慢指针和左右双指针均为 O(n)，
+每个指针只单向移动。三种解法辅助空间均为 O(1)，修改输入并返回整数长度。
+n = len(nums). Brute force takes O(n²) worst-case time due to repeated shifts;
+both pointer solutions take O(n) because pointers move only forward or inward.
+All three use O(1) auxiliary space and return an integer length.
 */
 
 func removeElementBruteForce(nums []int, val int) int {

@@ -13,6 +13,14 @@ Use one queue. After each Push, rotate all older elements from
 the front to the back so the new element becomes the front;
 Pop and Top can then use the front directly.
 
+关键逻辑：为什么这样做 / Why This Works
+入栈前，队首到队尾已经是栈顶到栈底。新值追加到尾部后，只把 size 个旧元素逐个移到后面，
+新值就来到队首，旧元素的相对顺序不变。例如 [2,1] 加入 3： [2,1,3] -> [1,3,2] -> [3,2,1]。
+因此只能旋转旧元素数量，不能把新元素也转走。
+Before Push, the queue runs from stack top to bottom. Append the new value, then rotate exactly size old items;
+the new value reaches the front while old items retain their order.
+Example: [2,1] plus 3 becomes [2,1,3] -> [1,3,2] -> [3,2,1]. Rotating the new item too would undo its placement.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为当前栈内元素数。Push 时间 O(n)，旋转所有旧元素；Pop、Top、Empty
 时间 O(1)。存储空间 O(n)。Go append 的扩容成本按均摊分析计入。

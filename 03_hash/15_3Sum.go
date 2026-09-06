@@ -11,6 +11,15 @@ Each triplet must use elements at three distinct indices.
 Sort the array, fix the first value, and use two pointers to find the other two.
 Move pointers according to the sum and skip duplicate values to avoid duplicate triplets.
 
+关键逻辑：为什么这样做 / Why This Works
+固定 a 后，若 a+b+c<0，当前 c 已是候选区间最大值，保留 b 再选更小的 c 也不可能成功，所以可以排除当前 b，
+移动 left。和过大时，当前 b 已是最小值，保留 c 也无法成功，所以移动 right。找到答案后，相同 b 或 c 只会再次得到同一值组合，
+才跳过重复值。i<left<right 保证不同下标，去重限制的是答案值组合，不是禁止答案含相同数字。
+For fixed a, if a+b+c<0, c is already the largest available partner,
+so this b cannot work with any remaining c; advance left. If the sum is too large, b is already the smallest partner,
+so discard this c by decrementing right. After a match, repeated b or c values only reproduce the same triplet.
+i<left<right ensures distinct indices; deduplication does not forbid equal values within a triplet.
+
 时间与空间复杂度 / Time and Space Complexity
 n = len(nums)，r 为结果三元组数量。时间 O(n²)：排序 O(n log n)，固定一个数后每次双指针扫描 O(n)。
 辅助空间 O(log n)，计入 Go 排序调用栈；结果占 O(r)，总额外空间 O(log n+r)。排序会修改输入。

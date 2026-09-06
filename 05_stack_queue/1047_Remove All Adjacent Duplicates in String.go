@@ -15,6 +15,15 @@ Use a byte slice as a stack. Pop when the current character matches the top;
 otherwise push it. The top is always the most recently retained character,
 so chain reactions are handled naturally.
 
+关键逻辑：为什么这样做 / Why This Works
+每轮开始时，栈是已扫描前缀消除相邻重复后的结果，内部已没有可删除的相邻对。
+新字符只可能与栈顶形成新的一对；相同就弹栈且不压入当前字符，等于同时删掉两者。
+例如 "abbaca"：a -> ab -> a -> 空 -> c -> ca，删掉 bb 后暴露的 a 会与下一个 a 抵消，因此不用回退原字符串下标。
+At each step the stack is the fully reduced scanned prefix, containing no adjacent duplicate pair.
+A new character can create a pair only with its top. On equality, pop and do not push the current character,
+removing both. For "abbaca": a -> ab -> a -> empty -> c -> ca. Removing bb exposes a for
+cancellation with the next a, without rewinding the input index.
+
 时间与空间复杂度 / Time and Space Complexity
 n = len(s)。时间 O(n)，每个字符最多入栈、出栈各一次，最后转换字符串也是 O(n) 上界。
 辅助空间 O(n) 保存栈；结果最多 O(n)，总空间仍为 O(n)。

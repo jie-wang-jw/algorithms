@@ -9,9 +9,18 @@ Given a positive integer n, generate an n x n matrix filled with the integers fr
 维护上、下、左、右四条未填充边界。每轮依次填充上边、右边、下边和左边，然后将四条边界向内收缩。
 Maintain top, bottom, left, and right boundaries for the unfilled area. Fill the four sides clockwise, then move all boundaries inward.
 
+关键逻辑：为什么这样做 / Why This Works
+四条边围住尚未填写的区域。每填完一条边就立即收缩该边界，而不是等四条边都写完才收缩：例如 top++ 后，右边从下一行开始，右上角不会重复填写；
+其他角同理。后两条边先检查剩余行/列，避免处理已经消失的区域。n=3 填完外圈后四个边界都为 1，下一轮只填中心的 9，随后边界交错，循环结束。
+The four boundaries enclose unfilled cells. Shrink each boundary immediately after filling that side, not after all four sides:
+top++ makes the right column start one row lower, avoiding a second write to the top-right corner. Other corners follow the same rule.
+Check remaining rows/columns before the last two sides. For n=3, all boundaries become 1 after the outer ring;
+the next round fills only the center with 9, then the boundaries cross.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为矩阵边长。时间 O(n²)，每个格子填入一次。除返回矩阵外辅助空间 O(1)；返回矩阵占 O(n²)，包含结果的总空间为 O(n²)。
-n is the matrix side length. Time O(n²), filling each cell once. Auxiliary space excluding the output is O(1); the returned matrix and total space take O(n²).
+n is the matrix side length. Time O(n²), filling each cell once. Auxiliary space excluding the output is O(1);
+the returned matrix and total space take O(n²).
 */
 
 func generateMatrix(n int) [][]int {

@@ -11,6 +11,17 @@ Given the head of a singly linked list, reverse the list and return its new head
 The iterative method uses prev and cur, saving the next node before reversing cur.Next.
 The recursive method reverses the suffix first and then attaches the current node at its end.
 
+关键逻辑：为什么这样做 / Why This Works
+迭代时 prev 是已经反转部分的头，cur 是尚未处理部分的头。cur.Next=prev 把当前节点接到已反转部分前面，
+所以 prev=cur；原来的后续节点必须提前保存，否则改向后就无法沿原链继续。cur=nil 表示未处理部分为空，因此 prev 就是完整结果。
+递归返回后，原来的 head.Next 已成为反转后半段的尾节点。
+让它的 Next 指回 head，就把 head 接到尾部；再将 head.Next=nil，切断原来的正向边，否则两节点会形成环。
+Iteratively, prev heads the reversed prefix and cur heads the unprocessed suffix. Linking cur.Next to prev prepends cur,
+making it the new prev. Save the old next pointer first so the remaining input stays reachable.
+When cur is nil, prev heads the complete result.
+After recursion, the original head.Next is the tail of the reversed suffix.
+Pointing its Next to head appends head. Set head.Next=nil to remove the original forward edge; otherwise the pair forms a cycle.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为节点数。reverseList：时间 O(n)，每条指针改向一次，辅助空间 O(1)。
 reverseList2：时间 O(n)，递归深度为 n，调用栈占 O(n) 辅助空间。两者均复用原节点。
