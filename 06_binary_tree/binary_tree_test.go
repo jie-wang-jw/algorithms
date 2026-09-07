@@ -117,6 +117,71 @@ func TestInorderTraversal(t *testing.T) {
 	}
 }
 
+func TestInvertTree(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) *TreeNode
+	}{
+		{name: "preorder recursive", fn: invertTree},
+		{name: "postorder recursive", fn: invertTreePostorderRecursive},
+		{name: "preorder iterative", fn: invertTreePreorderIterative},
+		{name: "postorder iterative", fn: invertTreePostorderIterative},
+		{name: "level order", fn: invertTreeLevelOrder},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// Allocate fresh trees per implementation because inversion mutates the input.
+			// 每种实现重新创建测试树，避免原地翻转影响下一个实现的输入。
+			// Compare complete structures, including nil children, rather than traversal values alone.
+			// 比较包含空孩子位置的完整结构，避免仅比较遍历值而漏掉结构错误。
+			tests := []struct {
+				name string
+				root *TreeNode
+				want *TreeNode
+			}{
+				{name: "empty tree", root: nil, want: nil},
+				{name: "single node", root: &TreeNode{Val: 1}, want: &TreeNode{Val: 1}},
+				{
+					name: "full tree",
+					root: &TreeNode{Val: 4,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 1}, Right: &TreeNode{Val: 3}},
+						Right: &TreeNode{Val: 7, Left: &TreeNode{Val: 6}, Right: &TreeNode{Val: 9}}},
+					want: &TreeNode{Val: 4,
+						Left:  &TreeNode{Val: 7, Left: &TreeNode{Val: 9}, Right: &TreeNode{Val: 6}},
+						Right: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}, Right: &TreeNode{Val: 1}}},
+				},
+				{
+					name: "left chain",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}},
+					want: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}},
+				},
+				{
+					name: "right chain",
+					root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}},
+					want: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}},
+				},
+				{
+					name: "equal values asymmetric shape",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 1, Right: &TreeNode{Val: 1}}},
+					want: &TreeNode{Val: 1, Right: &TreeNode{Val: 1, Left: &TreeNode{Val: 1}}},
+				},
+			}
+
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					got := implementation.fn(tt.root)
+					if got != tt.root {
+						t.Fatal("invertTree must preserve the root pointer")
+					}
+					if !reflect.DeepEqual(got, tt.want) {
+						t.Fatalf("invertTree() structure mismatch: got %#v, want %#v", got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
 func TestPostorderTraversal(t *testing.T) {
 	// Both iterative and recursive implementations must return left-right-root order.
 	// 迭代和递归实现都必须返回“左、右、根”的顺序。
