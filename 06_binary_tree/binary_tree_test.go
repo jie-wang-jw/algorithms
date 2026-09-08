@@ -59,6 +59,201 @@ func traversalTestCases() []traversalTestCase {
 	}
 }
 
+func TestIsSymmetric(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) bool
+	}{
+		{name: "recursive", fn: isSymmetric},
+		{name: "iterative", fn: isSymmetricIterative},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// Fresh trees keep implementations independent even if one mistakenly mutates input.
+			// 每种实现使用新树，即使某种实现误改输入，也不会干扰另一种实现。
+			tests := []struct {
+				name string
+				root *TreeNode
+				want bool
+			}{
+				{name: "empty tree", want: true},
+				{name: "single node", root: &TreeNode{Val: 1}, want: true},
+				{name: "left child only", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}}, want: false},
+				{name: "right child only", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2}}, want: false},
+				{name: "different child values", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 3}}, want: false},
+				{
+					name: "full mirror",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 3}, Right: &TreeNode{Val: 4}},
+						Right: &TreeNode{Val: 2, Left: &TreeNode{Val: 4}, Right: &TreeNode{Val: 3}}},
+					want: true,
+				},
+				{
+					// Equal level values do not imply mirrored nil positions.
+					// 每层值相同，也可能因为空节点位置不对称而失败。
+					name: "same direction is not a mirror",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3}},
+						Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}},
+					want: false,
+				},
+				{
+					name: "sparse mirror",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3}},
+						Right: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}},
+					want: true,
+				},
+				{
+					// A nil/nil outer pair must not hide a later inner mismatch.
+					// 外侧同时为空时只能继续，不能漏掉随后内侧的值不匹配。
+					name: "nil outer pair before inner mismatch",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3}},
+						Right: &TreeNode{Val: 2, Left: &TreeNode{Val: 4}}},
+					want: false,
+				},
+				{
+					name: "outer value mismatch",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 3}},
+						Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 4}}},
+					want: false,
+				},
+			}
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.root); got != tt.want {
+						t.Fatalf("symmetry = %t, want %t", got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestMaxDepth(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) int
+	}{
+		{name: "recursive", fn: maxDepth},
+		{name: "iterative", fn: maxDepthIterative},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			tests := []struct {
+				name string
+				root *TreeNode
+				want int
+			}{
+				{name: "empty tree", want: 0},
+				{name: "single node", root: &TreeNode{Val: 0}, want: 1},
+				{name: "two levels", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 3}}, want: 2},
+				{
+					name: "example deeper right",
+					root: &TreeNode{Val: 3, Left: &TreeNode{Val: 9}, Right: &TreeNode{Val: 20, Left: &TreeNode{Val: 15}, Right: &TreeNode{Val: 7}}},
+					want: 3,
+				},
+				{
+					name: "deeper left",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Right: &TreeNode{Val: 4}}, Right: &TreeNode{Val: 3}},
+					want: 3,
+				},
+				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: 3},
+				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: 3},
+				{
+					// Depth counts nodes on one path, regardless of values or direction changes.
+					// 深度数的是一条路径上的节点，与节点值、左右转向无关。
+					name: "zigzag equal values",
+					root: &TreeNode{Val: 0, Left: &TreeNode{Val: 0, Right: &TreeNode{Val: 0, Left: &TreeNode{Val: 0}}}},
+					want: 4,
+				},
+				{
+					// Seven nodes occupy only three levels: count layers, not nodes.
+					// 七个节点只有三层：检查是否错误地按节点数累加深度。
+					name: "full three levels",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 4}, Right: &TreeNode{Val: 5}},
+						Right: &TreeNode{Val: 3, Left: &TreeNode{Val: 6}, Right: &TreeNode{Val: 7}}},
+					want: 3,
+				},
+			}
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.root); got != tt.want {
+						t.Fatalf("max depth = %d, want %d", got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestMinDepth(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) int
+	}{
+		{name: "recursive", fn: minDepth},
+		{name: "iterative", fn: minDepthIterative},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// Build fresh inputs for each implementation.
+			// 每种实现使用独立的新树，避免用例之间相互影响。
+			tests := []struct {
+				name string
+				root *TreeNode
+				want int
+			}{
+				{name: "empty tree", want: 0},
+				{name: "single node", root: &TreeNode{Val: 1}, want: 1},
+				// A missing child is not a leaf and cannot shorten the path.
+				// 缺失的孩子不是叶子，不能通过空的一侧缩短路径。
+				{name: "left child only", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}}, want: 2},
+				{name: "right child only", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2}}, want: 2},
+				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: 3},
+				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: 3},
+				{
+					name: "example shallow left leaf",
+					root: &TreeNode{Val: 3, Left: &TreeNode{Val: 9},
+						Right: &TreeNode{Val: 20, Left: &TreeNode{Val: 15}, Right: &TreeNode{Val: 7}}},
+					want: 2,
+				},
+				{
+					// A left-first DFS leaf need not be the nearest leaf.
+					// 先沿左侧找到的叶子不一定最近，还要比较右侧浅叶子。
+					name: "shallow right leaf",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}, Right: &TreeNode{Val: 4}},
+					want: 2,
+				},
+				{
+					name: "full three levels",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 4}, Right: &TreeNode{Val: 5}},
+						Right: &TreeNode{Val: 3, Left: &TreeNode{Val: 6}, Right: &TreeNode{Val: 7}}},
+					want: 3,
+				},
+				{
+					// Repeated values and changing directions do not change path length.
+					// 重复值和左右转向不影响路径长度，每个真实节点都要计数。
+					name: "zigzag equal values",
+					root: &TreeNode{Val: 0, Left: &TreeNode{Val: 0, Right: &TreeNode{Val: 0, Left: &TreeNode{Val: 0}}}},
+					want: 4,
+				},
+			}
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.root); got != tt.want {
+						t.Fatalf("min depth = %d, want %d", got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
 func TestLevelOrder(t *testing.T) {
 	for _, tt := range traversalTestCases() {
 		t.Run(tt.name, func(t *testing.T) {
