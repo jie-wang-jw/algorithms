@@ -14,6 +14,70 @@ type traversalTestCase struct {
 	postorder []int
 }
 
+func TestCountNodes(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) int
+	}{
+		{name: "recursive", fn: countNodes},
+		{name: "iterative", fn: countNodesIterative},
+		{name: "optimized", fn: countNodesOptimized},
+	}
+	// Counts near full-level boundaries exercise both the formula and recursive splitting.
+	// 满层边界附近的数量，同时检验直接套公式和递归拆分两种情况。
+	tests := []struct {
+		name string
+		size int
+	}{
+		{name: "empty tree", size: 0},
+		{name: "single node", size: 1},
+		{name: "left child only", size: 2},
+		{name: "full two levels", size: 3},
+		{name: "last level one node", size: 4},
+		{name: "last level half full", size: 5},
+		{name: "six node example", size: 6},
+		{name: "full three levels", size: 7},
+		{name: "fourth level begins", size: 8},
+		{name: "one missing from four levels", size: 14},
+		{name: "full four levels", size: 15},
+		{name: "fifth level begins", size: 16},
+		{name: "full five levels", size: 31},
+		{name: "sixth level begins", size: 32},
+		{name: "large incomplete last level", size: 50000},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					// Level-order array positions 2*i+1 and 2*i+2 are the children of i.
+					// 连续层序数组中，i 的左右孩子下标是 2*i+1、2*i+2，天然构成完全二叉树。
+					// Allocate fresh nodes for each run; repeated values must not affect the count.
+					// 每次创建新节点；使用重复值，确保统计节点数量而不是不同值数量。
+					nodes := make([]TreeNode, tt.size)
+					for i := range nodes {
+						nodes[i].Val = i % 3
+						if left := 2*i + 1; left < len(nodes) {
+							nodes[i].Left = &nodes[left]
+						}
+						if right := 2*i + 2; right < len(nodes) {
+							nodes[i].Right = &nodes[right]
+						}
+					}
+					var root *TreeNode
+					if len(nodes) > 0 {
+						root = &nodes[0]
+					}
+					// The construction size is the expected count, independent of any solution.
+					// 构造时的节点数就是期望结果，不依赖任何待测算法计算答案。
+					if got := implementation.fn(root); got != tt.size {
+						t.Fatalf("countNodes() = %d, want %d", got, tt.size)
+					}
+				})
+			}
+		})
+	}
+}
+
 func traversalTestCases() []traversalTestCase {
 	// Ordinary tree:
 	// 普通二叉树：
