@@ -6,6 +6,153 @@ import (
 	"testing"
 )
 
+func TestFindBottomLeftValue(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) int
+	}{
+		{name: "level order", fn: findBottomLeftValue},
+		{name: "recursive DFS", fn: findBottomLeftValueDFS},
+		{name: "reverse BFS", fn: findBottomLeftValueReverseBFS},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// The problem guarantees a nonempty tree; do not invent a nil-root result.
+			// 题目保证树非空，不为 nil 根杜撰返回值；每种实现使用新树。
+			tests := []struct {
+				name string
+				root *TreeNode
+				want int
+			}{
+				{name: "single node", root: &TreeNode{Val: 7}, want: 7},
+				{name: "single zero", root: &TreeNode{Val: 0}, want: 0},
+				{name: "single negative", root: &TreeNode{Val: -9}, want: -9},
+				{name: "two level example", root: &TreeNode{Val: 2, Left: &TreeNode{Val: 1}, Right: &TreeNode{Val: 3}}, want: 1},
+				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: 3},
+				// A bottom-left node can itself be a right child.
+				// 最深层最左节点也可能是右孩子，不能按“左叶子”理解。
+				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: 3},
+				{
+					// A deeper node takes precedence over a shallower node farther left.
+					// 更深层优先，不能一直沿根的左边走到头就返回。
+					name: "deeper right subtree example",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 4}},
+						Right: &TreeNode{Val: 3, Left: &TreeNode{Val: 5, Left: &TreeNode{Val: 7}}, Right: &TreeNode{Val: 6}}},
+					want: 7,
+				},
+				{
+					name: "deeper left subtree",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Right: &TreeNode{Val: 8}}, Right: &TreeNode{Val: 3}},
+					want: 8,
+				},
+				{
+					// Same-depth nodes must not overwrite the leftmost answer; values do not decide position.
+					// 同层右节点不能覆盖最左答案；最左值也不必是最小值。
+					name: "full level leftmost not minimum",
+					root: &TreeNode{Val: 0,
+						Left:  &TreeNode{Val: 1, Left: &TreeNode{Val: 90}, Right: &TreeNode{Val: -5}},
+						Right: &TreeNode{Val: 2, Left: &TreeNode{Val: -20}, Right: &TreeNode{Val: -99}}},
+					want: 90,
+				},
+				{
+					name: "sparse level leftmost is right child",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 40}},
+						Right: &TreeNode{Val: 3, Left: &TreeNode{Val: 50}}},
+					want: 40,
+				},
+				{
+					name: "negative bottom left",
+					root: &TreeNode{Val: 10, Left: &TreeNode{Val: -7}, Right: &TreeNode{Val: -8}},
+					want: -7,
+				},
+			}
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.root); got != tt.want {
+						t.Fatalf("bottom-left value = %d, want %d", got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestSumOfLeftLeaves(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) int
+	}{
+		{name: "recursive", fn: sumOfLeftLeaves},
+		{name: "stack", fn: sumOfLeftLeavesIterative},
+		{name: "queue", fn: sumOfLeftLeavesBFS},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// Each implementation receives fresh trees.
+			// 每种实现使用独立的新树。
+			tests := []struct {
+				name string
+				root *TreeNode
+				want int
+			}{
+				{name: "empty tree", want: 0},
+				// A root has no parent, so even a leaf root is not a left leaf.
+				// 根没有父节点，所以即使根是叶子，也不是左叶子。
+				{name: "single root", root: &TreeNode{Val: 9}, want: 0},
+				{name: "left leaf", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 7}}, want: 7},
+				{name: "right leaf excluded", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 7}}, want: 0},
+				{
+					name: "example",
+					root: &TreeNode{Val: 3, Left: &TreeNode{Val: 9}, Right: &TreeNode{Val: 20, Left: &TreeNode{Val: 15}, Right: &TreeNode{Val: 7}}},
+					want: 24,
+				},
+				// Only the final node of the left chain is a leaf.
+				// 左链只有末尾是叶子，不能累加中间的左孩子。
+				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 20, Left: &TreeNode{Val: 3}}}, want: 3},
+				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: 0},
+				{
+					// Being in the left subtree does not make a right child a left leaf.
+					// 位于整棵树左侧，也不能把其中的右叶子算作左叶子。
+					name: "left child has only right child",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 20, Right: &TreeNode{Val: 3}}},
+					want: 0,
+				},
+				{
+					// Left-leaf status depends on the immediate parent, not the root.
+					// 左叶子身份取决于直接父节点，与它在根的哪一侧无关。
+					name: "left leaf inside right subtree",
+					root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Left: &TreeNode{Val: 8}}},
+					want: 8,
+				},
+				{
+					name: "multiple equal left leaves",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 5}, Right: &TreeNode{Val: 90}},
+						Right: &TreeNode{Val: 3, Left: &TreeNode{Val: 5}, Right: &TreeNode{Val: 80}}},
+					want: 10,
+				},
+				{
+					// Negative left-leaf values must be included without filtering.
+					// 负数左叶子也要按真实值累加，不能过滤掉。
+					name: "negative and positive leaves",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: -7}, Right: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}},
+					want: -4,
+				},
+				{name: "zero left leaf", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 0}, Right: &TreeNode{Val: 8}}, want: 0},
+			}
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.root); got != tt.want {
+						t.Fatalf("sum of left leaves = %d, want %d", got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
 func TestIsBalanced(t *testing.T) {
 	implementations := []struct {
 		name string
