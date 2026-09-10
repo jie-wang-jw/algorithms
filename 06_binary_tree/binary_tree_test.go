@@ -6,6 +6,147 @@ import (
 	"testing"
 )
 
+// Shared cases let 112 check existence and 113 check every matching path.
+// 共用用例：112 判断是否存在，113 检查所有匹配路径。
+func pathSumTestCases() []struct {
+	name   string
+	root   *TreeNode
+	target int
+	want   [][]int
+} {
+	return []struct {
+		name   string
+		root   *TreeNode
+		target int
+		want   [][]int
+	}{
+		{name: "empty zero target", target: 0},
+		{name: "empty nonzero target", target: 7},
+		{name: "single match", root: &TreeNode{Val: 5}, target: 5, want: [][]int{{5}}},
+		{name: "single mismatch", root: &TreeNode{Val: 5}, target: 6},
+		{name: "single zero", root: &TreeNode{Val: 0}, target: 0, want: [][]int{{0}}},
+		// A matching prefix is invalid until it reaches a leaf.
+		// 前缀和匹配但还未到叶子，不能算作答案。
+		{name: "internal match only", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}}, target: 1},
+		{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, target: 6, want: [][]int{{1, 2, 3}}},
+		{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, target: 6, want: [][]int{{1, 2, 3}}},
+		{name: "right branch only", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 3}}, target: 4, want: [][]int{{1, 3}}},
+		// Negative values make pruning after exceeding the target incorrect.
+		// 后续负数可以抵消前缀，不能因超过目标就剪枝。
+		{name: "negative child", root: &TreeNode{Val: 5, Right: &TreeNode{Val: -3}}, target: 2, want: [][]int{{5, -3}}},
+		{name: "negative target", root: &TreeNode{Val: -2, Left: &TreeNode{Val: -3}}, target: -5, want: [][]int{{-2, -3}}},
+		{name: "zero sum path", root: &TreeNode{Val: 1, Left: &TreeNode{Val: -1}}, target: 0, want: [][]int{{1, -1}}},
+		{name: "no matching leaf", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 3}}, target: 9},
+		{
+			name: "two matching branches",
+			root: &TreeNode{Val: 5,
+				Left:  &TreeNode{Val: 4, Left: &TreeNode{Val: 11, Left: &TreeNode{Val: 7}, Right: &TreeNode{Val: 2}}},
+				Right: &TreeNode{Val: 8, Left: &TreeNode{Val: 13}, Right: &TreeNode{Val: 4, Left: &TreeNode{Val: 5}, Right: &TreeNode{Val: 1}}}},
+			target: 22, want: [][]int{{5, 4, 11, 2}, {5, 8, 4, 5}},
+		},
+		// Equal value sequences from distinct leaves must remain separate answers.
+		// 不同叶子形成的相同值序列也要分别保留，不能去重。
+		{name: "duplicate paths", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 2}}, target: 3, want: [][]int{{1, 2}, {1, 2}}},
+		{name: "different path lengths", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 0, Right: &TreeNode{Val: 2}}}, target: 3, want: [][]int{{1, 2}, {1, 0, 2}}},
+	}
+}
+
+func TestHasPathSum(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode, int) bool
+	}{
+		{name: "recursive", fn: hasPathSum},
+		{name: "stack", fn: hasPathSumIterative},
+		{name: "BFS", fn: hasPathSumBFS},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			for _, tt := range pathSumTestCases() {
+				t.Run(tt.name, func(t *testing.T) {
+					want := len(tt.want) > 0
+					if got := implementation.fn(tt.root, tt.target); got != want {
+						t.Fatalf("hasPathSum(target=%d) = %t, want %t", tt.target, got, want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestPathSum(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode, int) [][]int
+	}{
+		{name: "backtracking", fn: pathSum},
+		{name: "stack", fn: pathSumIterative},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			for _, tt := range pathSumTestCases() {
+				t.Run(tt.name, func(t *testing.T) {
+					// Sort only the outer slice: order within each root-to-leaf path matters.
+					// 只排序外层路径列表，不能改变每条路径内部从根到叶子的顺序。
+					got := slices.Clone(implementation.fn(tt.root, tt.target))
+					want := slices.Clone(tt.want)
+					slices.SortFunc(got, slices.Compare[[]int])
+					slices.SortFunc(want, slices.Compare[[]int])
+					if !slices.EqualFunc(got, want, slices.Equal[[]int]) {
+						t.Fatalf("pathSum(target=%d) = %v, want %v", tt.target, got, want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestBuildTree(t *testing.T) {
+	implementations := []struct {
+		name     string
+		fn       func([]int, []int) *TreeNode
+		preorder bool
+	}{
+		{name: "105 slicing", fn: buildTreePreorder, preorder: true},
+		{name: "105 index map", fn: buildTreePreorderOptimized, preorder: true},
+		{name: "106 slicing", fn: buildTreePostOrder},
+		{name: "106 index map", fn: buildTreePostOrderOptimized},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// Reuse explicit traversal fixtures, not traversals computed by another solution.
+			// 复用已经明确写出的遍历用例，不用另一个算法临时生成期望值。
+			tests := traversalTestCases()
+			tests = append(tests,
+				traversalTestCase{name: "textbook example",
+					root:     &TreeNode{Val: 3, Left: &TreeNode{Val: 9}, Right: &TreeNode{Val: 20, Left: &TreeNode{Val: 15}, Right: &TreeNode{Val: 7}}},
+					preorder: []int{3, 9, 20, 15, 7}, inorder: []int{9, 3, 15, 20, 7}, postorder: []int{9, 15, 7, 20, 3}},
+				traversalTestCase{name: "zigzag negative and zero",
+					root:     &TreeNode{Val: 0, Left: &TreeNode{Val: -2, Right: &TreeNode{Val: 8, Left: &TreeNode{Val: -3}}}},
+					preorder: []int{0, -2, 8, -3}, inorder: []int{-2, -3, 8, 0}, postorder: []int{-3, 8, -2, 0}},
+			)
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					first, second := slices.Clone(tt.inorder), slices.Clone(tt.postorder)
+					if implementation.preorder {
+						first, second = slices.Clone(tt.preorder), slices.Clone(tt.inorder)
+					}
+					beforeFirst, beforeSecond := slices.Clone(first), slices.Clone(second)
+					got := implementation.fn(first, second)
+					// Compare complete structures, including nil-child positions.
+					// 比较完整树结构，包括空孩子位置，不只检查根节点值。
+					if !reflect.DeepEqual(got, tt.root) {
+						t.Fatalf("constructed tree differs from expected structure: got %#v, want %#v", got, tt.root)
+					}
+					if !slices.Equal(first, beforeFirst) || !slices.Equal(second, beforeSecond) {
+						t.Fatal("construction modified input traversals")
+					}
+				})
+			}
+		})
+	}
+}
+
 func TestFindBottomLeftValue(t *testing.T) {
 	implementations := []struct {
 		name string

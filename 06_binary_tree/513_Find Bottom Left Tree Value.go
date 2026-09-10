@@ -74,7 +74,8 @@ The tree is unchanged and the integer result uses O(1) space.
 
 练习 / Practice
 本文件只保留中英文题解，不提供实现或函数骨架。优先练习第一种，理解按层覆盖答案的逻辑。
-This file contains explanations only, without implementation or skeleton. Start with standard BFS and understand per-level answer replacement.
+This file contains explanations only, without implementation or skeleton.
+Start with standard BFS and understand per-level answer replacement.
 */
 
 // 1. 层序遍历：推荐
