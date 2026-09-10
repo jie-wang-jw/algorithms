@@ -2,8 +2,155 @@ package _6_binary_tree
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 )
+
+func TestIsBalanced(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) bool
+	}{
+		{name: "top down", fn: isBalancedTopDown},
+		{name: "bottom up", fn: isBalanced},
+		{name: "iterative", fn: isBalancedIterative},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// Rebuild inputs for each implementation to keep the checks independent.
+			// 每种实现重新创建输入树，让测试彼此独立。
+			tests := []struct {
+				name string
+				root *TreeNode
+				want bool
+			}{
+				{name: "empty tree", want: true},
+				{name: "single node", root: &TreeNode{Val: 1}, want: true},
+				{name: "one left child", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}}, want: true},
+				{name: "one right child", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2}}, want: true},
+				{name: "left chain difference two", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: false},
+				{name: "right chain difference two", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: false},
+				{
+					// A height difference of one is allowed; symmetry is not required.
+					// 高度差为 1 仍然平衡，不要求左右对称。
+					name: "balanced example",
+					root: &TreeNode{Val: 3, Left: &TreeNode{Val: 9}, Right: &TreeNode{Val: 20, Left: &TreeNode{Val: 15}, Right: &TreeNode{Val: 7}}},
+					want: true,
+				},
+				{
+					name: "full tree equal values",
+					root: &TreeNode{Val: 0,
+						Left:  &TreeNode{Val: 0, Left: &TreeNode{Val: 0}, Right: &TreeNode{Val: 0}},
+						Right: &TreeNode{Val: 0, Left: &TreeNode{Val: 0}, Right: &TreeNode{Val: 0}}},
+					want: true,
+				},
+				{
+					// The root passes, but imbalance in its left subtree must propagate upward.
+					// 根节点高度差为 1，但左子树内部失衡，必须向上传递失败。
+					name: "hidden left imbalance",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 3, Left: &TreeNode{Val: 4}}},
+						Right: &TreeNode{Val: 5, Left: &TreeNode{Val: 6}}},
+					want: false,
+				},
+				{
+					// A balanced left subtree must not hide an unbalanced right subtree.
+					// 左子树平衡也不能提前成功，右子树内部仍可能失衡。
+					name: "hidden right imbalance",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3}},
+						Right: &TreeNode{Val: 4, Right: &TreeNode{Val: 5, Right: &TreeNode{Val: 6}}}},
+					want: false,
+				},
+				{
+					// Identical values do not mean identical node heights: map keys must be pointers.
+					// 相同值的不同节点高度可能不同，高度表不能用节点值作为 key。
+					name: "equal values unequal heights",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 1},
+						Right: &TreeNode{Val: 1, Left: &TreeNode{Val: 1, Left: &TreeNode{Val: 1}}, Right: &TreeNode{Val: 1}}},
+					want: false,
+				},
+			}
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.root); got != tt.want {
+						t.Fatalf("isBalanced() = %t, want %t", got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestBinaryTreePaths(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) []string
+	}{
+		{name: "recursive strings", fn: binaryTreePaths},
+		{name: "backtracking", fn: binaryTreePathsBacktracking},
+		{name: "iterative", fn: binaryTreePathsIterative},
+	}
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// Build fresh trees for each implementation.
+			// 每种实现使用独立的测试树。
+			tests := []struct {
+				name string
+				root *TreeNode
+				want []string
+			}{
+				{name: "empty tree", want: []string{}},
+				{name: "single zero", root: &TreeNode{Val: 0}, want: []string{"0"}},
+				{name: "single negative", root: &TreeNode{Val: -12}, want: []string{"-12"}},
+				{
+					name: "example",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Right: &TreeNode{Val: 5}}, Right: &TreeNode{Val: 3}},
+					want: []string{"1->2->5", "1->3"},
+				},
+				// A node with one child is not a leaf: do not collect a partial path.
+				// 只有一个孩子的节点不是叶子，不能收集尚未走完的路径。
+				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: []string{"1->2->3"}},
+				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: []string{"1->2->3"}},
+				{
+					// Sibling branches must restore the shared prefix after each leaf.
+					// 每个叶子返回后都要恢复公共前缀，不能把上个分支带到兄弟路径里。
+					name: "four leaves backtracking",
+					root: &TreeNode{Val: 1,
+						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 4}, Right: &TreeNode{Val: 5}},
+						Right: &TreeNode{Val: 3, Left: &TreeNode{Val: 6}, Right: &TreeNode{Val: 7}}},
+					want: []string{"1->2->4", "1->2->5", "1->3->6", "1->3->7"},
+				},
+				{
+					name: "negative and multidigit values",
+					root: &TreeNode{Val: -10, Left: &TreeNode{Val: 0}, Right: &TreeNode{Val: 12, Left: &TreeNode{Val: -3}}},
+					want: []string{"-10->0", "-10->12->-3"},
+				},
+				{
+					// Distinct leaf paths may have identical text; retain both occurrences.
+					// 不同叶子的路径文字可以相同，必须保留两次，不能当集合去重。
+					name: "duplicate path strings",
+					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 2}},
+					want: []string{"1->2", "1->2"},
+				},
+			}
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					// Sort copies: result order is unrestricted, but duplicates still count.
+					// 排序副本后比较：忽略返回顺序，但保留重复路径的次数。
+					got := slices.Clone(implementation.fn(tt.root))
+					want := slices.Clone(tt.want)
+					slices.Sort(got)
+					slices.Sort(want)
+					if !slices.Equal(got, want) {
+						t.Fatalf("binary tree paths = %q, want %q", got, want)
+					}
+				})
+			}
+		})
+	}
+}
 
 type traversalTestCase struct {
 	name      string
