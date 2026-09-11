@@ -79,8 +79,9 @@ A missing nil-child entry reads as zero, matching empty-tree height; a non-nil c
 Expected time O(n), assuming average O(1) map operations; auxiliary space O(n) for the height map plus the O(h) stack.
 
 练习 / Practice
-优先掌握后序递归的返回值含义，再练习迭代。本文件只保留中英文题解，不提供实现或函数骨架。
-Master the postorder helper's return contract first, then practice iteration. This file contains explanations only, with no implementation or function skeleton.
+优先掌握后序递归的返回值含义，再练习迭代。三种实现都在下方，建议先自己写一遍再对照。
+Master the postorder helper's return contract first, then practice iteration.
+All three implementations appear below; write your own version before comparing.
 */
 
 // 1. 自顶向下递归：直接判断

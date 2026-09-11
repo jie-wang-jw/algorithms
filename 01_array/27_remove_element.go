@@ -61,6 +61,10 @@ both pointer solutions take O(n) because pointers move only forward or inward.
 All three use O(1) auxiliary space and return an integer length.
 */
 
+// 1. Brute-force shifting: overwrite each val by shifting the rest of the valid range left.
+// 1. 暴力移位法：把有效区间内后续元素整体左移一位，覆盖掉待删除的 val。
+// Time: O(n²), Space: O(1).
+// 时间复杂度：O(n²)，空间复杂度：O(1)。
 func removeElementBruteForce(nums []int, val int) int {
 	// size is the length of the current valid part of nums.
 	// size 表示 nums 当前仍然有效的区间长度。
@@ -84,6 +88,10 @@ func removeElementBruteForce(nums []int, val int) int {
 	return size
 }
 
+// 2. Fast and slow pointers: fast reads every element, slow writes only the kept ones.
+// 2. 快慢指针法：fast 读取每个元素，slow 只写入需要保留的元素。
+// Time: O(n), Space: O(1).
+// 时间复杂度：O(n)，空间复杂度：O(1)。
 func removeElementFastSlow(nums []int, val int) int {
 	// slow points to the next write position in the kept result.
 	// slow 指向保留结果中的下一个写入位置。
@@ -103,6 +111,10 @@ func removeElementFastSlow(nums []int, val int) int {
 	return slow
 }
 
+// 3. Opposing pointers: fill each removal slot on the left with a survivor from the right.
+// 3. 相向双指针法：用右侧需要保留的值，填补左侧待删除的位置。
+// Time: O(n), Space: O(1); the relative order of kept elements may change.
+// 时间复杂度：O(n)，空间复杂度：O(1)；保留元素的相对顺序可能改变。
 func removeElementTwoPointers(nums []int, val int) int {
 	// left searches for a value to remove; right searches for a value to keep.
 	// left 从左找待删除值；right 从右找可以保留的值。
@@ -124,7 +136,6 @@ func removeElementTwoPointers(nums []int, val int) int {
 		// Replace the left-side val with a right-side value that should be kept.
 		// 找到后，用右侧的非 val 覆盖左侧的 val。
 		if left < right {
-			//用右边需要保留的数字，覆盖左边需要删除的数字
 			nums[left] = nums[right]
 			left++
 			right--

@@ -20,6 +20,14 @@ n 为元素数，q 为查询数。预处理 O(n)，每次查询 O(1)，总时间
 当前实现保存 nums 和 prefix；输出逐条打印，不累计保存。
 For n values and q queries, preprocessing takes O(n), each query O(1), and total time O(n+q),
 treating integer I/O as constant cost. Auxiliary space O(n) stores nums and prefix; answers are printed without accumulation.
+
+补充解法：逐次求和 / Alternative: Direct Range Summation
+rangeSumBruteForce 是闭区间 [left,right] 单次查询的算法核心，不重复标准输入解析。
+直接累加区间中的每个值；q 次查询最坏 O(qn)，辅助空间 O(1)。
+没有预处理，适合查询很少的情况；查询多时原前缀和 O(n+q) 更好。
+rangeSumBruteForce is the core for one inclusive query, without duplicating input parsing.
+Sum every queried value: O(qn) worst-case time for q queries and O(1) auxiliary space.
+Useful for few queries; prefix sums reduce repeated-query work to O(n+q).
 */
 
 import (
@@ -66,4 +74,20 @@ func prefixSum() {
 		sum := prefix[right+1] - prefix[left]
 		fmt.Println(sum)
 	}
+}
+
+// Direct summation of one inclusive query, without any preprocessing.
+// 逐次求和：不做任何预处理，直接累加单次闭区间查询。
+// Time: O(right-left+1) per query, Space: O(1).
+// 单次查询时间复杂度 O(right-left+1)，空间复杂度 O(1)。
+func rangeSumBruteForce(nums []int, left, right int) int {
+	sum := 0
+
+	// Both boundaries are inclusive, so the loop condition uses <=.
+	// 闭区间包含左右两端，因此循环条件使用 <=。
+	for i := left; i <= right; i++ {
+		sum += nums[i]
+	}
+
+	return sum
 }

@@ -58,10 +58,19 @@ Maintain synchronized node, sum, and path stacks. Matching positions describe on
 Collect matching leaves; otherwise allocate a separate path per child, copy the parent prefix, append the child value, and store the new sum.
 Independent paths need no explicit undo, but copying occurs even along paths that ultimately do not match.
 
+解法三：队列 BFS，保存独立路径 / Method 3: BFS with Independent Paths
+把解法二的三个栈换成三个同步队列，从队首取出状态，判断和收集规则完全不变。
+本题不问深度，所以不需要 levelSize 或按层循环；队列只是改变了状态的处理顺序。
+代价是宽树会同时保留较多路径：解法二最多保存一条根到叶路径上的待处理状态，
+解法三可能同时保存一整层的状态，每个状态又各带一条完整路径。
+Replace the three stacks of method 2 with three synchronized queues, taking states from the front;
+the checks and the collection rule are unchanged.
+No depth is requested, so no levelSize or level loop is needed; the queue only changes the processing order.
+The cost is that wide trees retain more paths at once: method 2 holds pending states along one root-to-leaf path,
+while method 3 can hold a whole level of states, each carrying its own complete path.
+
 其他迭代选择 / Other Iterative Options
-相同状态可改用队列 BFS，从队首取出；判断规则不变，但宽树会同时保留较多路径。
 也可保存父指针及累计和，到匹配叶子才重建路径，减少中间复制；初学优先掌握直接的回溯写法。
-The same states can use a BFS queue, retaining more simultaneous paths on wide trees.
 Alternatively, parent pointers and sums allow reconstruction only at matching leaves; prioritize direct backtracking when learning.
 
 易错点 / Pitfalls
@@ -85,8 +94,11 @@ Independent-path stack DFS has O(nh) time and O(h²) auxiliary-space bounds, plu
 Independent-path BFS has O(nh) time and O(wh) auxiliary-space bounds, plus O(S) output.
 
 练习 / Practice
-本文件仅保留中英文题解，不提供实现或函数骨架。代码在聊天中展示，供自行手写练习。
-This file contains explanations only, without implementations or skeletons. Code is shown in chat for manual practice.
+先掌握解法一的“加入、收集、撤销”三步，再对比两种独立路径写法为何不需要撤销。
+三种实现按上面的编号顺序写在下方。
+Master the choose-collect-undo cycle of method 1 first,
+then compare why the two independent-path versions need no undo step.
+The three implementations appear below in the order of the numbered methods above.
 */
 
 // 1. 递归回溯：推荐 O(n+S)O(h)
@@ -167,6 +179,58 @@ func pathSumIterative(root *TreeNode, targetSum int) [][]int {
 
 			// Give each child its own backing array.
 			// 每个孩子分配独立的底层数组，避免兄弟路径相互覆盖。
+			nextPath := make([]int, len(path)+1)
+			copy(nextPath, path)
+			nextPath[len(path)] = child.Val
+
+			nodes = append(nodes, child)
+			sums = append(sums, sum+child.Val)
+			paths = append(paths, nextPath)
+		}
+	}
+
+	return result
+}
+
+// 3. 队列 BFS：同步队列保存独立路径 O(nh) 上界O(wh) 上界
+func pathSumBFS(root *TreeNode, targetSum int) [][]int {
+	result := [][]int{}
+	if root == nil {
+		return result
+	}
+
+	// Matching positions describe one pending state: node, sum, and its own path.
+	// 三个队列的相同位置描述同一个待处理状态：节点、累计和以及它自己的路径。
+	nodes := []*TreeNode{root}
+	sums := []int{root.Val}
+	paths := [][]int{{root.Val}}
+
+	for len(nodes) > 0 {
+		// Remove the whole state from the front, not just the node.
+		// 从队首取出的是整个状态，而不只是节点。
+		node, sum, path := nodes[0], sums[0], paths[0]
+		nodes = nodes[1:]
+		sums = sums[1:]
+		paths = paths[1:]
+
+		if node.Left == nil && node.Right == nil {
+			// A matching sum counts only at a leaf, where the path is complete.
+			// 只有叶子处的和相等才算答案，此时路径已经完整。
+			if sum == targetSum {
+				result = append(result, path)
+			}
+			continue
+		}
+
+		// Enqueue left before right; the result order is unrestricted either way.
+		// 先左后右入队；本题结果顺序不限，固定顺序只是方便观察。
+		for _, child := range []*TreeNode{node.Left, node.Right} {
+			if child == nil {
+				continue
+			}
+
+			// Copying the prefix gives each child an independent backing array.
+			// 复制前缀，让每个孩子拥有独立的底层数组，兄弟路径不会互相覆盖。
 			nextPath := make([]int, len(path)+1)
 			copy(nextPath, path)
 			nextPath[len(path)] = child.Val

@@ -88,8 +88,9 @@ Linear lookup recursion takes O(n²) worst-case time and O(h) auxiliary space, p
 Map-based range recursion takes expected O(n) time and O(n+h)=O(n) auxiliary space for the map and calls, plus O(n) output.
 
 练习 / Practice
-本文件只提供中英文题解，不写入实现或函数骨架。代码在聊天中展示，先练习画出根与四个子区间。
-This file contains explanations only, without implementation or skeleton. Code is shown in chat; practice identifying the root and four child ranges first.
+先练习画出根与四个子区间，再阅读下方的 buildTreePostOrder 和 buildTreePostOrderOptimized。
+Practice identifying the root and the four child ranges first,
+then read buildTreePostOrder and buildTreePostOrderOptimized below.
 */
 
 // 1. 递归切片：先理解这一版
@@ -246,8 +247,9 @@ For n nodes and height h, linear lookup takes O(n²) worst-case time and O(h) au
 Map lookup takes expected O(n) time and O(n+h)=O(n) auxiliary space. Both output trees use O(n) space.
 
 练习 / Practice
-本段只追加题解，不提供实现或函数骨架；代码在聊天中展示，保留前面 106 的实现。
-This section adds explanations only, without implementation or skeleton; code is shown in chat and existing 106 code is preserved.
+105 的两种实现在本段之后，命名为 buildTreePreorder 和 buildTreePreorderOptimized；106 的实现保留在文件前半部分。
+The two 105 implementations follow this section as buildTreePreorder and buildTreePreorderOptimized,
+while the 106 implementations remain in the first half of the file.
 */
 
 // 1. 递归切片

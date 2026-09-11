@@ -85,10 +85,12 @@ Since h=O(log n), worst-case time is O(log² n), with O(log n) auxiliary call-st
   The first two methods work on any binary tree in O(n); the third uses completeness for sublinear counting.
 
 练习 / Practice
-请在下方自行实现。本文件仅保留题解，不提供实现代码或函数骨架。
-Implement the solutions below. This file contains explanations only, with no implementation or function skeleton.
+三种实现按上面的编号顺序写在下方。先自己写出前两种，再推导第三种的等高判断。
+The three implementations appear below in the order of the numbered methods above.
+Write the first two yourself, then derive the equal-height test of the third.
 */
 
+// 1. 普通递归：左右数量相加
 func countNodes(root *TreeNode) int {
 	// An empty tree has no nodes.
 	// 空树没有节点。
@@ -104,6 +106,7 @@ func countNodes(root *TreeNode) int {
 	return leftCount + rightCount + 1
 }
 
+// 2. 层序遍历：每出队一个节点就计数
 func countNodesIterative(root *TreeNode) int {
 	// An empty tree has no nodes.
 	// 空树没有节点。
@@ -134,6 +137,7 @@ func countNodesIterative(root *TreeNode) int {
 	return count
 }
 
+// 3. 满子树公式：利用完全二叉树性质，推荐
 func countNodesOptimized(root *TreeNode) int {
 	// An empty subtree contributes zero nodes.
 	// 空子树贡献 0 个节点。

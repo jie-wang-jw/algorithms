@@ -1,5 +1,7 @@
 package _3_hash
 
+import "sort"
+
 /*
 题目描述 / Problem Description
 给定整数数组 nums 和整数 target，找出两个和为 target 的不同元素下标并返回。
@@ -25,6 +27,18 @@ n = len(nums)。在哈希表查询和写入平均 O(1) 的假设下，总时间 
 最坏保存几乎全部数字及下标；返回两个下标只占 O(1)。
 n = len(nums). Assuming average O(1) hash lookup and insertion, time is O(n).
 Auxiliary space O(n) stores seen values and indices; the two-index output takes O(1).
+
+补充解法 / Additional Approaches
+twoSumBruteForce 枚举 i<j，保证不重复使用同一位置；时间 O(n²)，辅助空间 O(1)。
+Enumerate i<j to use distinct positions: O(n²) time and O(1) auxiliary space.
+twoSumSorted 将值与原下标一起复制后排序，再用双指针。
+和偏小就增大左值，偏大就减小右值；返回保存的原下标，不能返回排序后的下标。
+两个下标按数值排序的位置返回，因此不保证升序，题目也不要求顺序。
+时间 O(n log n)，辅助空间 O(n)，不修改输入；哈希版平均 O(n) 更快。
+Sort copied value-index pairs and use two pointers, increasing the left value for a small sum
+and decreasing the right value for a large sum. Return original indices.
+They come out in sorted-value order, so the pair is not guaranteed to be ascending; the problem allows any order.
+Time O(n log n), auxiliary space O(n), no input mutation; hashing is expected O(n).
 */
 
 /*
@@ -40,6 +54,8 @@ If the complement is already in the map, I return the two indices.
 Otherwise, I store the current number and continue.
 否则保存当前数字并继续扫描。
 */
+
+// 1. 哈希表一次遍历：推荐
 func twoSum(nums []int, target int) []int {
 	// Key: a seen number; value: its index.
 	// key 是已经见过的数字，value 是该数字的下标。
@@ -61,5 +77,66 @@ func twoSum(nums []int, target int) []int {
 
 	// No valid pair was found.
 	// 没有找到满足条件的两个数。
+	return nil
+}
+
+// 2. 暴力双循环：枚举所有下标对
+func twoSumBruteForce(nums []int, target int) []int {
+	// i selects the first position of the pair.
+	// i 选择数对中的第一个位置。
+	for i := 0; i < len(nums); i++ {
+		// Starting j at i+1 keeps the two positions distinct and avoids checking a pair twice.
+		// j 从 i+1 开始，既保证两个下标不同，也避免同一对被检查两次。
+		for j := i + 1; j < len(nums); j++ {
+			if nums[i]+nums[j] == target {
+				return []int{i, j}
+			}
+		}
+	}
+
+	// Every pair of distinct positions has been tried.
+	// 所有不同下标的组合都尝试过了。
+	return nil
+}
+
+// 3. 排序 + 双指针：必须先保存原下标
+func twoSumSorted(nums []int, target int) []int {
+	// Sorting nums itself would destroy the indices the problem asks for, so copy value and index together.
+	// 直接排序 nums 会丢失题目要求返回的下标，所以把数值和原下标一起复制出来。
+	pairs := make([][2]int, len(nums))
+	for i, v := range nums {
+		pairs[i] = [2]int{v, i}
+	}
+
+	// Order by value only; each original index travels with its value.
+	// 只按数值排序，每个原下标跟着自己的数值一起移动。
+	sort.Slice(pairs, func(i, j int) bool {
+		return pairs[i][0] < pairs[j][0]
+	})
+
+	// left points at the smallest remaining value and right at the largest.
+	// left 指向剩余区间的最小值，right 指向最大值。
+	left, right := 0, len(pairs)-1
+
+	for left < right {
+		sum := pairs[left][0] + pairs[right][0]
+
+		if sum == target {
+			// Return the stored original indices, never the positions after sorting.
+			// 返回保存下来的原下标，不能返回排序后的位置。
+			return []int{pairs[left][1], pairs[right][1]}
+		} else if sum < target {
+			// The largest partner is already in use, so this left value can be discarded.
+			// 当前左值已经配上了最大的右值仍然偏小，因此可以放弃这个左值。
+			left++
+		} else {
+			// The smallest partner is already in use, so this right value can be discarded.
+			// 当前右值已经配上了最小的左值仍然偏大，因此可以放弃这个右值。
+			right--
+		}
+	}
+
+	// The two pointers met without finding a pair.
+	// 双指针相遇，仍然没有找到答案。
 	return nil
 }

@@ -23,6 +23,14 @@ first is the pair's tail and the next pair's predecessor, so set cur=first.
 n 为节点数。时间 O(n)，每对节点进行固定次数的指针重连。辅助空间 O(1)，只增加虚拟头节点和几个临时指针。
 n is the node count. Time O(n), with a constant number of link changes per pair.
 Auxiliary space O(1) for the dummy node and temporary pointers.
+
+补充解法：递归交换 / Alternative: Recursive Pair Swapping
+swapPairsRecursive 先递归交换第二个节点之后的链表，返回已处理后缀的新头。
+原 first 接这个后缀，second 接 first，返回 second 作为当前两节点的新头。
+不足两个节点时原样返回；时间 O(n)，辅助调用栈 O(n)，原迭代版为 O(1) 空间。
+Recursively swap the suffix after the second node. Connect first to that suffix and second to first.
+Return second as the new head; fewer than two nodes stay unchanged.
+Time O(n), call-stack space O(n), versus O(1) auxiliary space for the existing iteration.
 */
 
 /*
@@ -50,6 +58,10 @@ cur -> first -> second -> next
 cur -> second -> first -> next
 */
 
+// 1. Dummy-head iteration: reconnect three links per pair and advance to the next pair.
+// 1. 虚拟头节点迭代：每对节点重连三条指针，然后移动到下一对。
+// Time: O(n), Space: O(1).
+// 时间复杂度：O(n)，空间复杂度：O(1)。
 func swapPairs(head *ListNode) *ListNode {
 	// dummy keeps a stable node before the possibly changing head.
 	// dummy 在可能变化的头节点前提供一个固定位置。
@@ -79,4 +91,32 @@ func swapPairs(head *ListNode) *ListNode {
 	// dummy.Next is the possibly updated head of the list.
 	// dummy.Next 是交换后可能已经改变的新头节点。
 	return dummy.Next
+}
+
+// 2. Recursion: swap the suffix first, then swap the current pair in front of it.
+// 2. 递归解法：先交换后面的链表，再把当前这一对接到它前面。
+// Time: O(n), Space: O(n) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由递归调用栈产生。
+func swapPairsRecursive(head *ListNode) *ListNode {
+	// Fewer than two nodes leaves nothing to swap, so return the list unchanged.
+	// 不足两个节点时无法交换，原样返回即可，这也是递归的终止条件。
+	if head == nil || head.Next == nil {
+		return head
+	}
+
+	// second becomes the new head of this pair, so save it before changing any link.
+	// second 将成为这一对的新头节点，所以在修改指针前先保存它。
+	second := head.Next
+
+	// head becomes the pair's tail, so it must connect to the already swapped suffix.
+	// head 将成为这一对的尾节点，因此它要连接到已经交换好的后续链表。
+	head.Next = swapPairsRecursive(second.Next)
+
+	// Complete the swap by pointing second back to head.
+	// 让 second 指回 head，完成这一对的交换。
+	second.Next = head
+
+	// second is the new head of the swapped pair.
+	// second 就是交换后这一对的新头节点。
+	return second
 }

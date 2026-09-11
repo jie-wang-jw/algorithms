@@ -27,7 +27,7 @@ Both node values and structure must match at mirrored positions.
 第二棵树虽然每层的值看似对称，但两个 3 都是右孩子，位置并不互为镜像。
 In the second tree, both 3 nodes are right children. Their values match, but their positions do not mirror each other.
 
-解题思路：递归比较镜像位置 / Approach: Recursively Compare Mirrored Positions
+解法一：递归比较镜像位置（推荐） / Method 1: Recursively Compare Mirrored Positions (Recommended)
 不要分别判断左子树和右子树自己是否对称；需要判断它们彼此是否互为镜像。
 定义 mirror(left, right)：以这两个节点为根的子树是否互为镜像。
 Do not check whether each subtree is independently symmetric. Check whether they mirror each other.
@@ -73,19 +73,48 @@ An empty tree is symmetric; a single-node tree also passes because both children
 - 不含空位置的层序值回文不能证明对称，第二个示例就是反例。
   Palindromic level values without nil positions do not prove symmetry, as the second example shows.
 
+解法二：队列迭代 / Method 2: Iterative with a Queue
+递归其实只在处理“成对的位置”，所以容器里保存的单位也应该是一对节点，而不是单个节点。
+把 root.Left 和 root.Right 相邻入队，此后每轮取出相邻两个节点作为一对镜像位置。
+两个都为空只说明这一对匹配，必须 continue 继续检查其余对，不能直接返回 true。
+值相同后，按“外侧、内侧”的顺序成对入队：left.Left 与 right.Right，然后 left.Right 与 right.Left。
+每轮取走两个，然后放入四个或零个，所以队列长度始终为偶数，取相邻两个不会把不同对拆开。
+The recursion only ever compares position pairs, so the container should hold pairs rather than single nodes.
+Enqueue root.Left and root.Right next to each other, then remove two adjacent nodes as one mirrored pair each round.
+Two nils mean only that this pair matches, so continue checking the rest instead of returning true.
+Once the values match, enqueue the outer pair left.Left with right.Right, then the inner pair left.Right with right.Left.
+Each round removes two nodes and adds either four or none, so the length stays even and adjacent pairs are never split.
+
+解法三：栈迭代 / Method 3: Iterative with a Stack
+把队列换成栈，其余规则完全不变：仍然成对存取，仍然按外侧、内侧配对。
+出栈时栈顶是后压入的那个，所以先取的是“右侧候选”，下一个才是“左侧候选”，配对方向不能弄反。
+这说明本题与遍历顺序无关：需要的只是“把每一对镜像位置都检查一遍”，深度优先或广度优先都可以。
+Replace the queue with a stack and keep every rule: still store pairs, still match outer with outer and inner with inner.
+The stack top is the more recently pushed node, so the first value read is the right-side candidate
+and the second is the left-side candidate; do not swap that direction.
+This shows the problem does not depend on traversal order: it only requires visiting every mirrored pair once.
+
 时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高。最坏时间 O(n)，每个节点最多参与一次对应比较；发现不匹配可提前返回。
-辅助空间 O(h)，来自递归调用栈；平衡树为 O(log n)，用一般树高上界可记最坏 O(n)。
-返回布尔值，不新建树，也不修改节点。
-For n nodes and height h, worst-case time is O(n), with early return on a mismatch.
-Auxiliary call-stack space is O(h): O(log n) for a balanced tree, bounded by O(n) in general.
-The result is a boolean; no tree is constructed or modified.
+n 为节点数，h 为树高，w 为最大层宽。三种解法最坏时间均为 O(n)，每个节点最多参与一次对应比较；
+发现不匹配都可以提前返回，所以对称失败的树通常远小于这个上界。
+解法一辅助空间 O(h)，来自递归调用栈；平衡树为 O(log n)，用一般树高上界可记最坏 O(n)。
+解法二辅助空间 O(w)，队列同时保存的是相邻两层的成对候选；最坏 O(n)。
+解法三辅助空间 O(h)，栈沿一条路径展开成对候选；最坏 O(n)。
+三种解法都只返回布尔值，不新建树，也不修改节点。
+For n nodes, height h, and maximum width w, all three methods take O(n) worst-case time,
+comparing each node at most once, and all may return early on a mismatch, so failing trees usually do far less work.
+Method 1 uses O(h) auxiliary call-stack space: O(log n) when balanced and O(n) in the worst case.
+Method 2 uses O(w) auxiliary space, since the queue holds paired candidates from two adjacent levels, up to O(n).
+Method 3 uses O(h) auxiliary space, expanding paired candidates along one path, up to O(n).
+All three return only a boolean; none constructs or modifies a tree.
 
 练习 / Practice
-请在下方自行实现 isSymmetric 和镜像比较函数；本文件暂不提供实现或代码骨架。
-Implement isSymmetric and its mirror-comparison helper below. No implementation or skeleton is provided yet.
+先掌握 mirror(left,right) 的成对定义，再把它改写成迭代。三种实现按上面的编号顺序写在下方。
+Master the paired definition of mirror(left,right) first, then rewrite it iteratively.
+The three implementations appear below in the order of the numbered methods above.
 */
 
+// 1. 递归：交叉比较外侧与内侧，推荐
 func isSymmetric(root *TreeNode) bool {
 	// An empty tree is symmetric.
 	// 空树是对称的。
@@ -123,6 +152,7 @@ func isMirror(left, right *TreeNode) bool {
 		isMirror(left.Right, right.Left)
 }
 
+// 2. 队列迭代：成对入队、成对出队
 func isSymmetricIterative(root *TreeNode) bool {
 	// Consecutive nodes form pairs of mirrored positions.
 	// 队列中相邻的两个节点组成一对镜像位置。
@@ -159,5 +189,46 @@ func isSymmetricIterative(root *TreeNode) bool {
 
 	// All pairs matched; an empty tree also reaches this return.
 	// 所有对应位置都匹配；空树也会直接走到这里。
+	return true
+}
+
+// 3. 栈迭代：把队列换成栈，配对规则不变
+func isSymmetricStack(root *TreeNode) bool {
+	// The root lies on the axis, so start from its two children as one pair.
+	// 根位于中心轴上，因此直接把它的两个孩子作为第一对入栈。
+	var stack []*TreeNode
+	if root != nil {
+		stack = append(stack, root.Left, root.Right)
+	}
+
+	for len(stack) > 0 {
+		// The top is the later-pushed node, so it is the right-side candidate.
+		// 栈顶是后压入的节点，对应右侧候选；它下面一个才是左侧候选。
+		last := len(stack) - 1
+		left, right := stack[last-1], stack[last]
+		stack = stack[:last-1]
+
+		// This pair matches, but the remaining pairs still need checking.
+		// 这一对匹配了，但其余的对仍然必须继续检查。
+		if left == nil && right == nil {
+			continue
+		}
+
+		// Short-circuit evaluation rules out nil before reading Val.
+		// 短路求值先排除空指针，再读取节点值。
+		if left == nil || right == nil || left.Val != right.Val {
+			return false
+		}
+
+		// Push the outer pair, then the inner pair, keeping partners adjacent.
+		// 先压外侧一对，再压内侧一对，让同一对始终相邻。
+		stack = append(stack,
+			left.Left, right.Right,
+			left.Right, right.Left,
+		)
+	}
+
+	// Every mirrored pair matched; an empty tree also reaches this return.
+	// 所有镜像位置都匹配；空树也会直接走到这里。
 	return true
 }

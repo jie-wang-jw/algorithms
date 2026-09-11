@@ -27,7 +27,7 @@ The shortest path must end at an actual leaf, not a nil pointer.
 The right example's root has no left child but does have a right child, so it is not a leaf.
 Taking min(0,2)+1 would incorrectly return 1. That zero means absence of a subtree, not a valid path to a leaf.
 
-解题思路：递归 / Approach: Recursion
+解法一：递归（推荐） / Method 1: Recursion (Recommended)
 定义 minDepth(node)：返回以 node 为根，到该子树最近叶子的路径节点数。
 Define minDepth(node) as the number of nodes from node to the nearest leaf in its subtree.
 
@@ -51,7 +51,7 @@ A separate leaf case is unnecessary: step 2 returns the nil right subtree's dept
 For maximum depth, zero from a missing subtree cannot beat a positive depth under max.
 For minimum depth, min would incorrectly favor that zero, so exclude the missing side first.
 
-另一种思路：层序遍历 / Alternative: Breadth-First Search
+解法二：层序遍历 / Method 2: Breadth-First Search
 从第 1 层开始，逐层出队检查。第一次遇到左右孩子都为空的节点，就返回当前层数。
 队列按深度从小到大处理，因此第一个叶子的深度就是最小深度，不需要遍历更深的节点。
 判断叶子必须是两个孩子都为空，不能用“其中一个为空”。固定 levelSize，处理一整层后再增加深度。
@@ -68,10 +68,12 @@ Recursion takes O(n) worst-case time and O(h) call-stack space, up to O(n). It r
 BFS takes O(n) worst-case time, with early return at the first leaf, and O(w) auxiliary space, up to O(n).
 
 练习 / Practice
-请在下方自行实现 minDepth。本文件仅保留题解，不提供实现代码或函数骨架。
-Implement minDepth below. This file contains explanations only, without implementation code or a function skeleton.
+先想清楚“为什么不能直接把 max 换成 min”，再写两种实现。两种实现按上面的编号顺序写在下方。
+Settle the question of why max cannot simply become min, then write both versions.
+The two implementations appear below in the order of the numbered methods above.
 */
 
+// 1. 递归：先排除缺失的一边
 func minDepth(root *TreeNode) int {
 	// An empty tree has depth 0.
 	// 空树深度为 0。
@@ -101,6 +103,7 @@ func minDepth(root *TreeNode) int {
 	return min(leftDepth, rightDepth) + 1
 }
 
+// 2. 层序遍历：第一个叶子就是最近叶子
 func minDepthIterative(root *TreeNode) int {
 	// An empty tree has depth 0.
 	// 空树深度为 0。

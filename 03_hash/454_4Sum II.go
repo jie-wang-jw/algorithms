@@ -1,5 +1,7 @@
 package _3_hash
 
+import "sort"
+
 /*
 题目描述 / Problem Description
 给定四个整数数组 nums1、nums2、nums3 和 nums4，
@@ -25,6 +27,14 @@ second-pair combinations, the scans add 3+3=6. Equal values at different indices
 保存不同两数和及频次。若长度分别为 a,b,c,d，则时间 O(ab+cd)，空间 O(ab)。
 For four arrays of length n, average time is O(n²) and
 auxiliary space O(n²) for pair-sum frequencies. With lengths a,b,c,d, time is O(ab+cd) and space O(ab).
+
+补充解法：两组和排序 / Alternative: Sort Pair Sums
+fourSumCountSorted 保存 A+B 和 C+D 的全部位置组合（不要去重），排序后从两端找和为 0。
+命中时若左和出现 x 次、右和出现 y 次，就贡献 x*y 组下标组合，而不是只加 1。
+四个数组各长 n 时，时间 O(n² log(n+1))，辅助空间 O(n²)，不修改输入；原哈希法平均更快。
+Store all A+B and C+D index-pair sums, keeping multiplicities, then sort and search from opposite ends.
+A matching run of x left sums and y right sums contributes x*y tuples, not one.
+For four length-n arrays: O(n² log(n+1)) time, O(n²) auxiliary space, no input mutation.
 */
 
 /*
@@ -41,6 +51,7 @@ The frequency in the map tells me how many valid tuples we can form.
 哈希表中的频次表示当前组合能够配出多少个有效四元组。
 */
 
+// 1. 分组哈希：前两数和存 map，推荐
 func fourSumCount(A []int, B []int, C []int, D []int) int {
 	// Key: a + b; value: how many index pairs produce that sum.
 	// key 是 a+b，value 是产生这个和的下标组合数量。
@@ -67,4 +78,63 @@ func fourSumCount(A []int, B []int, C []int, D []int) int {
 	}
 
 	return count
+}
+
+// 2. 两组和排序 + 双指针：保留重复次数
+func fourSumCountSorted(a, b, c, d []int) int {
+	// Keep every index combination; deduplicating sums here would lose tuples.
+	// 保留每一个下标组合，这里去重会丢掉答案。
+	leftSums, rightSums := []int{}, []int{}
+
+	for _, x := range a {
+		for _, y := range b {
+			leftSums = append(leftSums, x+y)
+		}
+	}
+	for _, x := range c {
+		for _, y := range d {
+			rightSums = append(rightSums, x+y)
+		}
+	}
+
+	// Sorting gives the two pointers a direction to move in.
+	// 排序后双指针才有明确的移动方向。
+	sort.Ints(leftSums)
+	sort.Ints(rightSums)
+
+	result := 0
+
+	// i scans the left sums upward and j scans the right sums downward.
+	// i 从小到大扫描左侧的和，j 从大到小扫描右侧的和。
+	for i, j := 0, len(rightSums)-1; i < len(leftSums) && j >= 0; {
+		sum := leftSums[i] + rightSums[j]
+
+		if sum < 0 {
+			// Even the largest remaining right sum is too small for this left sum.
+			// 即使配上剩余最大的右侧和仍然偏小，因此放弃当前左侧和。
+			i++
+		} else if sum > 0 {
+			// Even the smallest remaining left sum is too large for this right sum.
+			// 即使配上剩余最小的左侧和仍然偏大，因此放弃当前右侧和。
+			j--
+		} else {
+			// Equal sums appear in runs after sorting, so measure both runs at once.
+			// 排序后相等的和是连续的一段，所以一次量出两侧的整段长度。
+			x, y := leftSums[i], rightSums[j]
+			startI, startJ := i, j
+
+			for i < len(leftSums) && leftSums[i] == x {
+				i++
+			}
+			for j >= 0 && rightSums[j] == y {
+				j--
+			}
+
+			// Multiplicities count independent choices of the two index pairs.
+			// 两组下标对可以独立选择，所以重复次数相乘。
+			result += (i - startI) * (startJ - j)
+		}
+	}
+
+	return result
 }

@@ -79,8 +79,9 @@ Recursion and stack DFS use O(h) auxiliary space; queue BFS uses O(w). Each pend
 All space bounds are at most O(n). The tree is unchanged, and the boolean result uses O(1) space.
 
 练习 / Practice
-本文件只提供中英文题解，不包含实现或函数骨架。优先掌握“剩余目标”的递归定义，再练习迭代。
-This file contains explanations only, without implementations or skeletons. Start with the remaining-target recursion, then practice iteration.
+优先掌握“剩余目标”的递归定义，再练习两种迭代。三种实现按上面的编号顺序写在下方。
+Start with the remaining-target recursion, then practice both iterative forms.
+The three implementations appear below in the same order as the numbered methods above.
 */
 
 // 1. 递归：传递“还差多少” O(n)O(h)

@@ -7,9 +7,9 @@ Given an integer array nums sorted in nondecreasing order,
 return a new array containing each value's square, also sorted in nondecreasing order.
 
 解题思路 / Solution Approach
-文件提供排序法和双指针法。双指针比较数组两端的平方值，将较大值从结果数组末尾向前写入，
+文件提供排序法、双指针法和分界归并法。双指针比较数组两端的平方值，将较大值从结果数组末尾向前写入，
 可在线性时间内完成。
-The file provides sorting and two-pointer solutions. The two-pointer method compares
+The file provides sorting, two-pointer, and sign-boundary merge solutions. The two-pointer method compares
 squared values at both ends and writes the larger one from the end of the result array.
 
 关键逻辑：为什么这样做 / Why This Works
@@ -28,14 +28,24 @@ sortedSquares_TwoPointers：时间 O(n)，除结果外辅助空间 O(1)，新建
 n = len(nums). sortedSquares takes O(n log n) time, including squaring and sorting;
 the current Go integer sort uses O(log n) stack space and the returned slice aliases the input.
 sortedSquares_TwoPointers takes O(n) time, O(1) auxiliary space excluding its O(n) output.
+
+补充解法：分界后归并 / Alternative: Merge around the Sign Boundary
+sortedSquaresMerge 找到第一个非负数，负数部分向左走时平方递增，非负部分向右走时平方递增。
+每次取两边较小平方写入结果，相当于归并两个有序序列；一边耗尽后使用另一边。
+时间 O(n)，除 O(n) 输出外辅助空间 O(1)，不修改输入。
+Locate the first nonnegative value. Negative squares increase leftward; nonnegative squares increase rightward.
+Merge the smaller next square, consuming the remaining side when the other is exhausted.
+Time O(n), O(1) auxiliary space beyond O(n) output; input is unchanged.
 */
 
 import (
 	"sort"
 )
 
-// Square every value and then sort the result.
-// 排序法：先把每个数平方，再对结果排序。
+// 1. Sorting: square every value in place and then sort the result.
+// 1. 排序法：先原地把每个数平方，再对结果排序。
+// Time: O(n log n), Space: O(log n) for the sort stack; the input slice is modified and reused.
+// 时间复杂度：O(n log n)，空间复杂度：O(log n)，由排序调用栈产生；输入切片被原地修改并直接复用。
 func sortedSquares(nums []int) []int {
 	for i, val := range nums {
 		nums[i] *= val
@@ -44,8 +54,10 @@ func sortedSquares(nums []int) []int {
 	return nums
 }
 
-// Two pointers: the largest square must come from one of the two ends.
-// 双指针法：最大平方值一定来自当前区间的最左端或最右端。
+// 2. Two pointers: the largest square must come from one of the two ends.
+// 2. 双指针法：最大平方值一定来自当前区间的最左端或最右端。
+// Time: O(n), Space: O(1) auxiliary beyond the O(n) result.
+// 时间复杂度：O(n)，除 O(n) 结果数组外辅助空间 O(1)。
 func sortedSquares_TwoPointers(nums []int) []int {
 	n := len(nums)
 	// i scans from the left, j scans from the right, and k writes from the end.
@@ -71,4 +83,42 @@ func sortedSquares_TwoPointers(nums []int) []int {
 		k--
 	}
 	return ans
+}
+
+// 3. Merge around the sign boundary: treat the two halves as two sorted square sequences.
+// 3. 分界归并法：把负数段和非负数段看成两个已排序的平方序列，再归并。
+// Time: O(n), Space: O(1) auxiliary beyond the O(n) result; the input is not modified.
+// 时间复杂度：O(n)，除 O(n) 结果数组外辅助空间 O(1)；不修改输入。
+func sortedSquaresMerge(nums []int) []int {
+	// right stops at the first nonnegative value, which splits the two sequences.
+	// right 停在第一个非负数上，这个位置把数组分成两段。
+	right := 0
+	for right < len(nums) && nums[right] < 0 {
+		right++
+	}
+
+	// left walks backwards over the negatives, where squares grow as left decreases.
+	// left 向左遍历负数段，下标越小平方越大，所以反向走才是递增顺序。
+	left := right - 1
+	result := make([]int, 0, len(nums))
+
+	// Keep merging while either sequence still has an unused value.
+	// 只要还有一段没用完，就继续归并。
+	for left >= 0 || right < len(nums) {
+		// Take from the negative side when the nonnegative side is exhausted,
+		// or when its square is the smaller of the two candidates.
+		// 非负数段已用完，或负数段的平方更小时，就从负数段取值。
+		takeLeft := right == len(nums) ||
+			(left >= 0 && nums[left]*nums[left] <= nums[right]*nums[right])
+
+		if takeLeft {
+			result = append(result, nums[left]*nums[left])
+			left--
+		} else {
+			result = append(result, nums[right]*nums[right])
+			right++
+		}
+	}
+
+	return result
 }

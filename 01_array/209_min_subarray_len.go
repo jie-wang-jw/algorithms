@@ -23,8 +23,23 @@ so extending it later cannot improve the minimum. This reasoning does not hold w
 时间与空间复杂度 / Time and Space Complexity
 n = len(nums)。时间 O(n)：左右边界各最多前进 n 次，嵌套循环不是 O(n²)。辅助空间 O(1)，只维护窗口和与下标。
 n = len(nums). Time O(n): each boundary advances at most n times, so the nested loops are not quadratic. Auxiliary space O(1) for the sum and indices.
+
+补充解法 / Additional Approaches
+minSubArrayLenBruteForce：固定左端点，向右累加，第一次达标即为该起点的最短答案。
+正数保证继续右扩只会更长；时间 O(n²)，辅助空间 O(1)。
+Fix each start and extend until the first qualifying sum: later ends cannot be shorter.
+Time O(n²), auxiliary space O(1).
+minSubArrayLenBinarySearch：prefix[j]-prefix[i]>=target 等价于 prefix[j]>=prefix[i]+target。
+正数让前缀和递增，因此二分找第一个达标的 j，而不是任意一个 j。
+时间 O(n log n)，辅助空间 O(n)；本题仍优先选择原有 O(n) 滑动窗口。
+Positive values make prefix sums increasing. Lower-bound search finds the earliest qualifying end.
+Time O(n log n), auxiliary space O(n); prefer the existing O(n) sliding window here.
 */
 
+// 1. Sliding window: expand the right boundary, then shrink the left one while the sum qualifies.
+// 1. 滑动窗口：右边界不断扩张，窗口和达标后再收缩左边界。
+// Time: O(n), Space: O(1).
+// 时间复杂度：O(n)，空间复杂度：O(1)。
 func minSubArrayLen(target int, nums []int) int {
 	// i is the left boundary of the current sliding window.
 	// i 是当前滑动窗口的左边界。
@@ -42,7 +57,6 @@ func minSubArrayLen(target int, nums []int) int {
 		for sum >= target {
 			// Both i and j are included, so the length is j - i + 1.
 			// i 和 j 都包含在窗口内，因此长度是 j - i + 1。
-			//result = min(result, j-i+1)
 			subLength := j - i + 1
 			if subLength < result {
 				result = subLength
@@ -60,4 +74,83 @@ func minSubArrayLen(target int, nums []int) int {
 		return 0
 	}
 	return result
+}
+
+// 2. Brute force: fix each start and extend right until the sum first qualifies.
+// 2. 暴力解法：固定左端点，向右累加，第一次达标就停止。
+// Time: O(n²), Space: O(1).
+// 时间复杂度：O(n²)，空间复杂度：O(1)。
+func minSubArrayLenBruteForce(target int, nums []int) int {
+	// best uses an impossible length as its sentinel, exactly like result above.
+	// best 同样使用不可能出现的长度作为哨兵初值。
+	best := len(nums) + 1
+
+	for left := range nums {
+		sum := 0
+		for right := left; right < len(nums); right++ {
+			sum += nums[right]
+			if sum >= target {
+				// All values are positive, so extending further only makes this start longer.
+				// 元素都是正数，继续右扩只会更长，因此当前长度就是该起点的最优解。
+				best = min(best, right-left+1)
+				break
+			}
+		}
+	}
+
+	if best > len(nums) {
+		// The sentinel was never replaced, so no valid subarray exists.
+		// 哨兵值从未被替换，说明不存在满足条件的子数组。
+		return 0
+	}
+
+	return best
+}
+
+// 3. Prefix sums plus binary search: find the earliest end whose prefix sum is large enough.
+// 3. 前缀和加二分查找：为每个起点二分出第一个达标的终点。
+// Time: O(n log n), Space: O(n) for the prefix array.
+// 时间复杂度：O(n log n)，空间复杂度：O(n)，由前缀和数组产生。
+func minSubArrayLenBinarySearch(target int, nums []int) int {
+	// prefix[i] is the sum of the first i values, so prefix[j]-prefix[i] is the sum of nums[i:j].
+	// prefix[i] 表示前 i 个数之和，因此 prefix[j]-prefix[i] 就是 nums[i:j] 的和。
+	prefix := make([]int, len(nums)+1)
+	for i, value := range nums {
+		prefix[i+1] = prefix[i] + value
+	}
+
+	best := len(nums) + 1
+
+	for i := range nums {
+		// Positive values make prefix strictly increasing, so a lower-bound search is valid.
+		// 元素都是正数，前缀和严格递增，因此可以用二分查找第一个达标位置。
+		left, right := i+1, len(prefix)
+
+		// Find the first qualifying end in the half-open range [left, right).
+		// 在左闭右开区间 [left, right) 中寻找第一个达标终点。
+		for left < right {
+			mid := left + (right-left)/2
+			if prefix[mid]-prefix[i] >= target {
+				// mid still qualifies, so it stays a candidate and becomes the new right bound.
+				// mid 仍然达标，它本身还是候选答案，所以 right = mid。
+				right = mid
+			} else {
+				// mid is too small, so the earliest qualifying end is after it.
+				// mid 太小，第一个达标终点只能在它之后。
+				left = mid + 1
+			}
+		}
+
+		// left == len(prefix) means no end qualifies for this start.
+		// left == len(prefix) 说明该起点没有任何达标终点。
+		if left < len(prefix) {
+			best = min(best, left-i)
+		}
+	}
+
+	if best > len(nums) {
+		return 0
+	}
+
+	return best
 }

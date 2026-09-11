@@ -21,12 +21,22 @@ n 为输入长度，d 为数字字符数量，输出长度为 n+5d，最多 6n�
 For input length n and d digit characters, output length is n+5d,
 at most 6n. Time O(n), writing at most six bytes per input character.
 The Builder result buffer uses O(n) space; other state is O(1), so total space including output is O(n).
+
+补充解法：扩容后从后向前写 / Alternative: Expand and Fill Backward
+replaceNumberBackward 先数 d 个数字，结果长度为 n+5d，因为每个数字由 1 字节变成 6 字节。
+复制原文到扩容缓冲区，read 从原文末尾读，write 从新末尾写；数字写入 number 的逆向字节。
+写指针始终不在读指针左侧，因此不会覆盖尚未读取的原文。时间 O(n)，Go 中缓冲区 O(n)。
+“反向填充用 O(1) 状态”不代表整个接收 string 的函数只用 O(1) 空间。
+Count d digits and allocate n+5d bytes. Read backward from the original end and write backward from the new end.
+Write "number" backward so the final word reads forward. The writer never overwrites unread bytes.
+Time O(n), buffer space O(n) in Go; O(1) pointer state does not make the whole string function constant-space.
 */
 
 import (
 	"strings"
 )
 
+// 1. 从左向右用 Builder 构造结果
 func replaceNumber(s string) string {
 	// Builder appends output efficiently without repeatedly creating new strings.
 	// Builder 可以高效追加内容，避免反复创建新的字符串。
@@ -53,4 +63,52 @@ func replaceNumber(s string) string {
 	// Build and return the final string.
 	// 生成并返回最终字符串。
 	return builder.String()
+}
+
+// 2. 先扩容再从后向前填充
+func replaceNumberBackward(s string) string {
+	// Count the digits first so the final length is known before any writing.
+	// 先统计数字个数，这样在写入之前就能知道结果的最终长度。
+	digits := 0
+	for i := 0; i < len(s); i++ {
+		if s[i] >= '0' && s[i] <= '9' {
+			digits++
+		}
+	}
+
+	// Each digit grows from 1 byte to the 6 bytes of "number", so the result needs 5 extra bytes per digit.
+	// 每个数字由 1 个字节变成 "number" 的 6 个字节，因此每个数字多占 5 个字节。
+	buffer := make([]byte, len(s)+5*digits)
+	copy(buffer, s)
+
+	// read consumes the original text from its end; write fills the enlarged buffer from its end.
+	// read 从原文末尾向前读取，write 从扩容后的末尾向前写入。
+	write := len(buffer) - 1
+
+	for read := len(s) - 1; read >= 0; read-- {
+		ch := buffer[read]
+
+		if ch >= '0' && ch <= '9' {
+			// Write "number" backward so that it reads forward in the finished buffer.
+			// 逆序写入 "number" 的字节，最终在缓冲区中读出来才是正序。
+			for j := len("number") - 1; j >= 0; j-- {
+				buffer[write] = "number"[j]
+				write--
+			}
+		} else {
+			// Letters are copied unchanged to the current write position.
+			// 字母原样复制到当前写入位置。
+			buffer[write] = ch
+			write--
+		}
+
+		/*
+			write stays at or ahead of read: the gap equals 5 times the digits still unread,
+			so filling backward never overwrites original bytes that have not been read yet.
+			write 始终不在 read 左侧：两者的距离等于尚未读取部分中数字的个数乘以 5，
+			因此从后向前填充不会覆盖还没读过的原文字节。
+		*/
+	}
+
+	return string(buffer)
 }

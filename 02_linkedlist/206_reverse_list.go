@@ -7,9 +7,9 @@ Given the head of a singly linked list, reverse the list and return its new head
 
 解题思路 / Solution Approach
 迭代法使用 prev 和 cur，先保存下一个节点，再令 cur.Next 指向 prev。
-递归法先反转后半段，再把当前节点接到反转后链表的末尾。
+从后向前递归先反转后半段，再把当前节点接到反转后链表的末尾。
 The iterative method uses prev and cur, saving the next node before reversing cur.Next.
-The recursive method reverses the suffix first and then attaches the current node at its end.
+The back-to-front recursion reverses the suffix first and then attaches the current node at its end.
 
 关键逻辑：为什么这样做 / Why This Works
 迭代时 prev 是已经反转部分的头，cur 是尚未处理部分的头。cur.Next=prev 把当前节点接到已反转部分前面，
@@ -28,6 +28,15 @@ reverseList2：时间 O(n)，递归深度为 n，调用栈占 O(n) 辅助空间�
 n is the node count. reverseList takes O(n) time and O(1) auxiliary space.
 reverseList2 takes O(n) time and O(n) call-stack space due to recursion depth n.
 Both reuse the original nodes.
+
+补充解法：从前往后递归 / Additional Approach: Front-to-Back Recursion
+reverseListFromFront 把迭代版的 prev 和 cur 直接作为递归参数，每层只反转一条指针，再带着新的 prev、cur 进入下一层。
+cur==nil 时未处理部分为空，返回 prev 就是新头节点；它与 reverseList 使用同一套不变量，只是把循环写成了递归形式。
+时间 O(n)；递归深度为 n，且 Go 不保证尾调用优化，因此调用栈占 O(n) 辅助空间，空间不如迭代版的 O(1)。
+reverseListFromFront passes the iterative prev and cur as recursion parameters, reversing one link per level
+and recursing with the updated pair. When cur is nil the unprocessed part is empty, so prev is the new head.
+It shares reverseList's invariant and only rewrites the loop as recursion.
+Time O(n); recursion depth n costs O(n) call-stack space because Go does not guarantee tail-call optimization.
 */
 
 /*
@@ -52,7 +61,9 @@ cur.Next = prev  // 当前节点反向指回前一个节点
 prev = cur       // prev 往前走
 cur = next       // cur 往前走
 */
-// Iterative two-pointer solution. / 迭代双指针解法。
+// 1. Iterative two-pointer solution. / 1. 迭代双指针解法。
+// Time: O(n), Space: O(1).
+// 时间复杂度：O(n)，空间复杂度：O(1)。
 func reverseList(head *ListNode) *ListNode {
 	// prev starts as nil because the new tail must point to nil.
 	// prev 初始为 nil，因为反转后的尾节点应该指向 nil。
@@ -77,8 +88,10 @@ func reverseList(head *ListNode) *ListNode {
 	return prev
 }
 
-// Recursive solution: reverse the remaining list first, then attach head at the end.
-// 递归解法：先递归反转后半段，再把 head 接到末尾。
+// 2. Back-to-front recursion: reverse the remaining list first, then attach head at the end.
+// 2. 从后向前递归：先递归反转后半段，再把 head 接到末尾。
+// Time: O(n), Space: O(n) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由递归调用栈产生。
 func reverseList2(head *ListNode) *ListNode {
 	// An empty list or a single-node list is already reversed.
 	// 空链表或只有一个节点的链表，本身就是反转结果。
@@ -100,4 +113,37 @@ func reverseList2(head *ListNode) *ListNode {
 	// The head of the reversed tail is also the head of the whole result.
 	// 后半段的新头节点，也是整个反转链表的新头节点。
 	return newHead
+}
+
+// 3. Front-to-back recursion: the iterative prev and cur become recursion parameters.
+// 3. 从前往后递归：把迭代版的 prev 和 cur 直接当作递归参数传递。
+// Time: O(n), Space: O(n) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由递归调用栈产生。
+func reverseListFromFront(head *ListNode) *ListNode {
+	// reverse reverses exactly one link per call; prev always heads the finished part.
+	// reverse 每层只反转一条指针；prev 始终是已经反转好的那部分的头节点。
+	var reverse func(prev, cur *ListNode) *ListNode
+
+	reverse = func(prev, cur *ListNode) *ListNode {
+		// An empty unprocessed part means prev already heads the complete result.
+		// 未处理部分为空，说明 prev 就是完整反转结果的头节点。
+		if cur == nil {
+			return prev
+		}
+
+		// Save the original next node before changing cur.Next.
+		// 修改 cur.Next 前先保存原来的下一个节点，防止后半段链表丢失。
+		next := cur.Next
+		// Reverse the current link so cur points to the processed part.
+		// 反转当前指针，让 cur 指向已经处理好的部分。
+		cur.Next = prev
+
+		// cur has joined the reversed part, so it becomes the next level's prev.
+		// cur 已经并入已反转部分，因此它就是下一层的 prev。
+		return reverse(cur, next)
+	}
+
+	// The new tail must point to nil, so the first prev is nil.
+	// 反转后的尾节点必须指向 nil，因此第一层的 prev 为 nil。
+	return reverse(nil, head)
 }

@@ -18,6 +18,9 @@ func TestReverseWords(t *testing.T) {
 		{name: "multiple spaces between words", s: "a good   example", want: "example good a"},
 		{name: "single word", s: "algorithm", want: "algorithm"},
 		{name: "only spaces", s: "     ", want: ""},
+		{name: "empty string", s: "", want: ""},
+		{name: "single character word", s: " a ", want: "a"},
+		{name: "two words with many spaces", s: "   first    second   ", want: "second first"},
 	}
 
 	reverseWordsFuncs := []struct {
@@ -26,6 +29,7 @@ func TestReverseWords(t *testing.T) {
 	}{
 		{name: "strings.Fields solution", fn: reverseWords},
 		{name: "manual in-place solution", fn: reverseWords2},
+		{name: "backward scan solution", fn: reverseWordsBackward},
 	}
 
 	for _, rf := range reverseWordsFuncs {
@@ -57,6 +61,10 @@ func TestStrStr(t *testing.T) {
 		{name: "needle longer than haystack", haystack: "a", needle: "aa", want: -1},
 		{name: "empty needle", haystack: "abc", needle: "", want: 0},
 		{name: "both empty", haystack: "", needle: "", want: 0},
+		{name: "empty haystack", haystack: "", needle: "a", want: -1},
+		{name: "match only at the very end", haystack: "aaab", needle: "ab", want: 2},
+		{name: "repeated prefix forces fallback", haystack: "aabaabaaf", needle: "aabaaf", want: 3},
+		{name: "whole string matches", haystack: "abc", needle: "abc", want: 0},
 	}
 
 	strStrFuncs := []struct {
@@ -91,6 +99,9 @@ func TestGetNext(t *testing.T) {
 		{name: "alternating pattern", s: "abab", want: []int{0, 0, 1, 2}},
 		{name: "fallback after partial match", s: "aabaaf", want: []int{0, 1, 0, 1, 2, 0}},
 		{name: "long prefix broken at end", s: "aaaaab", want: []int{0, 1, 2, 3, 4, 0}},
+		{name: "no repeated character", s: "abcd", want: []int{0, 0, 0, 0}},
+		{name: "single character", s: "a", want: []int{0}},
+		{name: "empty pattern writes nothing", s: "", want: []int{}},
 	}
 
 	for _, tt := range tests {
@@ -119,6 +130,9 @@ func TestRepeatedSubstringPattern(t *testing.T) {
 		{name: "equal prefix suffix but incomplete blocks", s: "aba", want: false},
 		{name: "no repeated pattern", s: "abac", want: false},
 		{name: "single character", s: "a", want: false},
+		{name: "two different characters", s: "ab", want: false},
+		{name: "two identical characters", s: "aa", want: true},
+		{name: "empty string", s: "", want: false},
 	}
 
 	repeatedFuncs := []struct {
@@ -167,6 +181,32 @@ func TestReverseString(t *testing.T) {
 	}
 }
 
+func TestReverseStringUnicode(t *testing.T) {
+	// The rune version must keep multibyte characters intact instead of reversing their bytes.
+	// rune 版本必须保持多字节字符完整，而不是把它们的字节顺序也反转。
+	tests := []struct {
+		name string
+		s    string
+		want string
+	}{
+		{name: "ascii odd length", s: "hello", want: "olleh"},
+		{name: "ascii even length", s: "abcd", want: "dcba"},
+		{name: "multibyte characters", s: "汉字串", want: "串字汉"},
+		{name: "mixed ascii and multibyte", s: "héllo", want: "olléh"},
+		{name: "single character", s: "a", want: "a"},
+		{name: "single multibyte character", s: "汉", want: "汉"},
+		{name: "empty", s: "", want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := reverseStringUnicode(tt.s); got != tt.want {
+				t.Fatalf("reverseStringUnicode(%q) = %q, want %q", tt.s, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestReverseStr(t *testing.T) {
 	tests := []struct {
 		name string
@@ -179,6 +219,12 @@ func TestReverseStr(t *testing.T) {
 		{name: "less than k remaining", s: "abc", k: 5, want: "cba"},
 		{name: "between k and 2k remaining", s: "abcdef", k: 4, want: "dcbaef"},
 		{name: "single character groups", s: "abc", k: 1, want: "abc"},
+		{name: "k equals length", s: "abcd", k: 4, want: "dcba"},
+		{name: "single character", s: "a", k: 2, want: "a"},
+		{name: "empty string", s: "", k: 2, want: ""},
+		// A nonpositive k would make the 2k step loop forever without the guard.
+		// 没有保护时，k 不是正数会让步长 2k 的循环无法结束。
+		{name: "nonpositive k returns input", s: "abcdef", k: 0, want: "abcdef"},
 	}
 
 	for _, tt := range tests {
@@ -201,12 +247,28 @@ func TestReplaceNumber(t *testing.T) {
 		{name: "all digits", s: "123", want: "numbernumbernumber"},
 		{name: "digit at both ends", s: "1abc2", want: "numberabcnumber"},
 		{name: "zero digit", s: "a0b", want: "anumberb"},
+		{name: "adjacent digits", s: "ab99cd", want: "abnumbernumbercd"},
+		{name: "single digit", s: "5", want: "number"},
+		{name: "single letter", s: "z", want: "z"},
+		{name: "empty string", s: "", want: ""},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := replaceNumber(tt.s); got != tt.want {
-				t.Fatalf("replaceNumber(%q) = %q, want %q", tt.s, got, tt.want)
+	replaceNumberFuncs := []struct {
+		name string
+		fn   func(string) string
+	}{
+		{name: "forward Builder solution", fn: replaceNumber},
+		{name: "backward fill solution", fn: replaceNumberBackward},
+	}
+
+	for _, rf := range replaceNumberFuncs {
+		t.Run(rf.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := rf.fn(tt.s); got != tt.want {
+						t.Fatalf("%s(%q) = %q, want %q", rf.name, tt.s, got, tt.want)
+					}
+				})
 			}
 		})
 	}

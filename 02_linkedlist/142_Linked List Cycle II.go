@@ -28,6 +28,13 @@ If a=0, both are already equal at the entrance when reset.
 n 为不同节点数。时间 O(n)：快慢指针找相遇点、再找入口都只需线性步数。辅助空间 O(1)，仅保存几个节点指针。
 n is the number of distinct nodes. Time O(n): both finding the meeting point and locating the entrance take linear steps.
 Auxiliary space O(1) for a few node pointers.
+
+补充解法：节点集合 / Alternative: Visited Node Set
+detectCycleHash 保存走过的节点指针。第一次再次遇到的节点就是环入口：
+入环前节点不会重复，入环后按 Next 绕一圈首先回到入口。比较地址而非 Val。
+平均时间 O(n)，辅助空间 O(n)；快慢指针省掉了集合的空间。
+Store visited pointers, not values. Prefix nodes never repeat; the first complete lap returns to the entry.
+Expected time O(n), auxiliary space O(n); Floyd's existing method avoids the set.
 */
 
 /*
@@ -52,6 +59,10 @@ I move both one step at a time, and their next meeting point is the cycle entran
 If fast reaches nil, there is no cycle.
 */
 
+// 1. Floyd's slow and fast pointers: find the meeting point, then walk to the entrance.
+// 1. Floyd 快慢指针：先找到相遇点，再从头和相遇点同速走到入环点。
+// Time: O(n), Space: O(1).
+// 时间复杂度：O(n)，空间复杂度：O(1)。
 func detectCycle(head *ListNode) *ListNode {
 	// Both pointers start at head; slow moves 1 step and fast moves 2 steps.
 	// 两个指针都从 head 出发；slow 每次走 1 步，fast 每次走 2 步。
@@ -93,5 +104,29 @@ func detectCycle(head *ListNode) *ListNode {
 
 	// Reaching nil means the list ends, so no cycle exists.
 	// fast 能走到 nil，说明链表存在终点，因此没有环。
+	return nil
+}
+
+// 2. Visited node set: the first node seen twice is the cycle entrance.
+// 2. 节点集合法：第一个被重复访问到的节点就是入环点。
+// Time: O(n) expected, Space: O(n) for the set.
+// 时间复杂度：期望 O(n)，空间复杂度：O(n)，由集合产生。
+func detectCycleHash(head *ListNode) *ListNode {
+	// The key is the node pointer, not its value, because values may repeat.
+	// 键是节点指针而不是节点值，因为不同节点的值可能相同。
+	seen := make(map[*ListNode]bool)
+
+	for node := head; node != nil; node = node.Next {
+		// Nodes before the cycle are never revisited, so the first repeat is the entrance.
+		// 入环前的节点不会被重复访问，因此第一个重复出现的节点就是入环点。
+		if seen[node] {
+			return node
+		}
+
+		seen[node] = true
+	}
+
+	// Reaching nil means the list ends, so no cycle exists.
+	// 能走到 nil 说明链表存在终点，因此没有环。
 	return nil
 }

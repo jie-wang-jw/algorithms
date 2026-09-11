@@ -70,35 +70,30 @@ func TestReverseList(t *testing.T) {
 	}{
 		{name: "empty", in: nil, want: nil},
 		{name: "single", in: []int{1}, want: []int{1}},
+		{name: "two nodes", in: []int{1, 2}, want: []int{2, 1}},
 		{name: "three nodes", in: []int{1, 2, 3}, want: []int{3, 2, 1}},
 		{name: "five nodes", in: []int{1, 2, 3, 4, 5}, want: []int{5, 4, 3, 2, 1}},
+		{name: "duplicate values", in: []int{7, 7, 8}, want: []int{8, 7, 7}},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			head := buildList(tt.in)
-			got := reverseList(head)
-			requireList(t, got, tt.want)
-		})
-	}
-}
-
-func TestReverseListRecursive(t *testing.T) {
-	tests := []struct {
+	reverseFuncs := []struct {
 		name string
-		in   []int
-		want []int
+		fn   func(*ListNode) *ListNode
 	}{
-		{name: "empty", in: nil, want: nil},
-		{name: "single", in: []int{1}, want: []int{1}},
-		{name: "five nodes", in: []int{1, 2, 3, 4, 5}, want: []int{5, 4, 3, 2, 1}},
+		{"iterative two pointers", reverseList},
+		{"back to front recursion", reverseList2},
+		{"front to back recursion", reverseListFromFront},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			head := buildList(tt.in)
-			got := reverseList2(head)
-			requireList(t, got, tt.want)
+	for _, rf := range reverseFuncs {
+		t.Run(rf.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					head := buildList(tt.in)
+					got := rf.fn(head)
+					requireList(t, got, tt.want)
+				})
+			}
 		})
 	}
 }
@@ -111,15 +106,29 @@ func TestSwapPairs(t *testing.T) {
 	}{
 		{name: "empty", in: nil, want: nil},
 		{name: "single", in: []int{1}, want: []int{1}},
+		{name: "two nodes", in: []int{1, 2}, want: []int{2, 1}},
 		{name: "even length", in: []int{1, 2, 3, 4}, want: []int{2, 1, 4, 3}},
 		{name: "odd length", in: []int{1, 2, 3, 4, 5}, want: []int{2, 1, 4, 3, 5}},
+		{name: "six nodes", in: []int{1, 2, 3, 4, 5, 6}, want: []int{2, 1, 4, 3, 6, 5}},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			head := buildList(tt.in)
-			got := swapPairs(head)
-			requireList(t, got, tt.want)
+	swapFuncs := []struct {
+		name string
+		fn   func(*ListNode) *ListNode
+	}{
+		{"dummy head iteration", swapPairs},
+		{"recursion", swapPairsRecursive},
+	}
+
+	for _, sf := range swapFuncs {
+		t.Run(sf.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					head := buildList(tt.in)
+					got := sf.fn(head)
+					requireList(t, got, tt.want)
+				})
+			}
 		})
 	}
 }
@@ -132,16 +141,31 @@ func TestRemoveNthFromEnd(t *testing.T) {
 		want []int
 	}{
 		{name: "remove middle", in: []int{1, 2, 3, 4, 5}, n: 2, want: []int{1, 2, 3, 5}},
+		{name: "remove head of five", in: []int{1, 2, 3, 4, 5}, n: 5, want: []int{2, 3, 4, 5}},
+		{name: "remove tail of five", in: []int{1, 2, 3, 4, 5}, n: 1, want: []int{1, 2, 3, 4}},
 		{name: "remove head", in: []int{1, 2}, n: 2, want: []int{2}},
 		{name: "remove tail", in: []int{1, 2}, n: 1, want: []int{1}},
 		{name: "remove only node", in: []int{1}, n: 1, want: nil},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			head := buildList(tt.in)
-			got := removeNthFromEnd(head, tt.n)
-			requireList(t, got, tt.want)
+	removeFuncs := []struct {
+		name string
+		fn   func(*ListNode, int) *ListNode
+	}{
+		{"fast slow pointers", removeNthFromEnd},
+		{"length then two passes", removeNthFromEndLength},
+		{"stack", removeNthFromEndStack},
+	}
+
+	for _, rf := range removeFuncs {
+		t.Run(rf.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					head := buildList(tt.in)
+					got := rf.fn(head, tt.n)
+					requireList(t, got, tt.want)
+				})
+			}
 		})
 	}
 }
@@ -155,28 +179,42 @@ func TestDetectCycle(t *testing.T) {
 	}{
 		{name: "cycle starts at index 1", vals: []int{3, 2, 0, -4}, pos: 1, want: 2},
 		{name: "cycle starts at head", vals: []int{1, 2}, pos: 0, want: 1},
+		{name: "cycle starts at tail", vals: []int{1, 2, 3}, pos: 2, want: 3},
 		{name: "single node cycle", vals: []int{1}, pos: 0, want: 1},
 		{name: "no cycle", vals: []int{1, 2, 3}, pos: -1, want: 0},
+		{name: "single node no cycle", vals: []int{1}, pos: -1, want: 0},
 		{name: "empty", vals: nil, pos: -1, want: 0},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			head, entry := buildCycleList(tt.vals, tt.pos)
-			got := detectCycle(head)
+	detectFuncs := []struct {
+		name string
+		fn   func(*ListNode) *ListNode
+	}{
+		{"floyd fast slow pointers", detectCycle},
+		{"visited node set", detectCycleHash},
+	}
 
-			if tt.pos == -1 {
-				if got != nil {
-					t.Fatalf("got node value %d, want nil", got.Val)
-				}
-				return
-			}
+	for _, df := range detectFuncs {
+		t.Run(df.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					head, entry := buildCycleList(tt.vals, tt.pos)
+					got := df.fn(head)
 
-			if got != entry {
-				if got == nil {
-					t.Fatalf("got nil, want entry value %d", tt.want)
-				}
-				t.Fatalf("got node value %d, want entry value %d", got.Val, tt.want)
+					if tt.pos == -1 {
+						if got != nil {
+							t.Fatalf("got node value %d, want nil", got.Val)
+						}
+						return
+					}
+
+					if got != entry {
+						if got == nil {
+							t.Fatalf("got nil, want entry value %d", tt.want)
+						}
+						t.Fatalf("got node value %d, want entry value %d", got.Val, tt.want)
+					}
+				})
 			}
 		})
 	}

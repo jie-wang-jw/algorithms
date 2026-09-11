@@ -73,8 +73,9 @@ Shared-slice backtracking: O(n+S) time, O(h) auxiliary space for the path and ca
 String-stack iteration: O(nh) time; at most O(h) pending nodes with stored paths give O(h²) auxiliary space, plus O(S) output.
 
 练习 / Practice
-先掌握字符串递归，再比较共享切片为何需要撤销。本文件只保留题解，不提供实现或函数骨架。
-Start with string recursion, then compare why the shared slice needs undo. This file contains explanations only, without implementations or skeletons.
+先掌握字符串递归，再比较共享切片为何需要撤销。三种实现按上面的编号顺序写在下方。
+Start with string recursion, then compare why the shared slice needs an undo step.
+The three implementations appear below in the order of the numbered methods above.
 */
 import (
 	"strconv"

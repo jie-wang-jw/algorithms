@@ -81,6 +81,7 @@ func TestPathSum(t *testing.T) {
 	}{
 		{name: "backtracking", fn: pathSum},
 		{name: "stack", fn: pathSumIterative},
+		{name: "BFS", fn: pathSumBFS},
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
@@ -549,12 +550,61 @@ func traversalTestCases() []traversalTestCase {
 		Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}},
 	}
 
+	// The left subtree has a long right boundary, which Morris threading walks twice
+	// and must fully restore afterwards.
+	// 左子树有一条较长的右边界，Morris 线索会重复走这条边界，并且必须完整还原。
+	//
+	//         5
+	//       /   \
+	//      2     8
+	//       \   /
+	//        3 6
+	//         \
+	//          4
+	longRightBoundary := &TreeNode{
+		Val:   5,
+		Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3, Right: &TreeNode{Val: 4}}},
+		Right: &TreeNode{Val: 8, Left: &TreeNode{Val: 6}},
+	}
+
 	return []traversalTestCase{
 		{name: "empty tree", root: nil, level: [][]int{}, preorder: []int{}, inorder: []int{}, postorder: []int{}},
 		{name: "single node", root: &TreeNode{Val: 7}, level: [][]int{{7}}, preorder: []int{7}, inorder: []int{7}, postorder: []int{7}},
 		{name: "ordinary tree", root: ordinary, level: [][]int{{1}, {2, 3}, {4, 5, 6}}, preorder: []int{1, 2, 4, 5, 3, 6}, inorder: []int{4, 2, 5, 1, 3, 6}, postorder: []int{4, 5, 2, 6, 3, 1}},
 		{name: "right skewed tree", root: rightSkewed, level: [][]int{{1}, {2}, {3}}, preorder: []int{1, 2, 3}, inorder: []int{1, 2, 3}, postorder: []int{3, 2, 1}},
 		{name: "left skewed tree", root: leftSkewed, level: [][]int{{1}, {2}, {3}}, preorder: []int{1, 2, 3}, inorder: []int{3, 2, 1}, postorder: []int{3, 2, 1}},
+		{name: "long right boundary", root: longRightBoundary, level: [][]int{{5}, {2, 8}, {3, 6}, {4}}, preorder: []int{5, 2, 3, 4, 8, 6}, inorder: []int{2, 3, 4, 5, 6, 8}, postorder: []int{4, 3, 2, 6, 8, 5}},
+	}
+}
+
+func TestMorrisRestoresTree(t *testing.T) {
+	// Morris traversal borrows nil right pointers as temporary threads.
+	// Every thread must be removed before returning, or the tree stays corrupted.
+	// Morris 遍历借用空右指针作为临时线索，返回前必须全部拆除，否则树会被永久改坏。
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) []int
+	}{
+		{name: "preorder", fn: preorderTraversalMorris},
+		{name: "inorder", fn: inorderTraversalMorris},
+	}
+
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			// Each call builds identical fresh trees, so an untouched copy is the expectation.
+			// 每次调用都会构造完全相同的新树，因此未被遍历的那一份就是期望结构。
+			traversed := traversalTestCases()
+			untouched := traversalTestCases()
+
+			for i, tt := range traversed {
+				t.Run(tt.name, func(t *testing.T) {
+					implementation.fn(tt.root)
+					if !reflect.DeepEqual(tt.root, untouched[i].root) {
+						t.Fatalf("tree not restored after Morris traversal: got %#v, want %#v", tt.root, untouched[i].root)
+					}
+				})
+			}
+		})
 	}
 }
 
@@ -564,7 +614,8 @@ func TestIsSymmetric(t *testing.T) {
 		fn   func(*TreeNode) bool
 	}{
 		{name: "recursive", fn: isSymmetric},
-		{name: "iterative", fn: isSymmetricIterative},
+		{name: "queue", fn: isSymmetricIterative},
+		{name: "stack", fn: isSymmetricStack},
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
@@ -636,8 +687,9 @@ func TestMaxDepth(t *testing.T) {
 		name string
 		fn   func(*TreeNode) int
 	}{
-		{name: "recursive", fn: maxDepth},
-		{name: "iterative", fn: maxDepthIterative},
+		{name: "postorder recursive", fn: maxDepth},
+		{name: "level order", fn: maxDepthIterative},
+		{name: "preorder backtracking", fn: maxDepthPreorder},
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
@@ -754,24 +806,40 @@ func TestMinDepth(t *testing.T) {
 }
 
 func TestLevelOrder(t *testing.T) {
-	for _, tt := range traversalTestCases() {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := levelOrder(tt.root); !reflect.DeepEqual(got, tt.level) {
-				t.Fatalf("levelOrder() = %v, want %v", got, tt.level)
+	// The queue groups levels explicitly, while the recursive version uses depth as an index.
+	// 队列版本显式分层，递归版本把深度直接当作结果下标，两者必须给出相同分组。
+	implementations := []struct {
+		name string
+		fn   func(*TreeNode) [][]int
+	}{
+		{name: "queue", fn: levelOrder},
+		{name: "recursive by depth", fn: levelOrderRecursive},
+	}
+
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			for _, tt := range traversalTestCases() {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.root); !reflect.DeepEqual(got, tt.level) {
+						t.Fatalf("levelOrder() = %v, want %v", got, tt.level)
+					}
+				})
 			}
 		})
 	}
 }
 
 func TestPreorderTraversal(t *testing.T) {
-	// Both iterative and recursive implementations must return root-left-right order.
-	// 迭代和递归实现都必须返回“根、左、右”的顺序。
+	// Every implementation must return root-left-right order.
+	// 所有实现都必须返回“根、左、右”的顺序。
 	implementations := []struct {
 		name string
 		fn   func(*TreeNode) []int
 	}{
 		{name: "iterative", fn: preorderTraversal},
 		{name: "recursive", fn: preorderTraversalRecursive},
+		{name: "unified", fn: preorderTraversalUnified},
+		{name: "Morris", fn: preorderTraversalMorris},
 	}
 
 	for _, implementation := range implementations {
@@ -788,14 +856,16 @@ func TestPreorderTraversal(t *testing.T) {
 }
 
 func TestInorderTraversal(t *testing.T) {
-	// Both iterative and recursive implementations must return left-root-right order.
-	// 迭代和递归实现都必须返回“左、根、右”的顺序。
+	// Every implementation must return left-root-right order.
+	// 所有实现都必须返回“左、根、右”的顺序。
 	implementations := []struct {
 		name string
 		fn   func(*TreeNode) []int
 	}{
 		{name: "iterative", fn: inorderTraversal},
 		{name: "recursive", fn: inorderTraversalRecursive},
+		{name: "unified", fn: inorderTraversalUnified},
+		{name: "Morris", fn: inorderTraversalMorris},
 	}
 
 	for _, implementation := range implementations {
@@ -877,14 +947,15 @@ func TestInvertTree(t *testing.T) {
 }
 
 func TestPostorderTraversal(t *testing.T) {
-	// Both iterative and recursive implementations must return left-right-root order.
-	// 迭代和递归实现都必须返回“左、右、根”的顺序。
+	// Every implementation must return left-right-root order.
+	// 所有实现都必须返回“左、右、根”的顺序。
 	implementations := []struct {
 		name string
 		fn   func(*TreeNode) []int
 	}{
 		{name: "iterative", fn: postorderTraversal},
 		{name: "recursive", fn: postorderTraversalRecursive},
+		{name: "unified", fn: postorderTraversalUnified},
 	}
 
 	for _, implementation := range implementations {

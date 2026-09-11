@@ -20,7 +20,7 @@ An empty tree has depth 0; a single-node tree has depth 1.
 最大深度为 3，例如路径 3 -> 20 -> 15 包含三个节点。
 The maximum depth is 3: for example, path 3 -> 20 -> 15 contains three nodes.
 
-解题思路：递归 / Approach: Recursion
+解法一：后序递归求高度（推荐） / Method 1: Postorder Recursion on Heights (Recommended)
 定义 maxDepth(node)：返回以 node 为根的这棵子树的最大深度，计数从 node 自己开始。
 它不是 node 在原树中处于第几层，也不需要知道它的父节点是谁。
 Define maxDepth(node) as the maximum depth of the subtree rooted at node, counting from node itself.
@@ -60,27 +60,47 @@ Both child results must be known before computing the current result, making thi
 - 不需要修改树，也不需要使用全局变量累计层数。
   No tree mutation or global depth counter is needed.
 
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高。时间 O(n)，每个节点只计算一次深度。
-辅助空间 O(h)，递归栈同时保存的是一条根到叶路径上的调用，而不是所有已经访问过的节点。
-平衡树为 O(log n)，链状树最坏为 O(n)。返回整数占 O(1)。
-For n nodes and height h, time is O(n), computing each node's depth once.
-Auxiliary space is O(h): active calls follow a root-to-leaf path, not all nodes ever visited.
-This is O(log n) for a balanced tree and O(n) for a skewed tree. The integer result uses O(1) space.
-
-另一种思路：层序遍历 / Alternative: Level-Order Traversal
+解法二：层序遍历 / Method 2: Level-Order Traversal
 沿用 102 题队列写法，每轮保存当前队列长度，恰好处理这一层的节点，再将深度加 1。
 全部节点处理完时，经过的层数就是最大深度。必须固定本层节点数，避免把新入队的孩子算入同一层。
-时间 O(n)，辅助空间 O(w)，w 为最大层宽，最坏 O(n)。
 Reuse the BFS queue from problem 102: save the level size, process exactly that many nodes, and increment depth once.
 The number of completed levels is the maximum depth. Fix the level size to keep newly enqueued children in the next level.
-Time is O(n), with O(w) auxiliary space for maximum width w, up to O(n).
+
+解法三：前序回溯记录深度 / Method 3: Preorder Backtracking on Depths
+解法一自底向上求“高度”；这一版自顶向下传“深度”，进入节点时就知道它位于第几层。
+递归参数 depth 表示当前节点所在层数，根为 1；每访问一个节点就把 answer 更新为 max(answer,depth)。
+空节点直接返回，不参与比较，所以缺失的一侧不会拉低答案。
+Method 1 computes heights bottom-up; this version passes a top-down depth, so each node knows its own level on entry.
+The parameter depth is the current level, starting at 1 for the root, and every visit updates answer to max(answer,depth).
+Nil nodes return immediately without comparing, so a missing side cannot lower the answer.
+
+为什么不需要显式撤销 depth？Go 的 int 参数按值传递，左子树调用改的是自己的副本，
+不会影响父调用随后传给右子树的值。代码随想录用 depth++/depth-- 强调回溯，二者结果相同。
+Why is there no explicit undo of depth? Go passes int arguments by value, so the left call mutates only its own copy
+and cannot affect the value the parent later passes to the right child.
+The 代码随想录 form writes depth++ and depth-- to highlight backtracking; both produce the same result.
+
+时间与空间复杂度 / Time and Space Complexity
+n 为节点数，h 为树高，w 为最大层宽。
+解法一：时间 O(n)，每个节点只计算一次深度；辅助空间 O(h)，递归栈同时保存的是一条根到叶路径上的调用，
+而不是所有已经访问过的节点。平衡树为 O(log n)，链状树最坏为 O(n)。
+解法二：时间 O(n)，每个节点入队、出队各一次；辅助空间 O(w)，最坏 O(n)。
+解法三：时间 O(n)，每个节点访问一次；辅助空间 O(h)，最坏 O(n)；answer 只占 O(1)。
+三种解法都不修改树，返回整数占 O(1)。
+For n nodes, height h, and maximum width w:
+Method 1 takes O(n) time, computing each node's depth once, and O(h) auxiliary space, because active calls
+follow one root-to-leaf path rather than every node ever visited; that is O(log n) when balanced and O(n) when skewed.
+Method 2 takes O(n) time, enqueuing and dequeuing each node once, and O(w) auxiliary space, up to O(n).
+Method 3 takes O(n) time and O(h) auxiliary space, up to O(n), with O(1) for answer.
+None of them modifies the tree, and each integer result uses O(1) space.
 
 练习 / Practice
-请在下方自行实现 maxDepth；本文件仅保留题解，不提供实现代码或函数骨架。
-Implement maxDepth below. This file contains explanations only, without implementation code or a function skeleton.
+先掌握解法一的“高度”定义，再对比解法三的“深度”定义。三种实现按上面的编号顺序写在下方。
+Master the height definition of method 1 first, then contrast it with the depth definition of method 3.
+The three implementations appear below in the order of the numbered methods above.
 */
 
+// 1. 后序递归：先求左右高度，再取较大值加一
 func maxDepth(root *TreeNode) int {
 	// An empty tree contains no nodes, so its depth is 0.
 	// 空树没有节点，深度为 0。
@@ -98,6 +118,7 @@ func maxDepth(root *TreeNode) int {
 	return max(leftDepth, rightDepth) + 1
 }
 
+// 2. 层序遍历：数完成了多少层
 func maxDepthIterative(root *TreeNode) int {
 	// An empty tree has no levels.
 	// 空树没有层，深度为 0。
@@ -135,4 +156,35 @@ func maxDepthIterative(root *TreeNode) int {
 	}
 
 	return depth
+}
+
+// 3. 前序回溯：自顶向下传递深度
+func maxDepthPreorder(root *TreeNode) int {
+	// An empty tree never updates the answer, so 0 remains correct.
+	// 空树不会触发任何更新，初始值 0 就是答案。
+	answer := 0
+
+	var traverse func(*TreeNode, int)
+	traverse = func(node *TreeNode, depth int) {
+		// A nil child is not a node and must not be compared.
+		// 空孩子不是节点，不参与最大值比较。
+		if node == nil {
+			return
+		}
+
+		// depth is this node's own level, already counting itself.
+		// depth 就是当前节点所在的层数，已经把它自己算进去了。
+		answer = max(answer, depth)
+
+		// Each child owns its copy of depth+1, so no manual undo is needed.
+		// 两个孩子各自拿到 depth+1 的副本，因此不需要手动撤销。
+		traverse(node.Left, depth+1)
+		traverse(node.Right, depth+1)
+	}
+
+	// The root lies on level 1 because depth counts nodes, not edges.
+	// 根位于第 1 层，因为深度按节点数计算，而不是按边数。
+	traverse(root, 1)
+
+	return answer
 }

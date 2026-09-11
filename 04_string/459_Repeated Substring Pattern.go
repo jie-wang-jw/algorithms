@@ -42,6 +42,13 @@ version uses O(n) construction time and space, plus substring-search time;
 calling Contains alone does not prove worst-case linear time, and naive-search
 analysis gives a conservative O(n²) bound. The KMP version takes O(n)
 time and O(n) auxiliary space for the prefix table.
+
+边界条件 / Edge Cases
+题目保证 s 非空。枚举法对空串天然返回 false；双倍字符串法会切出非法下标 doubled[1:-1]，
+KMP 法会读到越界的 next[n-1]，因此两者都先显式判空，使三种解法对空串结果一致。
+The problem guarantees a nonempty s. Enumeration already returns false for an empty string,
+while doubling would slice doubled[1:-1] and KMP would read next[n-1] out of range,
+so both check for an empty string first and all three solutions now agree.
 */
 
 import "strings"
@@ -93,6 +100,12 @@ If s is made of a repeated substring, s appears inside (s+s) after removing the 
 如果 s 由重复子串组成，那么在 (s+s) 去掉首尾字符后，仍然能找到完整的 s。
 */
 func repeatedSubstringPattern2(s string) bool {
+	// An empty string has no nonempty unit to repeat, and doubled[1:len-1] would be an invalid slice.
+	// 空串没有可重复的非空单元，而且 doubled[1:len-1] 的下标是非法的。
+	if len(s) == 0 {
+		return false
+	}
+
 	// Doubling contains every rotation of s.
 	// s+s 包含 s 的所有循环位移结果。
 	doubled := s + s
@@ -112,6 +125,12 @@ If n is divisible by that length, the pattern repeats exactly. / 如果 n 能整
 */
 func repeatedSubstringPattern3(s string) bool {
 	n := len(s)
+
+	// An empty string has no last prefix-table entry to read, so next[n-1] would panic.
+	// 空串没有前缀表的最后一项可读，直接访问 next[n-1] 会越界。
+	if n == 0 {
+		return false
+	}
 
 	// Build the prefix table for s.
 	// 给 s 构造前缀表。

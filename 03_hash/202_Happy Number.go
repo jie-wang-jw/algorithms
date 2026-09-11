@@ -29,6 +29,15 @@ Let d be the initial decimal digit count. The first digit-square sum costs O(d);
 the value then becomes at most 81d and rapidly shrinks to a fixed range, giving O(d), or O(log(n+1)), time.
 A conservative hash-set space bound is O(d), not O(n). getNext(x) takes time proportional to its digit count
 and O(1) auxiliary space. Hash operations are average O(1).
+
+补充解法：快慢指针 / Alternative: Floyd Cycle Detection
+isHappyFloyd 把每个整数看作节点，平方和变换 getNext 就是唯一的 Next。
+慢指针变换一次、快指针两次。相遇在 1 表示进入 1->1，否则进入不含 1 的环。
+正整数经过变换会进入有限范围，因此一定到 1 或进入环；不需要显式集合。
+d 为输入十进制位数，时间 O(d)，辅助空间 O(1)，复用原 getNext。
+Treat each integer as a node and getNext as its unique successor.
+Advance one and two steps; meeting at 1 means success, any other cycle means failure.
+Digit-square sums eventually enter a bounded range. Time O(d) for d input digits, O(1) auxiliary space.
 */
 
 /*
@@ -42,6 +51,7 @@ If I see the same number again, that means we are in a cycle, so it cannot reach
 如果某个中间结果再次出现，说明进入循环，之后不可能到达 1。
 */
 
+// 1. 哈希集合判重
 func isHappy(n int) bool {
 	// seen records every intermediate number we have processed.
 	// seen 记录已经处理过的每个中间结果。
@@ -62,6 +72,7 @@ func isHappy(n int) bool {
 	return true
 }
 
+// 各位数字平方和：两种解法共用的变换
 func getNext(n int) int {
 	// sum accumulates the square of every extracted digit.
 	// sum 累加每一位数字的平方。
@@ -81,4 +92,24 @@ func getNext(n int) int {
 		n /= 10
 	}
 	return sum
+}
+
+// 2. 快慢指针判环：不需要哈希集合
+func isHappyFloyd(n int) bool {
+	// Every number has exactly one successor, so the sequence behaves like a linked list.
+	// 每个数字只有一个后继，因此整条变换序列相当于一个链表。
+	// fast starts one step ahead so the loop condition is not satisfied immediately.
+	// fast 先走一步，这样循环条件不会在开始时就成立。
+	slow, fast := n, getNext(n)
+
+	// fast moves twice as quickly, so it catches slow inside any cycle.
+	// fast 的速度是 slow 的两倍，只要存在环就一定会追上 slow。
+	for slow != fast {
+		slow = getNext(slow)
+		fast = getNext(getNext(fast))
+	}
+
+	// 1 maps to itself, so meeting at 1 means the number is happy.
+	// 1 的后继还是 1，因此在 1 处相遇就说明是快乐数；在其他值相遇则是不含 1 的环。
+	return slow == 1
 }

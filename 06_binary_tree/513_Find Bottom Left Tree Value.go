@@ -73,9 +73,9 @@ Both BFS methods use O(w) auxiliary space; recursive DFS uses O(h). Each is at m
 The tree is unchanged and the integer result uses O(1) space.
 
 练习 / Practice
-本文件只保留中英文题解，不提供实现或函数骨架。优先练习第一种，理解按层覆盖答案的逻辑。
-This file contains explanations only, without implementation or skeleton.
+优先练习第一种，理解按层覆盖答案的逻辑。三种实现按上面的编号顺序写在下方。
 Start with standard BFS and understand per-level answer replacement.
+The three implementations appear below in the order of the numbered methods above.
 */
 
 // 1. 层序遍历：推荐

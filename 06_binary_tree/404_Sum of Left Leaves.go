@@ -78,8 +78,9 @@ Queue BFS takes O(n) time and O(w) auxiliary space. All space bounds are at most
 None modifies the tree; the integer result uses O(1) space.
 
 练习 / Practice
-本文件只保留中英文题解，不提供实现或函数骨架。先理解父节点判断，再自行实现递归和迭代。
-This file contains explanations only, without implementations or skeletons. Understand the parent-side check, then implement recursion and iteration.
+先理解父节点判断，再自行实现递归和两种迭代。三种实现按上面的编号顺序写在下方。
+Understand the parent-side check first, then write the recursion and both iterative forms.
+The three implementations appear below in the order of the numbered methods above.
 */
 
 // 1. 递归法

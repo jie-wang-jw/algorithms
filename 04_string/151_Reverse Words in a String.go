@@ -36,10 +36,20 @@ For n bytes and w words, reverseWords takes O(n) time, O(w) auxiliary
 space for word slices, and O(n) output space. reverseWords2 takes O(n)
 time for normalization and reversals; its []byte(s) copy uses O(n)
 auxiliary space, though the reversal steps alone use O(1). Total space including output is O(n) for both.
+
+补充解法：从右向左扫描单词 / Alternative: Scan Words Right to Left
+reverseWordsBackward 跳过尾部空格，再向左找到一个完整单词，按原字母顺序追加到结果。
+先遇到原字符串靠后的单词，因此单词顺序自然倒转，不需要先反转字母再恢复。
+只在已有结果后添加分隔空格；本题分隔符为普通空格。时间 O(n)，结果缓冲区 O(n)，其他状态 O(1)。
+Skip spaces from the right, locate a complete word, and append its letters in their original order.
+Later words are discovered first, reversing word order without reversing letters.
+Insert a separator only after an existing word. Uses ordinary spaces as specified.
+Time O(n), result buffer O(n), other state O(1).
 */
 
 import "strings"
 
+// 1. strings.Fields 辅助：先切词再反转切片
 func reverseWords(s string) string {
 	// Split keeps empty items for repeated spaces, while Fields removes extra whitespace.
 	// Split 会保留连续空格产生的空字符串；Fields 会自动去掉多余空白。
@@ -68,6 +78,7 @@ func reverseWords(s string) string {
 Example / 示例:
 "the sky" -> "yks eht" -> "sky the"
 */
+// 2. 整体反转再逐词反转：不依赖库函数切词
 func reverseWords2(s string) string {
 	// Go strings are immutable, so convert to []byte for in-place changes.
 	// Go 的 string 不能原地修改，所以先转换成 []byte。
@@ -142,4 +153,52 @@ func reverse(b []byte, left, right int) {
 		left++
 		right--
 	}
+}
+
+// 3. 从右向左扫描单词：单词顺序自然倒转
+func reverseWordsBackward(s string) string {
+	// Builder appends the result without allocating a new string per word.
+	// Builder 逐段追加结果，避免每个单词都创建一个新字符串。
+	var result strings.Builder
+
+	// right scans from the end of the string toward the beginning.
+	// right 从字符串末尾向开头扫描。
+	for right := len(s) - 1; right >= 0; {
+		// Skip the spaces that separate this word from the one already handled.
+		// 跳过当前单词与已处理部分之间的空格。
+		for right >= 0 && s[right] == ' ' {
+			right--
+		}
+
+		// Only spaces were left, so there is no further word to append.
+		// 剩下的全是空格，说明已经没有单词可以追加。
+		if right < 0 {
+			break
+		}
+
+		// left walks past the word until it reaches a space or the string start.
+		// left 一直向左走过整个单词，直到遇到空格或到达字符串开头。
+		left := right
+		for left >= 0 && s[left] != ' ' {
+			left--
+		}
+
+		// Add a separator only when the result already holds a word, so there is no leading space.
+		// 只有结果中已经有单词时才补分隔空格，因此不会产生前导空格。
+		if result.Len() > 0 {
+			result.WriteByte(' ')
+		}
+
+		// left stopped one position before the word, so the word is s[left+1:right+1].
+		// left 停在单词前一个位置，因此单词是 s[left+1:right+1]。
+		// Copying it forward keeps its letters in the original order; only the word order is reversed.
+		// 按原方向复制可以保持单词内部字母不变，只有单词之间的顺序被倒转。
+		result.WriteString(s[left+1 : right+1])
+
+		// Continue from the character before this word.
+		// 从这个单词前面的字符继续扫描。
+		right = left - 1
+	}
+
+	return result.String()
 }

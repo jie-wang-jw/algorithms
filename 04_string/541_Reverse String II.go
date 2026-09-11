@@ -20,6 +20,12 @@ Go 字符串不可修改，需要 []byte 副本；返回字符串也占 O(n)。
 n = len(s). Time O(n), with each character participating in
 at most one block reversal. Auxiliary space O(n) is needed for
 the mutable byte copy; the returned string also takes O(n).
+
+边界条件 / Edge Cases
+步长是 2k，因此 k<=0 时 start 不会前进，循环无法结束。题目保证 k>=1，
+函数仍然先判断 k<=0 并原样返回，避免死循环。
+The loop advances by 2k, so a nonpositive k never moves start and the loop cannot finish.
+The constraints guarantee k >= 1, but the function still returns s unchanged for k <= 0.
 */
 
 /*
@@ -37,6 +43,17 @@ If fewer than k characters remain, I reverse all remaining characters.
 */
 
 func reverseStr(s string, k int) string {
+	/*
+		The step below is 2k, so a nonpositive k would never advance start and would loop forever.
+		下面的步长是 2k，k 不是正数时 start 永远不会前进，会造成死循环。
+
+		k >= 1 由题目保证，这里只是防御性返回原字符串。
+		The constraints guarantee k >= 1; this is only a defensive guard.
+	*/
+	if k <= 0 {
+		return s
+	}
+
 	// bytes allows in-place character swaps.
 	// bytes 允许我们原地交换字符。
 	bytes := []byte(s)
