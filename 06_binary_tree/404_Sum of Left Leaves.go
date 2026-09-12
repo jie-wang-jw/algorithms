@@ -83,7 +83,10 @@ Understand the parent-side check first, then write the recursion and both iterat
 The three implementations appear below in the order of the numbered methods above.
 */
 
-// 1. 递归法
+// 1. Recursion: identify a left leaf from its parent, then always search the right subtree as well.
+// 1. 递归：从父节点判断左孩子是否为叶子，并且右子树也要继续找左叶子。
+// Time: O(n), Space: O(h) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
 func sumOfLeftLeaves(root *TreeNode) int {
 	// An empty tree contributes nothing.
 	// 空树没有左叶子，返回 0。
@@ -112,7 +115,10 @@ func sumOfLeftLeaves(root *TreeNode) int {
 	return leftSum + rightSum
 }
 
-// 2. 栈迭代
+// 2. Iterative DFS: pop a parent, add its left child's value only when that child is a leaf, then push existing children.
+// 2. 栈迭代：弹出父节点后，仅当左孩子是叶子才累加，再把非空孩子入栈。
+// Time: O(n), Space: O(h) for the stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由栈产生。
 func sumOfLeftLeavesIterative(root *TreeNode) int {
 	if root == nil {
 		return 0
@@ -149,7 +155,10 @@ func sumOfLeftLeavesIterative(root *TreeNode) int {
 	return sum
 }
 
-// 3. 队列迭代
+// 3. Breadth-first search: the same parent-side left-leaf check, taking nodes from the queue front.
+// 3. 队列迭代：判断规则与栈版本相同，只是从队首取节点。
+// Time: O(n), Space: O(w) for the queue.
+// 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 func sumOfLeftLeavesBFS(root *TreeNode) int {
 	if root == nil {
 		return 0

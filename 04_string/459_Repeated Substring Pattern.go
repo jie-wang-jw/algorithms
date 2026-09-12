@@ -58,7 +58,10 @@ Check whether the string can be constructed by repeating one of its substrings.
 判断字符串能否由它的某个非空子串重复多次构成。
 */
 
-// Enumeration: try every possible pattern length. / 枚举法：尝试每种可能的重复单元长度。
+// 1. Enumeration: try every possible repeated-unit length that divides n.
+// 1. 枚举法：尝试每种能整除 n 的重复单元长度。
+// Time: O(n²) conservative, Space: O(1).
+// 时间复杂度：保守上界 O(n²)，空间复杂度：O(1)。
 func repeatedSubstringPattern(s string) bool {
 	n := len(s)
 
@@ -99,6 +102,10 @@ func repeatedSubstringPattern(s string) bool {
 If s is made of a repeated substring, s appears inside (s+s) after removing the first and last characters.
 如果 s 由重复子串组成，那么在 (s+s) 去掉首尾字符后，仍然能找到完整的 s。
 */
+// 2. Doubled-string search: s appears inside (s+s) after the first and last characters are removed.
+// 2. 双倍字符串查找：去掉 (s+s) 的首尾后仍能找到 s。
+// Time: O(n²) conservative for naive search, Space: O(n) for the doubled string.
+// 时间复杂度：朴素搜索保守上界 O(n²)，空间复杂度：O(n)，由双倍字符串产生。
 func repeatedSubstringPattern2(s string) bool {
 	// An empty string has no nonempty unit to repeat, and doubled[1:len-1] would be an invalid slice.
 	// 空串没有可重复的非空单元，而且 doubled[1:len-1] 的下标是非法的。
@@ -123,6 +130,10 @@ The longer the equal prefix and suffix, the more the string overlaps with itself
 Pattern length = n - next[n-1]. / 重复单元长度 = n - next[n-1]。
 If n is divisible by that length, the pattern repeats exactly. / 如果 n 能整除该长度，就是重复子串。
 */
+// 3. KMP longest border: the candidate period is n-L and must divide n.
+// 3. KMP 最长相等前后缀：候选周期为 n-L，且必须整除 n。
+// Time: O(n), Space: O(n) for the prefix table.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由前缀表产生。
 func repeatedSubstringPattern3(s string) bool {
 	n := len(s)
 

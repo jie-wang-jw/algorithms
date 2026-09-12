@@ -69,7 +69,10 @@ If the sum is larger than the target, I move the right pointer to decrease the s
 I skip duplicate values for each position to avoid duplicate quadruplets.
 */
 
-// 1. 排序 + 双层循环 + 双指针 + 剪枝：推荐
+// 1. Sort + two nested loops + two pointers + pruning: fix two values, then search the rest from both ends. Recommended.
+// 1. 排序 + 双层循环 + 双指针 + 剪枝：固定前两个数，再在剩余区间用左右指针寻找另外两个数。推荐。
+// Time: O(n³), Space: O(log n+r) including the sort stack and r quadruplets.
+// 时间复杂度：O(n³)，空间复杂度：O(log n+r)，含排序栈与结果。
 func fourSum(nums []int, target int) [][]int {
 	// Sorting is required for directional pointer movement and deduplication.
 	// 排序是双指针定向移动和去重的前提。
@@ -156,7 +159,10 @@ func fourSum(nums []int, target int) [][]int {
 	return res
 }
 
-// 2. 固定两个数 + 哈希：复用两数之和
+// 2. Fix two values + hash: reuse Two Sum by looking up the remaining pair before inserting.
+// 2. 固定两个数 + 哈希：复用两数之和，先查剩余两数再插入。
+// Time: O(n³) expected, Space: O(n+r) auxiliary plus O(r) output.
+// 时间复杂度：期望 O(n³)，空间复杂度：辅助 O(n+r)，结果另占 O(r)。
 func fourSumHash(nums []int, target int) [][]int {
 	// Sorting keeps each answer ascending, which makes it usable as a deduplication key.
 	// 排序让每个答案本身保持升序，可以直接当作去重的 key。

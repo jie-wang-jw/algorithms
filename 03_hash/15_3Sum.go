@@ -61,7 +61,10 @@ I also skip duplicate values to avoid returning the same triplet multiple times.
 跳过重复值，避免返回相同的三元组。
 */
 
-// 1. 排序 + 双指针：推荐
+// 1. Sort + two pointers: fix the first value, then search the rest from both ends. Recommended.
+// 1. 排序 + 双指针：固定第一个数，再在右侧用左右指针寻找另外两个数。推荐。
+// Time: O(n²), Space: O(log n+r) including the sort stack and r triplets.
+// 时间复杂度：O(n²)，空间复杂度：O(log n+r)，含排序栈与结果。
 func threeSum(nums []int) [][]int {
 	// Sorting puts duplicates together and gives pointer movement a direction.
 	// 排序后相同数字会相邻，也方便根据总和大小移动双指针。
@@ -125,7 +128,10 @@ func threeSum(nums []int) [][]int {
 	return res
 }
 
-// 2. 固定一个数 + 哈希：复用两数之和
+// 2. Fix one value + hash: reuse Two Sum by looking up b=-a-c before inserting c.
+// 2. 固定一个数 + 哈希：复用两数之和，先查 b=-a-c 再插入 c。
+// Time: O(n²) expected, Space: O(n+r) auxiliary plus O(r) output.
+// 时间复杂度：期望 O(n²)，空间复杂度：辅助 O(n+r)，结果另占 O(r)。
 func threeSumHash(nums []int) [][]int {
 	// Sorting is not needed to find triplets, but it makes each answer come out in ascending order.
 	// 排序不是找答案的必要条件，但能让每个答案本身保持升序，方便当作去重的 key。

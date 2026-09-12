@@ -42,6 +42,10 @@ If fewer than k characters remain, I reverse all remaining characters.
 如果剩余字符少于 k 个，就把剩余字符全部反转。
 */
 
+// 1. Walk every 2k-byte block and reverse the first min(k, remaining) characters with two pointers.
+// 1. 按 2k 分组，用双指针反转每组前 min(k, 剩余长度) 个字符。
+// Time: O(n), Space: O(n) for the []byte copy.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由 []byte 副本产生。
 func reverseStr(s string, k int) string {
 	/*
 		The step below is 2k, so a nonpositive k would never advance start and would loop forever.

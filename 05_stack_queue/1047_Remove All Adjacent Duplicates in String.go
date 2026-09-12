@@ -71,7 +71,10 @@ The remaining stack forms the final string.
 最后栈中剩余的字符组成最终字符串。
 */
 
-// 1. 字节切片模拟栈：推荐
+// 1. Byte slice as a stack (recommended): pop when the current character equals the top, otherwise push it.
+// 1. 字节切片模拟栈：推荐；当前字符与栈顶相同就弹栈，否则入栈，连锁删除自然完成。
+// Time: O(n), Space: O(n) for the stack, and the result is also at most O(n).
+// 时间复杂度：O(n)，空间复杂度：O(n)，由栈产生，结果最多也是 O(n)。
 func removeDuplicates(s string) string {
 	// stack stores the characters that remain after processing.
 	// stack 保存处理过程中尚未被删除的字符。
@@ -104,7 +107,10 @@ func removeDuplicates(s string) string {
 	return string(stack)
 }
 
-// 2. 快慢指针原地模拟栈：复用字节副本的前部
+// 2. Fast and slow pointers over a byte copy: buffer[:slow] is the stack, so slow is both write position and stack size.
+// 2. 快慢指针原地模拟栈：复用字节副本的前部，buffer[:slow] 就是栈，slow 既是写入位置也是栈长度。
+// Time: O(n), Space: O(n), because []byte(s) copies the immutable string; this is not an O(1) in-place algorithm.
+// 时间复杂度：O(n)，空间复杂度：O(n)，因为 []byte(s) 会复制不可变字符串，所以它不是 O(1) 原地算法。
 func removeDuplicatesTwoPointers(s string) string {
 	// Go strings are immutable, so this conversion copies; the caller's data is never modified.
 	// Go 的字符串不可变，这次转换一定会复制，因此不会修改调用方的数据。

@@ -51,7 +51,10 @@ If I see the same number again, that means we are in a cycle, so it cannot reach
 如果某个中间结果再次出现，说明进入循环，之后不可能到达 1。
 */
 
-// 1. 哈希集合判重
+// 1. Hash set of seen values: a repeated intermediate number means the sequence is cycling.
+// 1. 哈希集合判重：中间结果再次出现即进入循环。
+// Time: O(d) for d decimal digits, Space: O(d) for the hash set.
+// 时间复杂度：O(d)（d 为十进制位数），空间复杂度：O(d)，由哈希集合产生。
 func isHappy(n int) bool {
 	// seen records every intermediate number we have processed.
 	// seen 记录已经处理过的每个中间结果。
@@ -72,7 +75,10 @@ func isHappy(n int) bool {
 	return true
 }
 
-// 各位数字平方和：两种解法共用的变换
+// Digit-square sum: the shared transform used by both solutions.
+// 各位数字平方和：两种解法共用的变换。
+// Time: O(d) for a d-digit argument, Space: O(1).
+// 时间复杂度：O(d)（d 为参数的十进制位数），空间复杂度：O(1)。
 func getNext(n int) int {
 	// sum accumulates the square of every extracted digit.
 	// sum 累加每一位数字的平方。
@@ -94,7 +100,10 @@ func getNext(n int) int {
 	return sum
 }
 
-// 2. 快慢指针判环：不需要哈希集合
+// 2. Floyd's slow and fast pointers: treat getNext as the unique successor; meeting at 1 is happy. No hash set needed.
+// 2. 快慢指针判环：把 getNext 当作唯一后继，相遇在 1 即快乐数；不需要哈希集合。
+// Time: O(d) for d decimal digits, Space: O(1).
+// 时间复杂度：O(d)（d 为十进制位数），空间复杂度：O(1)。
 func isHappyFloyd(n int) bool {
 	// Every number has exactly one successor, so the sequence behaves like a linked list.
 	// 每个数字只有一个后继，因此整条变换序列相当于一个链表。

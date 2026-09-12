@@ -100,7 +100,10 @@ can be processed in the next round.
 	//     4   5     6
 */
 
-// 1. 队列层序：固定 levelSize 分隔相邻两层，推荐
+// 1. Level-by-level queue (recommended): save levelSize before enqueuing children so adjacent levels stay separated.
+// 1. 队列层序：推荐；入队孩子之前先固定 levelSize，用来分隔相邻两层。
+// Time: O(n), Space: O(w) for the queue.
+// 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 func levelOrder(root *TreeNode) [][]int {
 	// An empty tree has no levels.
 	// 空树没有任何层。
@@ -160,7 +163,10 @@ func levelOrder(root *TreeNode) [][]int {
 	return result
 }
 
-// 2. 递归按深度分组：深度就是结果下标
+// 2. Recursion grouped by depth: carry depth as the result index and append a new subarray on first arrival.
+// 2. 递归按深度分组：深度就是结果下标，第一次到达该层时先追加一个空子数组。
+// Time: O(n), Space: O(h) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
 func levelOrderRecursive(root *TreeNode) [][]int {
 	// An empty tree produces no levels, so the empty result is already correct.
 	// 空树没有任何层，空结果就是正确答案。

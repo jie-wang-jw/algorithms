@@ -108,7 +108,10 @@ This moves the new element to the front, making it the new stack top.
 这样新元素就会移动到队首，成为新的栈顶。
 */
 
-// 1. 入栈时旋转：推荐
+// 1. Rotate on Push (recommended): one queue held in stack order, so its front is always the stack top.
+// 1. 入栈时旋转：推荐；单个队列始终按栈序保存元素，队首永远是栈顶。
+// Time: Push O(n), Pop/Top/Empty O(1). Space: O(n).
+// 时间复杂度：Push O(n)，Pop/Top/Empty O(1)。空间复杂度：O(n)。
 type MyStack struct {
 	// queue stores elements in stack order:
 	// front = stack top, back = stack bottom.
@@ -117,16 +120,20 @@ type MyStack struct {
 	queue []int
 }
 
-// StackConstructor creates an empty stack.
-// StackConstructor 创建一个空栈。
+// Create an empty stack backed by one queue already stored in stack order.
+// 创建一个空栈，底层单个队列已按栈序准备好。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func StackConstructor() MyStack {
 	return MyStack{
 		queue: make([]int, 0),
 	}
 }
 
-// Push adds x onto the top of the stack.
-// Push 将 x 压入栈顶。
+// Append x, then rotate every older element behind it so the front becomes the new top.
+// 先把 x 追加到队尾，再把所有旧元素依次转到后面，使队首成为新的栈顶。
+// Time: O(n), Space: O(1) extra.
+// 时间复杂度：O(n)，空间复杂度：额外 O(1)。
 func (s *MyStack) Push(x int) {
 	// Save the number of existing elements.
 	// 保存加入新元素之前的旧元素数量。
@@ -156,8 +163,10 @@ func (s *MyStack) Push(x int) {
 	// 此时，新元素已经位于队首。
 }
 
-// Pop removes and returns the top element.
-// Pop 删除并返回栈顶元素。
+// Pop the queue front, which each Push rotation already made the stack top.
+// 直接弹出队首：入栈时的旋转已经保证队首就是栈顶。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (s *MyStack) Pop() int {
 	// The queue front represents the stack top.
 	// 队首元素就是栈顶元素。
@@ -170,21 +179,28 @@ func (s *MyStack) Pop() int {
 	return top
 }
 
-// Top returns the top element without removing it.
-// Top 返回栈顶元素，但不删除它。
+// Read the queue front without removing it; that front is the stack top.
+// 只读队首、不删除；队首就是栈顶。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (s *MyStack) Top() int {
 	// The queue front always represents the stack top.
 	// 队首元素始终表示栈顶元素。
 	return s.queue[0]
 }
 
-// Empty returns whether the stack contains no elements.
-// Empty 判断栈中是否没有元素。
+// Report emptiness from the queue length alone.
+// 只看队列长度判断栈是否为空。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (s *MyStack) Empty() bool {
 	return len(s.queue) == 0
 }
 
-// 2. 出栈时旋转：把 O(n) 成本推迟到 Pop
+// 2. Rotate on Pop: keep arrival order and defer the O(n) rotation until removal.
+// 2. 出栈时旋转：队列按入栈先后保存，把 O(n) 成本推迟到 Pop。
+// Time: Push amortized O(1), Pop/Top O(n), Empty O(1). Space: O(n).
+// 时间复杂度：Push 均摊 O(1)，Pop/Top O(n)，Empty O(1)。空间复杂度：O(n)。
 type MyStackLazy struct {
 	// queue stores elements in arrival order:
 	// front = oldest = stack bottom, back = newest = stack top.
@@ -196,16 +212,20 @@ type MyStackLazy struct {
 	queue []int
 }
 
-// Push adds x onto the top of the stack.
-// Push 将 x 压入栈顶。
+// Append x at the back; the back is the stack top, so Push does not rotate.
+// 直接追加到队尾：队尾就是栈顶，入栈不必旋转。
+// Time: amortized O(1), Space: O(1) extra.
+// 时间复杂度：均摊 O(1)，空间复杂度：额外 O(1)。
 func (s *MyStackLazy) Push(x int) {
 	// Appending is all that is needed because the back represents the top.
 	// 队尾就代表栈顶，所以只需追加，不必立刻整理顺序。
 	s.queue = append(s.queue, x)
 }
 
-// Pop removes and returns the top element.
-// Pop 删除并返回栈顶元素。
+// Rotate the oldest n-1 elements to the back, then dequeue the newest value at the front.
+// 把前 n-1 个旧元素转到队尾，再从队首弹出最新入栈的值。
+// Time: O(n), Space: O(1) extra.
+// 时间复杂度：O(n)，空间复杂度：额外 O(1)。
 func (s *MyStackLazy) Pop() int {
 	// Rotate every element except the newest one to the back.
 	// 把除最新元素以外的所有元素移动到队尾。
@@ -238,8 +258,10 @@ func (s *MyStackLazy) Pop() int {
 	return value
 }
 
-// Top returns the top element without removing it.
-// Top 返回栈顶元素，但不删除它。
+// Reuse Pop then Push so the newest value is read without accessing the queue back.
+// 复用 Pop 取出栈顶，再用 Push 加回队尾，避免直接读队尾。
+// Time: O(n), Space: O(1) extra.
+// 时间复杂度：O(n)，空间复杂度：额外 O(1)。
 func (s *MyStackLazy) Top() int {
 	// A queue cannot read its back directly, so remove the top the same way Pop does.
 	// 队列接口不能直接读队尾，所以用与 Pop 相同的方式把栈顶取出来。
@@ -252,13 +274,18 @@ func (s *MyStackLazy) Top() int {
 	return value
 }
 
-// Empty returns whether the stack contains no elements.
-// Empty 判断栈中是否没有元素。
+// Report emptiness from the queue length alone.
+// 只看队列长度判断栈是否为空。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (s *MyStackLazy) Empty() bool {
 	return len(s.queue) == 0
 }
 
-// 3. 两个队列：备份队列中转，不在同一个队列里回排
+// 3. Two queues with a backup: transfer all but the newest into a second queue, then swap roles.
+// 3. 两个队列，备份队列中转：把除最新元素以外的全部转移到 backup，再交换角色。
+// Time: Push amortized O(1), Pop/Top O(n), Empty O(1). Space: O(n).
+// 时间复杂度：Push 均摊 O(1)，Pop/Top O(n)，Empty O(1)。空间复杂度：O(n)。
 type MyStackTwoQueues struct {
 	// main holds every element in arrival order:
 	// front = oldest = stack bottom, back = newest = stack top.
@@ -274,16 +301,20 @@ type MyStackTwoQueues struct {
 	// 零值即可使用：两个 nil 切片就是一个空栈，无需构造函数。
 }
 
-// Push adds x onto the top of the stack.
-// Push 将 x 压入栈顶。
+// Append x onto main; its back is the stack top.
+// 把 x 追加到 main 队尾，队尾就是栈顶。
+// Time: amortized O(1), Space: O(1) extra.
+// 时间复杂度：均摊 O(1)，空间复杂度：额外 O(1)。
 func (s *MyStackTwoQueues) Push(x int) {
 	// The back of main represents the top, so appending is enough.
 	// main 的队尾就代表栈顶，所以只需追加。
 	s.main = append(s.main, x)
 }
 
-// Pop removes and returns the top element.
-// Pop 删除并返回栈顶元素。
+// Drain every older element from main into backup, dequeue the leftover top, then swap the two queues.
+// 把旧元素全部转移到 backup，弹出 main 里剩下的栈顶，再交换两个队列的角色。
+// Time: O(n), Space: O(1) extra.
+// 时间复杂度：O(n)，空间复杂度：额外 O(1)。
 func (s *MyStackTwoQueues) Pop() int {
 	// Move everything except the newest element into the backup queue.
 	// 把除最新元素以外的所有元素转移到备份队列。
@@ -308,8 +339,10 @@ func (s *MyStackTwoQueues) Pop() int {
 	return value
 }
 
-// Top returns the top element without removing it.
-// Top 返回栈顶元素，但不删除它。
+// Reuse Pop then Push so the newest value is read without accessing the queue back.
+// 复用 Pop 取出栈顶，再用 Push 加回，避免直接读队尾。
+// Time: O(n), Space: O(1) extra.
+// 时间复杂度：O(n)，空间复杂度：额外 O(1)。
 func (s *MyStackTwoQueues) Top() int {
 	// A queue cannot read its back directly, so take the top out the way Pop does.
 	// 队列接口不能直接读队尾，所以用与 Pop 相同的方式把栈顶取出来。
@@ -322,8 +355,10 @@ func (s *MyStackTwoQueues) Top() int {
 	return value
 }
 
-// Empty returns whether the stack contains no elements.
-// Empty 判断栈中是否没有元素。
+// Report emptiness from main alone, because backup is empty between operations.
+// 两次操作之间 backup 一定为空，所以只看 main 的长度。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (s *MyStackTwoQueues) Empty() bool {
 	// backup is empty between operations, so main's length alone decides.
 	// 两次操作之间 backup 一定为空，因此只看 main 的长度就够了。

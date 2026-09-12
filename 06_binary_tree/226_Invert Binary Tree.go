@@ -72,6 +72,10 @@ The other three DFS versions also take O(n) time and O(h) auxiliary space. Itera
 BFS takes O(n) time and O(w) auxiliary space for maximum width w, even while the queue mixes adjacent levels.
 */
 
+// 1. Preorder recursion (recommended): swap the two child pointers first, then invert each relocated subtree.
+// 1. 前序递归：推荐；先交换左右孩子指针，再分别翻转换位后的两棵子树。
+// Time: O(n), Space: O(h) for the recursion stack; auxiliary space is not O(1).
+// 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生，不能写成 O(1)。
 func invertTree(root *TreeNode) *TreeNode {
 	// An empty subtree is already its own mirror.
 	// 空子树的镜像仍是空子树，也是递归的停止条件。
@@ -100,6 +104,10 @@ func invertTree(root *TreeNode) *TreeNode {
 Mirror both original subtrees internally before exchanging their positions.
 A recursive return means the entire subtree is finished, not just its root.
 */
+// 2. Postorder recursion: invert both child interiors first, then swap their positions.
+// 2. 后序递归：先翻转左右子树内部，再交换它们的位置。
+// Time: O(n), Space: O(h) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
 func invertTreePostorderRecursive(root *TreeNode) *TreeNode {
 	if root == nil {
 		return nil
@@ -123,6 +131,10 @@ Descend into one, then visit the other after popping.
 The stack remembers pending right-subtree work. Do not swap again on pop,
 which would undo the inversion.
 */
+// 3. Iterative preorder: swap on first arrival, push the node, then descend into the swapped left child.
+// 3. 前序迭代：首次到达时交换，压栈后再深入交换后的左子树，出栈后处理另一边。
+// Time: O(n), Space: O(h) for the stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由显式栈产生。
 func invertTreePreorderIterative(root *TreeNode) *TreeNode {
 	stack := []*TreeNode{}
 	node := root
@@ -155,6 +167,10 @@ On pop, the left subtree is complete. Right=nil means no right subtree; Right=pr
 Only then swap this node. Inverting a child subtree preserves its root pointer, so the pointer comparison remains valid.
 Otherwise push the node back to resume after its right subtree. Set node=nil after completion to resume an ancestor instead of descending again.
 */
+// 4. Iterative postorder: swap a node only after both child subtrees are done, using prev as the last finished root.
+// 4. 后序迭代：用 prev 记录最近完成的子树根，左右都完成后才交换当前节点。
+// Time: O(n), Space: O(h) for the stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由显式栈产生。
 func invertTreePostorderIterative(root *TreeNode) *TreeNode {
 	stack := []*TreeNode{}
 	node := root
@@ -193,6 +209,10 @@ Swap each dequeued node once, then enqueue both children. Their order changes, b
 No per-level result is needed, so a saved level length and inner loop are unnecessary.
 Front obtains the queue element, Remove returns its stored value, and .(*TreeNode) asserts that value to the stored node-pointer type.
 */
+// 5. Breadth-first traversal: swap each dequeued node once, then enqueue both children without grouping levels.
+// 5. 层序遍历：每个节点出队时交换一次，再将两个孩子入队，不必按层分组。
+// Time: O(n), Space: O(w) for the queue.
+// 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 func invertTreeLevelOrder(root *TreeNode) *TreeNode {
 	if root == nil {
 		return nil

@@ -78,7 +78,10 @@ The time complexity is \(O(n)\), and the space complexity is \(O(n)\).
 时间复杂度是 \(O(n)\)，空间复杂度是 \(O(n)\)。
 */
 
-// 1. 栈保存期待的右括号：直接比较
+// 1. Stack of expected closing brackets: push the closer an opening bracket demands, then compare bytes directly.
+// 1. 栈保存期待的右括号：直接比较；入栈时换成对应的右括号，之后只做一次字节相等判断。
+// Time: O(n), Space: O(n) for the stack.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由栈产生。
 func isValid(s string) bool {
 	// A valid bracket string must have an even number of characters.
 	// 有效括号字符串的字符数量一定是偶数。
@@ -134,7 +137,10 @@ func isValid(s string) bool {
 	return len(stack) == 0
 }
 
-// 2. 哈希表映射：压入左括号本身
+// 2. Hash map lookup: push opening brackets unchanged, and map each closing bracket back to the opener it expects.
+// 2. 哈希表映射：压入左括号本身，闭括号时用映射表换回它期待的左括号。
+// Time: O(n) average, Space: O(n) for the stack plus O(1) for the three-entry table.
+// 时间复杂度：平均 O(n)，空间复杂度：O(n)，由栈产生，外加三条映射表的 O(1)。
 func isValidWithMap(s string) bool {
 	// A valid bracket string must have an even number of characters.
 	// 有效括号字符串的字符数量一定是偶数。

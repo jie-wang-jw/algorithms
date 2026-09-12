@@ -127,44 +127,47 @@ auxiliary space O(m).
 The problem guarantees a unique answer set, not a fixed order, so differing arrangements of ties are not errors.
 */
 
-// 1. 大小为 k 的小顶堆：推荐
-
-// frequencyHeap is a min-heap ordered by frequency.
-// frequencyHeap 是按频率维护父子大小关系的小顶堆，不是完全有序的切片。
-//
-// Each item stores [number, frequency].
-// 每个元素保存 [数字, 出现频率]。
+// frequencyHeap is a min-heap of [number, frequency] pairs ordered by frequency, not a fully sorted slice.
+// frequencyHeap 是按频率维护父子大小关系的小顶堆，保存 [数字, 出现频率]，不是完全有序的切片。
 type frequencyHeap [][2]int
 
-// Len returns the number of elements in the heap.
-// Len 返回堆中的元素数量。
+// Report the heap size so container/heap can locate the last slot.
+// 返回堆中的元素数量，供 container/heap 定位末尾位置。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (h frequencyHeap) Len() int {
 	return len(h)
 }
 
-// Less places the lower-frequency element closer to the root.
-// Less 让出现频率较低的元素更接近堆顶。
+// Compare frequencies only so the lower one sits closer to the root, forming a min-heap.
+// 只比较出现频率，让较低频率更接近堆顶，从而形成小顶堆。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (h frequencyHeap) Less(i, j int) bool {
 	return h[i][1] < h[j][1]
 }
 
-// Swap exchanges two heap elements.
-// Swap 交换堆中的两个元素。
+// Exchange two heap slots while container/heap sifts.
+// 在上浮和下沉过程中交换堆中的两个元素。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (h frequencyHeap) Swap(i, j int) {
 	h[i], h[j] = h[j], h[i]
 }
 
-// Push adds a new element to the end of the underlying slice.
-// Push 将新元素加入底层切片末尾。
+// Append the new pair to the backing slice; heap.Push then sifts it up with Less and Swap.
+// 把新元素追加到底层切片末尾；heap.Push 随后用 Less 和 Swap 上浮。
+// Time: amortized O(1) for the append. Space: O(1) extra.
+// 时间复杂度：追加均摊 O(1)。空间复杂度：额外 O(1)。
 func (h *frequencyHeap) Push(value any) {
 	item := value.([2]int)
 	*h = append(*h, item)
 }
 
-// Pop removes and returns the last element of the underlying slice.
-// container/heap moves the root to the end before calling this method.
-// Pop 删除并返回底层切片末尾的元素。
-// container/heap 调用此方法前，会先把原堆顶移动到切片末尾。
+// Remove the last backing-slice element after container/heap has already moved the root there.
+// 删除底层切片末尾元素；container/heap 调用前已把原堆顶移到末尾。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (h *frequencyHeap) Pop() any {
 	oldHeap := *h
 	lastIndex := len(oldHeap) - 1
@@ -180,6 +183,10 @@ func (h *frequencyHeap) Pop() any {
 	return item
 }
 
+// 1. Min-heap of size k (recommended): count frequencies, then evict the least frequent root whenever the heap exceeds k.
+// 1. 大小为 k 的小顶堆：推荐；先统计频次，堆超过 k 就删除频率最低的堆顶。
+// Time: O(n + m log(k+1)) average, Space: O(m+k) for the map and the heap.
+// 时间复杂度：平均 O(n + m log(k+1))，空间复杂度：O(m+k)，由频次表和堆产生。
 func topKFrequent(nums []int, k int) []int {
 	// frequency maps each number to its occurrence count.
 	// frequency 记录每个数字的出现次数。
@@ -224,7 +231,10 @@ func topKFrequent(nums []int, k int) []int {
 	return result
 }
 
-// 2. 全排序取前 k 个：最直观的基线
+// 2. Sort all distinct values: count frequencies, sort the m values by descending frequency, then take the first k.
+// 2. 全排序取前 k 个：统计频次后按频次降序排序，直接取前 k 个。
+// Time: O(n + m log(m+1)) average, Space: O(m).
+// 时间复杂度：平均 O(n + m log(m+1))，空间复杂度：O(m)。
 func topKFrequentSorted(nums []int, k int) []int {
 	// counts maps each number to its occurrence count.
 	// counts 记录每个数字的出现次数。
@@ -251,7 +261,10 @@ func topKFrequentSorted(nums []int, k int) []int {
 	return append([]int(nil), values[:k]...)
 }
 
-// 3. 桶排序按频次分桶：不需要比较排序
+// 3. Bucket sort by frequency: put each value in buckets[count], then scan from n downward until k values are collected.
+// 3. 桶排序按频次分桶：buckets[count] 保存出现 count 次的值，从 n 向下扫描直到凑满 k 个。
+// Time: O(n+m) average, Space: O(n+m) because the bucket array always occupies n+1 slots.
+// 时间复杂度：平均 O(n+m)，空间复杂度：O(n+m)，桶数组固定占 n+1 个槽位。
 func topKFrequentBucket(nums []int, k int) []int {
 	// counts maps each number to its occurrence count.
 	// counts 记录每个数字的出现次数。
@@ -291,7 +304,10 @@ func topKFrequentBucket(nums []int, k int) []int {
 	return result
 }
 
-// 4. 三路划分快速选择：只让第 k-1 名就位
+// 4. Quickselect with three-way partition: partition until rank k-1 sits in the equal-frequency band.
+// 4. 三路划分快速选择：只划分到第 k-1 名落入等频段为止，不做完整排序。
+// Time: O(n+m) expected, O(n+m²) worst case. Space: O(m).
+// 时间复杂度：随机化后期望 O(n+m)，最坏 O(n+m²)。空间复杂度：O(m)。
 func topKFrequentQuickselect(nums []int, k int) []int {
 	// counts maps each number to its occurrence count.
 	// counts 记录每个数字的出现次数。

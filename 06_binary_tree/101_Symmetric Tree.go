@@ -114,7 +114,10 @@ Master the paired definition of mirror(left,right) first, then rewrite it iterat
 The three implementations appear below in the order of the numbered methods above.
 */
 
-// 1. 递归：交叉比较外侧与内侧，推荐
+// 1. Recursively compare mirrored positions (recommended): start from the two children and cross outer with inner.
+// 1. 递归比较镜像位置：推荐；从根的两个孩子出发，交叉比较外侧与内侧。
+// Time: O(n), Space: O(h) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
 func isSymmetric(root *TreeNode) bool {
 	// An empty tree is symmetric.
 	// 空树是对称的。
@@ -127,6 +130,10 @@ func isSymmetric(root *TreeNode) bool {
 	return isMirror(root.Left, root.Right)
 }
 
+// Compare mirrored positions by pairing outer children and inner children, not the same directions.
+// 交叉比较镜像位置：外侧 left.Left 对 right.Right，内侧 left.Right 对 right.Left，而不是同方向比较。
+// Time: O(n), Space: O(h).
+// 时间复杂度：O(n)，空间复杂度：O(h)。
 func isMirror(left, right *TreeNode) bool {
 	// Both mirrored positions are empty, so they match.
 	// 两个对应位置都没有节点，匹配成功。
@@ -152,7 +159,10 @@ func isMirror(left, right *TreeNode) bool {
 		isMirror(left.Right, right.Left)
 }
 
-// 2. 队列迭代：成对入队、成对出队
+// 2. Iterative queue: store mirrored positions as adjacent pairs and dequeue two nodes each round.
+// 2. 队列迭代：成对入队、成对出队，每轮取出相邻两个节点作为一对镜像位置。
+// Time: O(n), Space: O(w) for the queue.
+// 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 func isSymmetricIterative(root *TreeNode) bool {
 	// Consecutive nodes form pairs of mirrored positions.
 	// 队列中相邻的两个节点组成一对镜像位置。
@@ -192,7 +202,10 @@ func isSymmetricIterative(root *TreeNode) bool {
 	return true
 }
 
-// 3. 栈迭代：把队列换成栈，配对规则不变
+// 3. Iterative stack: keep the same pair rule, but the top is the later-pushed right-side candidate.
+// 3. 栈迭代：配对规则不变，但栈顶是后压入的右侧候选，下面一个才是左侧候选。
+// Time: O(n), Space: O(h) for the stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由栈产生。
 func isSymmetricStack(root *TreeNode) bool {
 	// The root lies on the axis, so start from its two children as one pair.
 	// 根位于中心轴上，因此直接把它的两个孩子作为第一对入栈。

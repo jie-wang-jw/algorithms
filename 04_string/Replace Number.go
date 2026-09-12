@@ -36,7 +36,10 @@ import (
 	"strings"
 )
 
-// 1. 从左向右用 Builder 构造结果
+// 1. Scan left to right and build the result with strings.Builder.
+// 1. 从左向右用 Builder 构造结果。
+// Time: O(n), Space: O(n) for the Builder buffer.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由 Builder 缓冲区产生。
 func replaceNumber(s string) string {
 	// Builder appends output efficiently without repeatedly creating new strings.
 	// Builder 可以高效追加内容，避免反复创建新的字符串。
@@ -65,7 +68,10 @@ func replaceNumber(s string) string {
 	return builder.String()
 }
 
-// 2. 先扩容再从后向前填充
+// 2. Expand first, then fill from the back: write "number" backward so it reads forward.
+// 2. 先扩容再从后向前填充：逆序写入 "number"，读出来才是正序。
+// Time: O(n), Space: O(n) for the expanded buffer.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由扩容缓冲区产生。
 func replaceNumberBackward(s string) string {
 	// Count the digits first so the final length is known before any writing.
 	// 先统计数字个数，这样在写入之前就能知道结果的最终长度。

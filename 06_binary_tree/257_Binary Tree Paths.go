@@ -82,7 +82,10 @@ import (
 	"strings"
 )
 
-// 1. 递归传递字符串：最容易理解  T:O(nh) S:O(h²)
+// 1. Recursion with a path string: append the current value onto an immutable prefix; each call owns its own string.
+// 1. 递归传递路径字符串：把当前值拼到不可变前缀上，每次调用拥有自己的字符串。
+// Time: O(nh), Space: O(h²) auxiliary for retained prefixes plus O(S) output, where S is the total output character count.
+// 时间复杂度：O(nh)，空间复杂度：辅助 O(h²)，由各层同时保留的路径前缀产生，输出另占 O(S)，S 为所有路径字符串的总字符数。
 func binaryTreePaths(root *TreeNode) []string {
 	result := []string{}
 
@@ -116,7 +119,10 @@ func binaryTreePaths(root *TreeNode) []string {
 	return result
 }
 
-// 2. 共享切片回溯：显式“加入、撤销” T:O(n+S) S:O(h)
+// 2. Backtracking with a shared path slice: append on entry, join at a leaf, then undo the last value before returning.
+// 2. 共享切片回溯：进入时加入，叶子处拼接结果，返回前撤销最后一个值。
+// Time: O(n+S), Space: O(h) auxiliary plus O(S) output, where S is the total output character count.
+// 时间复杂度：O(n+S)，空间复杂度：辅助 O(h)，输出另占 O(S)，S 为所有路径字符串的总字符数。
 func binaryTreePathsBacktracking(root *TreeNode) []string {
 	result := []string{}
 	path := []string{}
@@ -149,7 +155,10 @@ func binaryTreePathsBacktracking(root *TreeNode) []string {
 	return result
 }
 
-// 3. 栈迭代 T:O(nh) S:O(h²)
+// 3. Iterative DFS: keep synchronized node and path-string stacks so each pending node carries its full root-to-node path.
+// 3. 栈迭代：节点栈与路径字符串栈同步，每个待处理节点带着从根到它自己的完整路径。
+// Time: O(nh), Space: O(h²) auxiliary plus O(S) output, where S is the total output character count.
+// 时间复杂度：O(nh)，空间复杂度：辅助 O(h²)，输出另占 O(S)，S 为所有路径字符串的总字符数。
 func binaryTreePathsIterative(root *TreeNode) []string {
 	result := []string{}
 	if root == nil {

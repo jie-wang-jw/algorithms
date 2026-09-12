@@ -49,7 +49,10 @@ Time O(n), result buffer O(n), other state O(1).
 
 import "strings"
 
-// 1. strings.Fields 辅助：先切词再反转切片
+// 1. strings.Fields helper: split into words, then reverse the slice.
+// 1. strings.Fields 辅助：先切词再反转切片。
+// Time: O(n), Space: O(w) for the word slice plus O(n) output.
+// 时间复杂度：O(n)，空间复杂度：单词切片 O(w)，输出 O(n)。
 func reverseWords(s string) string {
 	// Split keeps empty items for repeated spaces, while Fields removes extra whitespace.
 	// Split 会保留连续空格产生的空字符串；Fields 会自动去掉多余空白。
@@ -78,7 +81,10 @@ func reverseWords(s string) string {
 Example / 示例:
 "the sky" -> "yks eht" -> "sky the"
 */
-// 2. 整体反转再逐词反转：不依赖库函数切词
+// 2. Reverse the whole string, then reverse each word: no library split.
+// 2. 整体反转再逐词反转：不依赖库函数切词。
+// Time: O(n), Space: O(n) for the []byte copy.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由 []byte(s) 副本产生。
 func reverseWords2(s string) string {
 	// Go strings are immutable, so convert to []byte for in-place changes.
 	// Go 的 string 不能原地修改，所以先转换成 []byte。
@@ -112,6 +118,10 @@ func reverseWords2(s string) string {
 2. Remove trailing spaces. / 去掉结尾空格。
 3. Keep exactly one space between words. / 单词之间只保留一个空格。
 */
+// Collapse extra spaces in place: one separator before every non-first word.
+// 原地清空格：仅在非首单词前补一个分隔空格。
+// Time: O(n), Space: O(1).
+// 时间复杂度：O(n)，空间复杂度：O(1)。
 func removeExtraSpaces(b []byte) []byte {
 	// slow is the next write position in the cleaned result.
 	// slow 是清理后结果的下一个写入位置。
@@ -147,6 +157,8 @@ func removeExtraSpaces(b []byte) []byte {
 
 // Reverse the inclusive range [left, right] in place.
 // 原地反转闭区间 [left, right]。
+// Time: O(right-left+1), Space: O(1).
+// 时间复杂度：O(right-left+1)，空间复杂度：O(1)。
 func reverse(b []byte, left, right int) {
 	for left < right {
 		b[left], b[right] = b[right], b[left]
@@ -155,7 +167,10 @@ func reverse(b []byte, left, right int) {
 	}
 }
 
-// 3. 从右向左扫描单词：单词顺序自然倒转
+// 3. Scan words from right to left: later words are appended first, so order reverses naturally.
+// 3. 从右向左扫描单词：单词顺序自然倒转。
+// Time: O(n), Space: O(n) for the result buffer.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由结果缓冲区产生。
 func reverseWordsBackward(s string) string {
 	// Builder appends the result without allocating a new string per word.
 	// Builder 逐段追加结果，避免每个单词都创建一个新字符串。

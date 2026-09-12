@@ -87,7 +87,10 @@ The only value remaining in the stack is the final answer.
 最后栈中唯一剩余的数字就是最终答案。
 */
 
-// 1. 显式栈从前向后求值：推荐
+// 1. Explicit stack, forward scan (recommended): push numbers, and each operator pops the right operand then the left.
+// 1. 显式栈从前向后求值：推荐；数字入栈，遇到运算符先弹出右操作数再弹出左操作数。
+// Time: O(n), Space: O(n) for the operand stack.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由操作数栈产生。
 func evalRPN(tokens []string) int {
 	// Each binary operator reduces the stack size by one; one final value means operands=operators+1.
 	// Thus (len(tokens)+1)/2 is the exact numeric-token count and an upper bound on stack size.
@@ -140,7 +143,10 @@ func evalRPN(tokens []string) int {
 	return stack[0]
 }
 
-// 2. 从后向前递归求值：用调用栈代替显式栈
+// 2. Recursive reverse parsing: use the call stack instead of an explicit stack, parsing the right subexpression first.
+// 2. 从后向前递归求值：用调用栈代替显式栈，先递归右子表达式再递归左子表达式。
+// Time: O(n), Space: O(d) for the recursion stack, where d is the nesting depth, worst case O(n).
+// 时间复杂度：O(n)，空间复杂度：O(d)，由递归调用栈产生，d 为表达式嵌套深度，最坏 O(n)。
 func evalRPNRecursive(tokens []string) int {
 	// index is the shared cursor; it starts at the last token and only ever moves left.
 	// index 是共享游标，从最后一个 token 开始，且只向左移动。

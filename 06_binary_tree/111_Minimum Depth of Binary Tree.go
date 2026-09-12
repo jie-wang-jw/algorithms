@@ -73,7 +73,10 @@ Settle the question of why max cannot simply become min, then write both version
 The two implementations appear below in the order of the numbered methods above.
 */
 
-// 1. 递归：先排除缺失的一边
+// 1. Recursion (recommended): skip a missing child so min cannot treat a nil pointer as a finished leaf path.
+// 1. 递归：推荐；先排除缺失的一边，避免 min 把空指针当成已经到达叶子。
+// Time: O(n), Space: O(h) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
 func minDepth(root *TreeNode) int {
 	// An empty tree has depth 0.
 	// 空树深度为 0。
@@ -103,7 +106,10 @@ func minDepth(root *TreeNode) int {
 	return min(leftDepth, rightDepth) + 1
 }
 
-// 2. 层序遍历：第一个叶子就是最近叶子
+// 2. Breadth-first search: return the current depth at the first node whose both children are nil.
+// 2. 层序遍历：第一次遇到左右孩子都为空的节点，当前层数就是最小深度。
+// Time: O(n), Space: O(w) for the queue.
+// 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 func minDepthIterative(root *TreeNode) int {
 	// An empty tree has depth 0.
 	// 空树深度为 0。

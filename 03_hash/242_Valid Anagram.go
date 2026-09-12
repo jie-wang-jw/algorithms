@@ -45,7 +45,10 @@ If the two strings are anagrams, all counts should become zero.
 如果两个字符串是字母异位词，最后每个字符的计数都应该回到 0。
 */
 
-// 1. 固定 26 计数数组：分两次遍历
+// 1. Fixed 26-slot frequency array: count s, then decrement with t.
+// 1. 固定 26 计数数组：分两次遍历。
+// Time: O(n+m), Space: O(1).
+// 时间复杂度：O(n+m)，空间复杂度：O(1)。
 func isAnagram1(s string, t string) bool {
 	/*
 		Different lengths cannot contain exactly the same characters.
@@ -73,7 +76,10 @@ func isAnagram1(s string, t string) bool {
 	return record == [26]int{}
 }
 
-// 2. 固定 26 计数数组：一次遍历同时加减
+// 2. Fixed 26-slot frequency array: increment s and decrement t in one pass.
+// 2. 固定 26 计数数组：一次遍历同时加减。
+// Time: O(n+m), Space: O(1).
+// 时间复杂度：O(n+m)，空间复杂度：O(1)。
 func isAnagram2(s string, t string) bool {
 	// This version updates counts for s and t in the same loop.
 	// 这个版本在同一个循环中同时更新 s 和 t 的计数。
@@ -101,7 +107,10 @@ func isAnagram2(s string, t string) bool {
 	return true
 }
 
-// 3. 排序后比较：字符集不受 26 个字母限制
+// 3. Sort then compare: the character set is not limited to 26 letters.
+// 3. 排序后比较：字符集不受 26 个字母限制。
+// Time: O(n log n), Space: O(n).
+// 时间复杂度：O(n log n)，空间复杂度：O(n)。
 func isAnagramSorted(s, t string) bool {
 	// Different lengths cannot hold the same multiset of characters.
 	// 长度不同，就不可能是同一个字符多重集合。
@@ -127,7 +136,10 @@ func isAnagramSorted(s, t string) bool {
 	return string(a) == string(b)
 }
 
-// 4. rune 频次表：按 Unicode 码点统计
+// 4. Rune frequency map: count by Unicode code point.
+// 4. rune 频次表：按 Unicode 码点统计。
+// Time: O(n+m) expected, Space: O(u) for distinct code points.
+// 时间复杂度：期望 O(n+m)，空间复杂度：O(u)，u 为不同码点数。
 func isAnagramUnicode(s, t string) bool {
 	// Key: one Unicode code point; value: its signed count difference.
 	// key 是一个 Unicode 码点，value 是它在两个字符串中的计数差。

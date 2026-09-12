@@ -27,9 +27,10 @@ code points, such as a base letter plus a combining accent, is still split apart
 For n bytes and u code points: time O(n), auxiliary space O(u) for the rune slice, plus O(n) output.
 */
 
-// 1. 字节双指针原地交换：推荐
-// Reverse the byte slice in place with two pointers.
-// 使用左右双指针原地反转字节切片。
+// 1. Two-pointer in-place byte swap: exchange from both ends until the pointers meet. Recommended.
+// 1. 字节双指针原地交换：从两端向中间交换，直到指针相遇。推荐。
+// Time: O(n), Space: O(1).
+// 时间复杂度：O(n)，空间复杂度：O(1)。
 func reverseString(s []byte) {
 	// left starts at the first character and right starts at the last character.
 	// left 从第一个字符开始，right 从最后一个字符开始。
@@ -48,7 +49,10 @@ func reverseString(s []byte) {
 	}
 }
 
-// 2. rune 双指针：多字节字符不会被拆坏
+// 2. Two-pointer rune swap: multi-byte characters stay intact.
+// 2. rune 双指针：多字节字符不会被拆坏。
+// Time: O(n), Space: O(u) for the rune slice plus O(n) output.
+// 时间复杂度：O(n)，空间复杂度：rune 切片 O(u)，输出另占 O(n)。
 func reverseStringUnicode(s string) string {
 	// []rune(s) decodes UTF-8, so every element is one complete code point instead of one byte.
 	// []rune(s) 会解码 UTF-8，因此每个元素都是一个完整码点，而不是一个字节。

@@ -151,7 +151,10 @@ Before adding a new index, I remove expired indices from the front and remove sm
 Therefore,the front of the deque always represents the maximum value in the current window.
 */
 
-// 1. 单调递减队列：推荐
+// 1. Monotonic decreasing deque (recommended): drop expired fronts and weaker backs so the front is the window max.
+// 1. 单调递减队列：推荐；删除过期队首和不大于当前值的队尾，队首始终是窗口最大值。
+// Time: O(n), Space: O(k) for the deque plus O(n-k+1) output.
+// 时间复杂度：O(n)，空间复杂度：队列 O(k)，输出 O(n-k+1)。
 func maxSlidingWindow(nums []int, k int) []int {
 	// deque stores indices instead of values.
 	// deque 保存数组下标，而不是直接保存数字。
@@ -202,7 +205,10 @@ func maxSlidingWindow(nums []int, k int) []int {
 	return result
 }
 
-// 2. 逐窗口暴力扫描：理解单调队列价值的基线
+// 2. Brute force per window: rescan each [left, left+k-1] without reusing the previous window.
+// 2. 逐窗口暴力扫描：每个窗口重新扫描 k 个元素，不复用上一窗口的信息。
+// Time: O((n-k+1)k), Space: O(1) auxiliary plus O(n-k+1) output.
+// 时间复杂度：O((n-k+1)k)，空间复杂度：辅助 O(1)，输出 O(n-k+1)。
 func maxSlidingWindowBruteForce(nums []int, k int) []int {
 	// There are len(nums)-k+1 complete windows.
 	// 一共有 len(nums)-k+1 个完整窗口。
@@ -227,51 +233,50 @@ func maxSlidingWindowBruteForce(nums []int, k int) []int {
 	return result
 }
 
-// 3. 惰性删除的大顶堆：只在堆顶过期时弹出
-
-// windowMaxHeap is a max-heap ordered by value, not a fully sorted slice.
-// windowMaxHeap 是按数值维护父子大小关系的大顶堆，不是完全有序的切片。
-//
-// Each pair stores a value and its original index.
-// 每一项保存数值及其原始下标。
+// windowMaxHeap is a max-heap of [value, index] pairs ordered by value, not a fully sorted slice.
+// windowMaxHeap 是按数值维护父子大小关系的大顶堆，保存 [值, 下标]，不是完全有序的切片。
 type windowMaxHeap [][2]int
 
-// Len reports the heap size, which container/heap uses to locate the last slot.
-// Len 返回堆中的元素数量，container/heap 借它定位末尾位置。
+// Report the heap size so container/heap can locate the last slot.
+// 返回堆中的元素数量，供 container/heap 定位末尾位置。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (h windowMaxHeap) Len() int {
 	return len(h)
 }
 
-// Less places the larger value closer to the root, making this a max-heap.
-// Less 让数值较大的元素更接近堆顶，因此这是一个大顶堆。
+// Compare values only so the larger one sits closer to the root, forming a max-heap.
+// 只比较数值，让较大值更接近堆顶，从而形成大顶堆。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (h windowMaxHeap) Less(i, j int) bool {
 	// Only the value is compared; equal values may sit in either order.
 	// 只比较数值，数值相等时两者先后顺序不确定。
 	return h[i][0] > h[j][0]
 }
 
-// Swap exchanges two heap elements; container/heap calls it while sifting.
-// Swap 交换堆中的两个元素；container/heap 在上浮和下沉时调用它。
+// Exchange two heap slots while container/heap sifts.
+// 在上浮和下沉过程中交换堆中的两个元素。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (h windowMaxHeap) Swap(i, j int) {
 	h[i], h[j] = h[j], h[i]
 }
 
-// Push adds a new element to the end of the underlying slice.
-// heap.Push calls this first, then sifts the new element up using Less and Swap.
-// Push 将新元素加入底层切片末尾。
-// heap.Push 先调用它追加元素，再用 Less 和 Swap 把该元素上浮到正确位置。
+// Append the new pair to the backing slice; heap.Push then sifts it up with Less and Swap.
+// 把新元素追加到底层切片末尾；heap.Push 随后用 Less 和 Swap 上浮。
+// Time: amortized O(1) for the append. Space: O(1) extra.
+// 时间复杂度：追加均摊 O(1)。空间复杂度：额外 O(1)。
 func (h *windowMaxHeap) Push(x any) {
 	// The pointer receiver is required because appending may reallocate the slice.
 	// 必须使用指针接收者，因为 append 可能重新分配底层数组。
 	*h = append(*h, x.([2]int))
 }
 
-// Pop removes and returns the last element of the underlying slice.
-// container/heap moves the root to the end and repairs the rest before calling this method,
-// so Pop never needs to search for the maximum itself.
-// Pop 删除并返回底层切片末尾的元素。
-// container/heap 调用它之前，会先把原堆顶移到切片末尾并调整剩余部分，
-// 所以 Pop 自己不需要去寻找最大值。
+// Remove the last backing-slice element after container/heap has already moved the root there.
+// 删除底层切片末尾元素；container/heap 调用前已把原堆顶移到末尾并修好剩余堆。
+// Time: O(1), Space: O(1).
+// 时间复杂度：O(1)，空间复杂度：O(1)。
 func (h *windowMaxHeap) Pop() any {
 	old := *h
 	last := len(old) - 1
@@ -287,6 +292,10 @@ func (h *windowMaxHeap) Pop() any {
 	return value
 }
 
+// 3. Max-heap with lazy deletion: insert each index, then pop expired roots only; auxiliary space is O(n), not O(k).
+// 3. 惰性删除的大顶堆：每轮插入当前下标，只弹出过期堆顶；辅助空间是 O(n) 而不是 O(k)。
+// Time: O(n log n), Space: O(n) for the heap because lazy deletion can retain expired entries.
+// 时间复杂度：O(n log n)，空间复杂度：O(n)，由堆产生，因为惰性删除让堆规模由 n 而不是 k 决定。
 func maxSlidingWindowHeap(nums []int, k int) []int {
 	// An empty literal is already a valid heap, so heap.Init is unnecessary.
 	// 空字面量本身就是合法的堆，因此不需要调用 heap.Init。
@@ -322,7 +331,10 @@ func maxSlidingWindowHeap(nums []int, k int) []int {
 	return result
 }
 
-// 4. 分块预处理前后缀最大值：用两次线性扫描代替队列
+// 4. Block prefix and suffix maxima: a length-k window spans at most two blocks, so max(suffix[left], prefix[right]) is the answer.
+// 4. 分块预处理前后缀最大值：长度 k 的窗口最多跨两块，因此 max(suffix[left], prefix[right]) 就是窗口最大值。
+// Time: O(n), Space: O(n) for the prefix and suffix arrays.
+// 时间复杂度：O(n)，空间复杂度：O(n)，由前后缀数组产生。
 func maxSlidingWindowBlocks(nums []int, k int) []int {
 	// prefix[i] is the maximum from the start of i's block through i.
 	// suffix[i] is the maximum from i through the end of i's block.

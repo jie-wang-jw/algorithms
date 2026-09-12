@@ -93,8 +93,11 @@ Practice identifying the root and the four child ranges first,
 then read buildTreePostOrder and buildTreePostOrderOptimized below.
 */
 
-// 1. 递归切片：先理解这一版
 // 中序与后序排列虽然不同，但同一棵左子树的节点数量一定相同，所以可以用中序得到的 k 去切后序。
+// 1. Linear root lookup and slice splitting: take the last postorder value as root, then use its inorder index k to split both arrays.
+// 1. 递归切片：先理解这一版；后序末尾是根，用中序位置 k 同时切开两组遍历。
+// Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
+// 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
 func buildTreePostOrder(inorder []int, postorder []int) *TreeNode {
 	// An empty traversal represents an empty subtree.
 	// 遍历为空，说明这棵子树不存在。
@@ -128,8 +131,11 @@ func buildTreePostOrder(inorder []int, postorder []int) *TreeNode {
 	return root
 }
 
-// 2. 哈希表 + 区间递归：优化查找
 // 后序末尾找根 → 中序定位根 → 算左子树数量 → 用这个数量切后序 → 递归构造并连接。
+// 2. Index map and ranges (recommended): locate the root in average O(1), then split half-open intervals by leftSize = k-inLeft.
+// 2. 哈希表 + 区间递归：优化查找；平均 O(1) 定位根，再用 leftSize = k-inLeft 切分左闭右开区间。
+// Time: O(n) expected, Space: O(n+h) = O(n) for the map and the recursion stack.
+// 时间复杂度：平均 O(n)，空间复杂度：O(n+h)=O(n)，由索引表和递归栈产生。
 func buildTreePostOrderOptimized(inorder []int, postorder []int) *TreeNode {
 	// Unique values map to unique inorder positions.
 	// 节点值互不相同，每个值对应唯一的中序位置。
@@ -252,8 +258,11 @@ The two 105 implementations follow this section as buildTreePreorder and buildTr
 while the 106 implementations remain in the first half of the file.
 */
 
-// 1. 递归切片
 // 前序第一个值确定根，中序根左侧的节点数，决定前序中左子树占多少个位置。
+// 1. Linear lookup and slice splitting: take preorder[0] as root, then use its inorder index k as the left-subtree size.
+// 1. 递归切片：前序第一个值是根，用中序位置 k 作为左子树节点数去切前序。
+// Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
+// 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
 func buildTreePreorder(preorder []int, inorder []int) *TreeNode {
 	// Empty traversals represent an empty subtree.
 	// 遍历为空，说明当前子树不存在。
@@ -292,7 +301,10 @@ func buildTreePreorder(preorder []int, inorder []int) *TreeNode {
 	return root
 }
 
-// 2. 哈希表 + 区间递归
+// 2. Index map and ranges: the root is preorder[preLeft]; skip it and take leftSize = k-inLeft preorder elements.
+// 2. 哈希表 + 区间递归：根是 preorder[preLeft]，跳过它再取 leftSize = k-inLeft 个前序元素。
+// Time: O(n) expected, Space: O(n+h) = O(n) for the map and the recursion stack.
+// 时间复杂度：平均 O(n)，空间复杂度：O(n+h)=O(n)，由索引表和递归栈产生。
 func buildTreePreorderOptimized(preorder []int, inorder []int) *TreeNode {
 	// Map each unique value to its inorder index.
 	// 保存每个节点值对应的中序下标，避免重复扫描。

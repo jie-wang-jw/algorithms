@@ -51,7 +51,10 @@ The frequency in the map tells me how many valid tuples we can form.
 哈希表中的频次表示当前组合能够配出多少个有效四元组。
 */
 
-// 1. 分组哈希：前两数和存 map，推荐
+// 1. Split-group hashing: store every A+B sum in a map, then look up -(C+D). Recommended.
+// 1. 分组哈希：前两数和存 map，再查找后两数和的相反数。推荐。
+// Time: O(n²) expected, Space: O(n²) for the pair-sum map.
+// 时间复杂度：期望 O(n²)，空间复杂度：O(n²)，由两数和哈希表产生。
 func fourSumCount(A []int, B []int, C []int, D []int) int {
 	// Key: a + b; value: how many index pairs produce that sum.
 	// key 是 a+b，value 是产生这个和的下标组合数量。
@@ -80,7 +83,10 @@ func fourSumCount(A []int, B []int, C []int, D []int) int {
 	return count
 }
 
-// 2. 两组和排序 + 双指针：保留重复次数
+// 2. Sort both pair-sum arrays + two pointers: keep multiplicities and add x*y on a match.
+// 2. 两组和排序 + 双指针：保留重复次数，命中时累加 x*y。
+// Time: O(n² log(n+1)), Space: O(n²).
+// 时间复杂度：O(n² log(n+1))，空间复杂度：O(n²)。
 func fourSumCountSorted(a, b, c, d []int) int {
 	// Keep every index combination; deduplicating sums here would lose tuples.
 	// 保留每一个下标组合，这里去重会丢掉答案。

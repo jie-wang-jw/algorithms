@@ -61,7 +61,8 @@ cur.Next = prev  // 当前节点反向指回前一个节点
 prev = cur       // prev 往前走
 cur = next       // cur 往前走
 */
-// 1. Iterative two-pointer solution. / 1. 迭代双指针解法。
+// 1. Iterative two pointers: prev heads the reversed part, cur heads the rest, flipping one link per step.
+// 1. 迭代双指针：prev 是已反转部分的头，cur 是未处理部分的头，每轮反转一条指针。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
 func reverseList(head *ListNode) *ListNode {

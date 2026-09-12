@@ -90,7 +90,10 @@ The three implementations appear below in the order of the numbered methods abov
 Write the first two yourself, then derive the equal-height test of the third.
 */
 
-// 1. 普通递归：左右数量相加
+// 1. Ordinary recursion: add both disjoint subtree counts, then include the current root.
+// 1. 普通递归：左右子树节点数相加，再加上当前根。
+// Time: O(n), Space: O(h); completeness makes h = O(log n).
+// 时间复杂度：O(n)，空间复杂度：O(h)，本题完全二叉树使 h=O(log n)。
 func countNodes(root *TreeNode) int {
 	// An empty tree has no nodes.
 	// 空树没有节点。
@@ -106,7 +109,10 @@ func countNodes(root *TreeNode) int {
 	return leftCount + rightCount + 1
 }
 
-// 2. 层序遍历：每出队一个节点就计数
+// 2. Breadth-first traversal: increment the count on every dequeue; no levelSize is needed.
+// 2. 层序遍历：每出队一个节点就计数，本题不需要分层。
+// Time: O(n), Space: O(w) for the queue.
+// 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 func countNodesIterative(root *TreeNode) int {
 	// An empty tree has no nodes.
 	// 空树没有节点。
@@ -137,7 +143,10 @@ func countNodesIterative(root *TreeNode) int {
 	return count
 }
 
-// 3. 满子树公式：利用完全二叉树性质，推荐
+// 3. Perfect-subtree shortcut (recommended): equal left/right boundary heights yield 2^h-1 without visiting the interior.
+// 3. 满子树公式：推荐；最左、最右路径等高即可直接返回 2^h-1，不必再进入内部。
+// Time: O(log² n), Space: O(log n) for the recursion stack.
+// 时间复杂度：O(log² n)，空间复杂度：O(log n)，由递归栈产生。
 func countNodesOptimized(root *TreeNode) int {
 	// An empty subtree contributes zero nodes.
 	// 空子树贡献 0 个节点。

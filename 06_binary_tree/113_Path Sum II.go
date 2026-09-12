@@ -101,7 +101,10 @@ then compare why the two independent-path versions need no undo step.
 The three implementations appear below in the order of the numbered methods above.
 */
 
-// 1. 递归回溯：推荐 O(n+S)O(h)
+// 1. Recursive backtracking (recommended): append on entry, copy a matching leaf path, then undo before returning.
+// 1. 递归回溯：推荐；进入时加入路径，叶子且剩余为 0 时复制答案，返回前撤销。
+// Time: O(n+S), Space: O(h) auxiliary plus O(S) output, where S is the total number of integers in all returned paths.
+// 时间复杂度：O(n+S)，空间复杂度：辅助 O(h)，输出另占 O(S)，S 为所有返回路径中整数的总数。
 func pathSum(root *TreeNode, targetSum int) [][]int {
 	result := [][]int{}
 	path := []int{}
@@ -141,7 +144,10 @@ func pathSum(root *TreeNode, targetSum int) [][]int {
 	return result
 }
 
-// 2. 栈迭代：每个分支保存独立路径 O(nh) 上界O(h²) 上界
+// 2. Iterative DFS with independent paths: copy the parent prefix for each child so no explicit undo is needed.
+// 2. 栈迭代保存独立路径：每个孩子复制父路径前缀，因此不必手动回溯。
+// Time: O(nh) upper bound, Space: O(h²) auxiliary plus O(S) output.
+// 时间复杂度：上界 O(nh)，空间复杂度：辅助上界 O(h²)，输出另占 O(S)。
 func pathSumIterative(root *TreeNode, targetSum int) [][]int {
 	result := [][]int{}
 	if root == nil {
@@ -192,7 +198,10 @@ func pathSumIterative(root *TreeNode, targetSum int) [][]int {
 	return result
 }
 
-// 3. 队列 BFS：同步队列保存独立路径 O(nh) 上界O(wh) 上界
+// 3. BFS with independent paths: three synchronized queues hold node, sum, and a private path copy.
+// 3. 队列 BFS 保存独立路径：三个同步队列分别保存节点、累计和以及各自的完整路径。
+// Time: O(nh) upper bound, Space: O(wh) auxiliary plus O(S) output.
+// 时间复杂度：上界 O(nh)，空间复杂度：辅助上界 O(wh)，输出另占 O(S)。
 func pathSumBFS(root *TreeNode, targetSum int) [][]int {
 	result := [][]int{}
 	if root == nil {

@@ -39,7 +39,10 @@ If a number exists in the set, I add it to the result and remove it from the set
 如果数字存在于集合中，就把它加入结果，并从集合删除以避免重复结果。
 */
 
-// 1. 哈希集合：推荐
+// 1. Hash set: store nums1, then record a nums2 hit and delete it so each value appears once. Recommended.
+// 1. 哈希集合：先存 nums1，再扫 nums2，命中后删除以保证结果唯一。推荐。
+// Time: O(n+m) expected, Space: O(n) for the set.
+// 时间复杂度：期望 O(n+m)，空间复杂度：O(n)，由集合产生。
 func intersection(nums1 []int, nums2 []int) []int {
 	// The map acts as a set; only key existence matters.
 	// 这里把 map 当作集合使用，只关心 key 是否存在。
@@ -69,7 +72,10 @@ func intersection(nums1 []int, nums2 []int) []int {
 	return result
 }
 
-// 2. 排序 + 双指针：会修改输入顺序
+// 2. Sort + two pointers: advance the smaller side; mutates both inputs.
+// 2. 排序 + 双指针：较小一侧前进，相等则记录；会修改输入顺序。
+// Time: O(n log n+m log m), Space: O(log(n+1)+log(m+1)) for the sort stacks plus O(r) output.
+// 时间复杂度：O(n log n+m log m)，空间复杂度：排序栈 O(log(n+1)+log(m+1))，结果 O(r)。
 func intersectionSorted(nums1, nums2 []int) []int {
 	// Sorting both sides lets a single forward scan compare values in increasing order.
 	// 两侧都排序后，就可以按数值递增的顺序单向扫描比较。

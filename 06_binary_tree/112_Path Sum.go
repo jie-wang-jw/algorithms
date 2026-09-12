@@ -84,7 +84,10 @@ Start with the remaining-target recursion, then practice both iterative forms.
 The three implementations appear below in the same order as the numbered methods above.
 */
 
-// 1. 递归：传递“还差多少” O(n)O(h)
+// 1. Recursion with a remaining target: subtract the current value, then succeed only at a leaf whose remainder is 0.
+// 1. 递归传递剩余目标：先扣除当前值，只有到达叶子且剩余为 0 才成功。
+// Time: O(n), Space: O(h).
+// 时间复杂度：O(n)，空间复杂度：O(h)。
 func hasPathSum(root *TreeNode, targetSum int) bool {
 	// An empty tree has no root-to-leaf path.
 	// 空树没有根到叶子的路径，即使目标为 0 也不能成功。
@@ -108,7 +111,10 @@ func hasPathSum(root *TreeNode, targetSum int) bool {
 		hasPathSum(root.Right, remaining)
 }
 
-// 2. 栈迭代：节点和累计和一起保存 O(n)O(h)
+// 2. Iterative DFS: keep synchronized node and sum stacks so each pending node carries its own root-to-node total.
+// 2. 栈迭代：节点栈与路径和栈同步，每个待处理节点带着从根到它自己的累计和。
+// Time: O(n), Space: O(h).
+// 时间复杂度：O(n)，空间复杂度：O(h)。
 func hasPathSumIterative(root *TreeNode, targetSum int) bool {
 	if root == nil {
 		return false
@@ -147,7 +153,10 @@ func hasPathSumIterative(root *TreeNode, targetSum int) bool {
 	return false
 }
 
-// 3. 队列 BFS O(n)O(w)
+// 3. Breadth-first search: dequeue a node together with its path sum; no levelSize is needed.
+// 3. 队列 BFS：节点与累计和一起出队，本题不问深度，无需按层循环。
+// Time: O(n), Space: O(w).
+// 时间复杂度：O(n)，空间复杂度：O(w)。
 func hasPathSumBFS(root *TreeNode, targetSum int) bool {
 	if root == nil {
 		return false

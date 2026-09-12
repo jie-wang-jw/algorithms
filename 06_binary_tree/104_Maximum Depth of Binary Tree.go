@@ -100,7 +100,10 @@ Master the height definition of method 1 first, then contrast it with the depth 
 The three implementations appear below in the order of the numbered methods above.
 */
 
-// 1. 后序递归：先求左右高度，再取较大值加一
+// 1. Postorder recursion on heights (recommended): take the larger child height and add one for the current node.
+// 1. 后序递归求高度：推荐；先求左右高度，再取较大值加一。
+// Time: O(n), Space: O(h) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
 func maxDepth(root *TreeNode) int {
 	// An empty tree contains no nodes, so its depth is 0.
 	// 空树没有节点，深度为 0。
@@ -118,7 +121,10 @@ func maxDepth(root *TreeNode) int {
 	return max(leftDepth, rightDepth) + 1
 }
 
-// 2. 层序遍历：数完成了多少层
+// 2. Level-order traversal: process a fixed levelSize of nodes, then increment depth once per finished level.
+// 2. 层序遍历：每轮固定 levelSize 处理一层，整层结束后深度加一。
+// Time: O(n), Space: O(w) for the queue.
+// 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 func maxDepthIterative(root *TreeNode) int {
 	// An empty tree has no levels.
 	// 空树没有层，深度为 0。
@@ -158,7 +164,10 @@ func maxDepthIterative(root *TreeNode) int {
 	return depth
 }
 
-// 3. 前序回溯：自顶向下传递深度
+// 3. Preorder backtracking on depths: pass a top-down level and keep the maximum seen so far.
+// 3. 前序回溯记录深度：自顶向下传递层数，并用当前深度更新答案。
+// Time: O(n), Space: O(h) for the recursion stack.
+// 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
 func maxDepthPreorder(root *TreeNode) int {
 	// An empty tree never updates the answer, so 0 remains correct.
 	// 空树不会触发任何更新，初始值 0 就是答案。

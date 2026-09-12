@@ -55,7 +55,10 @@ Otherwise, I store the current number and continue.
 否则保存当前数字并继续扫描。
 */
 
-// 1. 哈希表一次遍历：推荐
+// 1. Hash map in one pass: store every seen value with its index and look up target-num. Recommended.
+// 1. 哈希表一次遍历：把见过的数字连同下标存入哈希表，再查找 target-num。推荐。
+// Time: O(n) expected, Space: O(n) for the hash map.
+// 时间复杂度：期望 O(n)，空间复杂度：O(n)，由哈希表产生。
 func twoSum(nums []int, target int) []int {
 	// Key: a seen number; value: its index.
 	// key 是已经见过的数字，value 是该数字的下标。
@@ -80,7 +83,10 @@ func twoSum(nums []int, target int) []int {
 	return nil
 }
 
-// 2. 暴力双循环：枚举所有下标对
+// 2. Brute-force double loop: enumerate every index pair i<j so no element is reused.
+// 2. 暴力双循环：枚举所有 i<j 的下标对，保证不重复使用同一个元素。
+// Time: O(n²), Space: O(1).
+// 时间复杂度：O(n²)，空间复杂度：O(1)。
 func twoSumBruteForce(nums []int, target int) []int {
 	// i selects the first position of the pair.
 	// i 选择数对中的第一个位置。
@@ -99,7 +105,10 @@ func twoSumBruteForce(nums []int, target int) []int {
 	return nil
 }
 
-// 3. 排序 + 双指针：必须先保存原下标
+// 3. Sort + two pointers: copy value-index pairs first, because sorting would otherwise destroy the original indices.
+// 3. 排序 + 双指针：必须先把数值和原下标一起复制出来，否则排序会丢失要返回的下标。
+// Time: O(n log n), Space: O(n) for the value-index copy.
+// 时间复杂度：O(n log n)，空间复杂度：O(n)，由数值与下标的副本产生。
 func twoSumSorted(nums []int, target int) []int {
 	// Sorting nums itself would destroy the indices the problem asks for, so copy value and index together.
 	// 直接排序 nums 会丢失题目要求返回的下标，所以把数值和原下标一起复制出来。

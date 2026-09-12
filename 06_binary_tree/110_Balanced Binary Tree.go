@@ -84,7 +84,10 @@ Master the postorder helper's return contract first, then practice iteration.
 All three implementations appear below; write your own version before comparing.
 */
 
-// 1. 自顶向下递归：直接判断
+// 1. Top-down recursion: check this node's height difference, then recurse into both subtrees; height work is repeated.
+// 1. 自顶向下递归：先判断当前高度差，再分别判断左右子树；求高度会重复遍历。
+// Time: O(n²) conservative, Space: O(h).
+// 时间复杂度：保守上界 O(n²)，空间复杂度：O(h)。
 func isBalancedTopDown(root *TreeNode) bool {
 	// An empty tree is balanced.
 	// 空树是平衡的。
@@ -108,13 +111,20 @@ func isBalancedTopDown(root *TreeNode) bool {
 		isBalancedTopDown(root.Right)
 }
 
-// 2. 自底向上递归：推荐
+// 2. Bottom-up postorder recursion (recommended): a nonnegative helper result means the whole tree is balanced.
+// 2. 自底向上后序递归：推荐；辅助函数返回非负高度即整棵树平衡。
+// Time: O(n), Space: O(h).
+// 时间复杂度：O(n)，空间复杂度：O(h)。
 func isBalanced(root *TreeNode) bool {
 	// Any nonnegative result means the entire tree is balanced.
 	// 返回非负高度，说明整棵树平衡。
 	return balancedHeight(root) != -1
 }
 
+// Postorder height helper: return the real height, or -1 as a sentinel once any subtree is unbalanced.
+// 后序求高辅助函数：子树平衡时返回真实高度，一旦失衡就返回哨兵 -1，该值不能再当高度使用。
+// Time: O(n), Space: O(h).
+// 时间复杂度：O(n)，空间复杂度：O(h)。
 func balancedHeight(root *TreeNode) int {
 	// An empty subtree is balanced and has height 0.
 	// 空子树平衡，高度为 0。
@@ -147,7 +157,10 @@ func balancedHeight(root *TreeNode) int {
 	return max(leftHeight, rightHeight) + 1
 }
 
-// 3. 后序迭代：用栈代替递归
+// 3. Iterative postorder: finish both children, then read heights from a node-pointer map and check the difference.
+// 3. 后序迭代：左右孩子都完成后，用节点指针当 key 的高度表检查差值。
+// Time: O(n) expected, Space: O(n) for the height map plus O(h) for the stack.
+// 时间复杂度：平均 O(n)，空间复杂度：O(n)，由高度表产生，外加 O(h) 的栈。
 func isBalancedIterative(root *TreeNode) bool {
 	stack := []*TreeNode{}
 	heights := make(map[*TreeNode]int)

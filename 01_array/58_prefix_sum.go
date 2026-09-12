@@ -36,6 +36,10 @@ import (
 	"os"
 )
 
+// 1. Prefix sums: build prefix once, then answer each query with a single subtraction.
+// 1. 前缀和：预处理出 prefix 数组，之后每次查询只做一次减法。
+// Time: O(n+q) for n values and q queries, Space: O(n) for the nums and prefix arrays.
+// 时间复杂度：O(n+q)（n 为元素数、q 为查询数），空间复杂度：O(n)，由 nums 与 prefix 数组产生。
 func prefixSum() {
 	// Use buffered input because the problem may contain many numbers and queries.
 	// 使用缓冲输入，因为题目可能包含大量数字和查询。
@@ -76,10 +80,10 @@ func prefixSum() {
 	}
 }
 
-// Direct summation of one inclusive query, without any preprocessing.
-// 逐次求和：不做任何预处理，直接累加单次闭区间查询。
+// 2. Direct summation: add up every value in [left, right] without any preprocessing.
+// 2. 逐次求和：不做任何预处理，直接累加闭区间 [left, right] 内的每个值。
 // Time: O(right-left+1) per query, Space: O(1).
-// 单次查询时间复杂度 O(right-left+1)，空间复杂度 O(1)。
+// 时间复杂度：每次查询 O(right-left+1)，空间复杂度：O(1)。
 func rangeSumBruteForce(nums []int, left, right int) int {
 	sum := 0
 

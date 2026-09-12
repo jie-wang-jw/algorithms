@@ -43,7 +43,10 @@ Both solutions return 0 for an empty needle by convention. getNext is also reuse
 so it checks for an empty string itself: writing next[0] for an empty pattern would be out of range.
 */
 
-// 1. 暴力滑动比较：枚举每个起点
+// 1. Brute-force sliding compare: try every starting index in haystack.
+// 1. 暴力滑动比较：枚举每个起点。
+// Time: O((n-m+1)m) worst case when m<=n, Space: O(1).
+// 时间复杂度：m<=n 时最坏 O((n-m+1)m)，空间复杂度：O(1)。
 func strStr(haystack string, needle string) int {
 	// If needle is empty, return 0 by convention.
 	// 按题目约定，needle 为空时返回 0。
@@ -94,7 +97,10 @@ When a mismatch happens, it uses the prefix table to move the pattern pointer.
 发生不匹配时，利用前缀表移动模式串指针。
 */
 
-// 2. KMP 前缀表：主串指针不回退
+// 2. KMP prefix table: reuse matched prefix information so the text pointer never retreats.
+// 2. KMP 前缀表：主串指针不回退。
+// Time: O(n+m), Space: O(m) for the prefix table.
+// 时间复杂度：O(n+m)，空间复杂度：O(m)，由 next 数组产生。
 func strStr2(haystack string, needle string) int {
 	// Empty pattern matches at index 0.
 	// 空模式串默认匹配在下标 0。
@@ -157,7 +163,10 @@ i: the character currently being processed. / 当前正在处理的字符位置�
 j: the current longest equal prefix-suffix length. / 当前最长相等前后缀的长度。
 next[i]: the answer for substring s[0:i+1]. / 到 i 为止这一段的最长相等前后缀长度。
 */
-// 前缀表：KMP 相关解法共用
+// Prefix table: shared by the KMP-related solutions.
+// 前缀表：KMP 相关解法共用。
+// Time: O(m), Space: O(1) beyond the supplied next table.
+// 时间复杂度：O(m)，空间复杂度：除传入的 next 外 O(1)。
 func getNext(next []int, s string) {
 	// An empty pattern has no entries, so writing next[0] would be out of range.
 	// 空模式串没有任何表项，写入 next[0] 会越界。
