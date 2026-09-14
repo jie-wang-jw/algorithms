@@ -32,6 +32,18 @@ func normalizeIndexPair(indices []int) []int {
 	return pair
 }
 
+func equalStringSlice(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func copyInts(nums []int) []int {
 	return append([]int(nil), nums...)
 }
@@ -379,6 +391,83 @@ func TestFourSumCount(t *testing.T) {
 				t.Run(tt.name, func(t *testing.T) {
 					if got := cf.fn(tt.a, tt.b, tt.c, tt.d); got != tt.want {
 						t.Fatalf("%s(%v, %v, %v, %v) = %d, want %d", cf.name, tt.a, tt.b, tt.c, tt.d, got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestCommonChars(t *testing.T) {
+	tests := []struct {
+		name  string
+		words []string
+		want  []string
+	}{
+		{name: "example bella", words: []string{"bella", "label", "roller"}, want: []string{"e", "l", "l"}},
+		{name: "example cool", words: []string{"cool", "lock", "cook"}, want: []string{"c", "o"}},
+		{name: "all same letters", words: []string{"ll", "ll", "ll"}, want: []string{"l", "l"}},
+		{name: "no common", words: []string{"abc", "def"}, want: []string{}},
+		{name: "single word", words: []string{"abc"}, want: []string{"a", "b", "c"}},
+		{name: "empty input", words: []string{}, want: []string{}},
+	}
+
+	commonFuncs := []struct {
+		name string
+		fn   func([]string) []string
+	}{
+		{name: "26-slot array", fn: commonChars},
+		{name: "hash map", fn: commonCharsMap},
+	}
+
+	for _, cf := range commonFuncs {
+		t.Run(cf.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					got := cf.fn(tt.words)
+					sort.Strings(got)
+					want := append([]string(nil), tt.want...)
+					sort.Strings(want)
+					if !equalStringSlice(got, want) {
+						t.Fatalf("%s(%v) = %v, want %v", cf.name, tt.words, got, want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestCanConstruct(t *testing.T) {
+	tests := []struct {
+		name       string
+		ransomNote string
+		magazine   string
+		want       bool
+	}{
+		{name: "cannot", ransomNote: "a", magazine: "b", want: false},
+		{name: "not enough a", ransomNote: "aa", magazine: "ab", want: false},
+		{name: "can construct", ransomNote: "aa", magazine: "aab", want: true},
+		{name: "empty ransom", ransomNote: "", magazine: "abc", want: true},
+		{name: "empty magazine", ransomNote: "a", magazine: "", want: false},
+		{name: "both empty", ransomNote: "", magazine: "", want: true},
+		{name: "exact match", ransomNote: "abc", magazine: "cba", want: true},
+		{name: "ransom longer", ransomNote: "abcd", magazine: "abc", want: false},
+	}
+
+	constructFuncs := []struct {
+		name string
+		fn   func(string, string) bool
+	}{
+		{name: "brute force", fn: canConstructBruteForce},
+		{name: "frequency array", fn: canConstruct},
+	}
+
+	for _, cf := range constructFuncs {
+		t.Run(cf.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := cf.fn(tt.ransomNote, tt.magazine); got != tt.want {
+						t.Fatalf("%s(%q, %q) = %v, want %v", cf.name, tt.ransomNote, tt.magazine, got, tt.want)
 					}
 				})
 			}

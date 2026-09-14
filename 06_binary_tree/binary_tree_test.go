@@ -1,6 +1,7 @@
 package _6_binary_tree
 
 import (
+	"fmt"
 	"reflect"
 	"slices"
 	"testing"
@@ -109,8 +110,10 @@ func TestBuildTree(t *testing.T) {
 		preorder bool
 	}{
 		{name: "105 slicing", fn: buildTreePreorder, preorder: true},
+		{name: "105 index ranges", fn: buildTreePreorderIndex, preorder: true},
 		{name: "105 index map", fn: buildTreePreorderOptimized, preorder: true},
 		{name: "106 slicing", fn: buildTreePostOrder},
+		{name: "106 index ranges", fn: buildTreePostOrderIndex},
 		{name: "106 index map", fn: buildTreePostOrderOptimized},
 	}
 	for _, implementation := range implementations {
@@ -969,4 +972,166 @@ func TestPostorderTraversal(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNaryLevelOrder(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*NaryNode) [][]int
+	}{
+		{name: "queue", fn: naryLevelOrder},
+		{name: "recursive by depth", fn: naryLevelOrderRecursive},
+	}
+
+	tests := []struct {
+		name string
+		root *NaryNode
+		want [][]int
+	}{
+		{name: "empty", want: [][]int{}},
+		{name: "single", root: &NaryNode{Val: 1}, want: [][]int{{1}}},
+		{
+			name: "article example",
+			root: &NaryNode{Val: 1, Children: []*NaryNode{
+				{Val: 3, Children: []*NaryNode{{Val: 5}, {Val: 6}}},
+				{Val: 2},
+				{Val: 4},
+			}},
+			want: [][]int{{1}, {3, 2, 4}, {5, 6}},
+		},
+		{
+			name: "uneven children",
+			root: &NaryNode{Val: 1, Children: []*NaryNode{
+				{Val: 2, Children: []*NaryNode{{Val: 4}}},
+				{Val: 3},
+			}},
+			want: [][]int{{1}, {2, 3}, {4}},
+		},
+	}
+
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.root); !reflect.DeepEqual(got, tt.want) {
+						t.Fatalf("naryLevelOrder() = %v, want %v", got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestConnectPerfect(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*Node) *Node
+	}{
+		{name: "queue", fn: connect},
+		{name: "recursive", fn: connectRecursive},
+		{name: "constant extra space", fn: connectConstant},
+	}
+
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			t.Run("empty", func(t *testing.T) {
+				if got := implementation.fn(nil); got != nil {
+					t.Fatal("empty tree should stay nil")
+				}
+			})
+			t.Run("single", func(t *testing.T) {
+				root := &Node{Val: 1}
+				if got := implementation.fn(root); got != root || got.Next != nil {
+					t.Fatal("single node next should be nil")
+				}
+			})
+			t.Run("perfect three levels", func(t *testing.T) {
+				root := perfectThreeLevels()
+				got := implementation.fn(root)
+				if got != root {
+					t.Fatal("must preserve the root pointer")
+				}
+				if err := requireNextLinks(root, [][]int{{1}, {2, 3}, {4, 5, 6, 7}}); err != nil {
+					t.Fatal(err)
+				}
+			})
+		})
+	}
+}
+
+func TestConnectII(t *testing.T) {
+	implementations := []struct {
+		name string
+		fn   func(*Node) *Node
+	}{
+		{name: "queue 116", fn: connect},
+		{name: "queue 117", fn: connectII},
+	}
+
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			t.Run("missing children", func(t *testing.T) {
+				root := &Node{Val: 1,
+					Left:  &Node{Val: 2, Left: &Node{Val: 4}, Right: &Node{Val: 5}},
+					Right: &Node{Val: 3, Right: &Node{Val: 7}},
+				}
+				got := implementation.fn(root)
+				if got != root {
+					t.Fatal("must preserve the root pointer")
+				}
+				if err := requireNextLinks(root, [][]int{{1}, {2, 3}, {4, 5, 7}}); err != nil {
+					t.Fatal(err)
+				}
+			})
+			t.Run("left child only", func(t *testing.T) {
+				root := &Node{Val: 1, Left: &Node{Val: 2}}
+				_ = implementation.fn(root)
+				if err := requireNextLinks(root, [][]int{{1}, {2}}); err != nil {
+					t.Fatal(err)
+				}
+			})
+		})
+	}
+}
+
+func perfectThreeLevels() *Node {
+	return &Node{Val: 1,
+		Left:  &Node{Val: 2, Left: &Node{Val: 4}, Right: &Node{Val: 5}},
+		Right: &Node{Val: 3, Left: &Node{Val: 6}, Right: &Node{Val: 7}},
+	}
+}
+
+func requireNextLinks(root *Node, want [][]int) error {
+	for depth, level := range want {
+		cur := leftmostAt(root, depth)
+		for i, val := range level {
+			if cur == nil {
+				return fmt.Errorf("level %d missing node %d", depth, val)
+			}
+			if cur.Val != val {
+				return fmt.Errorf("level %d node %d: got %d", depth, i, cur.Val)
+			}
+			if i == len(level)-1 {
+				if cur.Next != nil {
+					return fmt.Errorf("level %d last next should be nil, got %d", depth, cur.Next.Val)
+				}
+			} else if cur.Next == nil || cur.Next.Val != level[i+1] {
+				return fmt.Errorf("level %d node %d next mismatch", depth, i)
+			}
+			cur = cur.Next
+		}
+	}
+	return nil
+}
+
+func leftmostAt(root *Node, depth int) *Node {
+	cur := root
+	for i := 0; i < depth && cur != nil; i++ {
+		if cur.Left != nil {
+			cur = cur.Left
+		} else {
+			cur = cur.Right
+		}
+	}
+	return cur
 }

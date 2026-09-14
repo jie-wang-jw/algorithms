@@ -49,13 +49,25 @@ Split inorder into [:k] and [k+1:], and postorder into [:k] and [k:len(postorder
 Here k is also the left-subtree size because each input slice begins at the current subtree.
 Attach the returned child-root pointers to the new root's Left and Right, then return that root.
 
-解法二：哈希表定位根 + 下标区间（推荐） / Method 2: Index Map and Ranges (Recommended)
+解法二：线性查找根 + 下标区间 / Method 2: Linear Root Lookup and Index Ranges
+思路与解法一相同：后序末尾是根，在中序里线性扫描切割点。
+区别是不再切出子切片，而是用左闭右开区间 [inLeft,inRight) 与 [postLeft,postRight) 描述同一棵子树。
+空区间 postLeft==postRight 返回 nil；区间只剩一个节点时直接返回根。
+切割点 delimiterIndex 是全局中序下标，左子树大小是 delimiterIndex-inLeft，不能直接拿 delimiterIndex 去切后序。
+文章强调区间不变量必须全程一致：四个子区间都坚持左闭右开，才不会把根算进孩子，或漏掉节点。
+Same idea as method 1: the last postorder value is the root, found by a linear inorder scan.
+Instead of creating child slices, describe the same subtree with half-open ranges [inLeft,inRight) and [postLeft,postRight).
+Return nil when postLeft==postRight; return the root immediately when the interval has one node.
+delimiterIndex is a global inorder index, so the left-subtree size is delimiterIndex-inLeft, not delimiterIndex.
+Keep the half-open invariant on every child range so the root is excluded exactly once.
+
+解法三：哈希表定位根 + 下标区间（推荐） / Method 3: Index Map and Ranges (Recommended)
 先保存“节点值 -> 中序下标”，后续平均 O(1) 找到根的位置，避免每层重复扫描。
-使用左闭右开区间 inorder[inLeft:inRight] 和 postorder[postLeft:postRight] 表示同一棵子树。
+区间切分与解法二相同；只是把线性查找换成哈希表。
 空区间 inLeft==inRight 返回 nil；当前根为 postorder[postRight-1]。
 设根的全局中序位置为 k，左子树大小必须算 k-inLeft，而不是直接用 k。
 Precompute value -> inorder index for average O(1) root lookup.
-Half-open ranges inorder[inLeft:inRight] and postorder[postLeft:postRight] describe the same subtree.
+Range splitting matches method 2; only the delimiter search becomes a map lookup.
 Return nil when inLeft==inRight; the root value is postorder[postRight-1].
 For global inorder root index k, the left-subtree size is k-inLeft, not k.
 
@@ -76,24 +88,27 @@ Excluding k from inorder and the final root from postorder prevents duplicate co
   Unique node values allow one inorder position per root; invalid inputs are outside the problem's contract.
 - 本文为左右子树传独立区间，先构造左还是右都可以。只有共享一个从后往前的后序游标时，才必须先右后左。
   Independent child ranges allow either construction order. A shared reverse-postorder cursor instead requires right before left.
-- Go 的切片操作只创建视图，不会自动复制元素；两种方法均只读输入，新建的是结果树节点。
-  Go subslicing creates views rather than copying elements. Both methods read the inputs and allocate output tree nodes.
+- Go 的切片操作只创建视图，不会自动复制元素；三种方法均只读输入，新建的是结果树节点。
+  Go subslicing creates views rather than copying elements. All three methods read the inputs and allocate output tree nodes.
 
 时间与空间复杂度 / Time and Space Complexity
 n 为节点数，h 为结果树高度。
-线性查找递归：最坏时间 O(n²)，根查找可累计 n+(n-1)+...+1；辅助空间 O(h)，输出树 O(n)。
+线性查找切片递归：最坏时间 O(n²)，根查找可累计 n+(n-1)+...+1；辅助空间 O(h)，输出树 O(n)。
+Go 切片是视图，不会像 C++ vector 那样按层复制元素，因此解法一、解法二的辅助空间同为 O(h)。
+下标区间线性查找：最坏时间仍为 O(n²)；用下标表达切分，对应文章避免重复定义数组的写法。
 哈希表区间递归：平均时间 O(n)，每个节点一次定位和构造；辅助空间 O(n+h)=O(n)，包括索引表和递归栈，输出树另占 O(n)。
 For n nodes and resulting height h:
-Linear lookup recursion takes O(n²) worst-case time and O(h) auxiliary space, plus O(n) output tree space.
+Slice recursion with linear lookup takes O(n²) worst-case time and O(h) auxiliary space, plus O(n) output tree space.
+Go slices are views and do not copy elements the way C++ vectors do, so methods 1 and 2 share O(h) auxiliary space.
+Index-range linear lookup remains O(n²) worst-case; it matches the article's version that splits by indices instead of new arrays.
 Map-based range recursion takes expected O(n) time and O(n+h)=O(n) auxiliary space for the map and calls, plus O(n) output.
 
 练习 / Practice
-先练习画出根与四个子区间，再阅读下方的 buildTreePostOrder 和 buildTreePostOrderOptimized。
+先练习画出根与四个子区间，再按切片、下标、哈希表的顺序阅读 buildTreePostOrder、buildTreePostOrderIndex 和 buildTreePostOrderOptimized。
 Practice identifying the root and the four child ranges first,
-then read buildTreePostOrder and buildTreePostOrderOptimized below.
+then read buildTreePostOrder, buildTreePostOrderIndex, and buildTreePostOrderOptimized in that order.
 */
 
-// 中序与后序排列虽然不同，但同一棵左子树的节点数量一定相同，所以可以用中序得到的 k 去切后序。
 // 1. Linear root lookup and slice splitting: take the last postorder value as root, then use its inorder index k to split both arrays.
 // 1. 递归切片：先理解这一版；后序末尾是根，用中序位置 k 同时切开两组遍历。
 // Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
@@ -131,9 +146,74 @@ func buildTreePostOrder(inorder []int, postorder []int) *TreeNode {
 	return root
 }
 
-// 后序末尾找根 → 中序定位根 → 算左子树数量 → 用这个数量切后序 → 递归构造并连接。
-// 2. Index map and ranges (recommended): locate the root in average O(1), then split half-open intervals by leftSize = k-inLeft.
-// 2. 哈希表 + 区间递归：优化查找；平均 O(1) 定位根，再用 leftSize = k-inLeft 切分左闭右开区间。
+// 2. Linear root lookup and index ranges: split half-open inorder and postorder intervals without creating child slices.
+// 2. 下标区间递归：用左闭右开下标切分中序和后序，切割点仍靠线性查找。
+// Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
+// 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
+func buildTreePostOrderIndex(inorder []int, postorder []int) *TreeNode {
+	// Empty input has no subtree to construct.
+	// 输入为空，没有可构造的子树。
+	if len(inorder) == 0 || len(postorder) == 0 {
+		return nil
+	}
+
+	// Keep the half-open invariant [begin, end) on every recursive call.
+	// 每一层都坚持左闭右开区间 [begin, end)。
+	return buildPostorderIndex(inorder, 0, len(inorder), postorder, 0, len(postorder))
+}
+
+// Half-open inorder [inLeft, inRight) and postorder [postLeft, postRight) describe the same subtree.
+// 左闭右开的中序 [inLeft, inRight) 与后序 [postLeft, postRight) 表示同一棵子树。
+// Time: O(n²) worst case, Space: O(h).
+// 时间复杂度：最坏 O(n²)，空间复杂度：O(h)。
+func buildPostorderIndex(inorder []int, inLeft, inRight int, postorder []int, postLeft, postRight int) *TreeNode {
+	// Equal postorder bounds mean this interval has no nodes.
+	// 后序区间两端相等，说明当前子树为空。
+	if postLeft == postRight {
+		return nil
+	}
+
+	// The last postorder value is the current subtree root.
+	// 后序区间最后一个值就是当前子树的根。
+	rootValue := postorder[postRight-1]
+	root := &TreeNode{Val: rootValue}
+
+	// A single-node interval is already a complete leaf.
+	// 区间只剩一个节点，它就是叶子，不必再切分。
+	if postRight-postLeft == 1 {
+		return root
+	}
+
+	// Scan the current inorder interval for the delimiter.
+	// 在当前中序区间里线性查找切割点。
+	delimiterIndex := inLeft
+	for delimiterIndex < inRight && inorder[delimiterIndex] != rootValue {
+		delimiterIndex++
+	}
+
+	// leftSize is the inorder distance from inLeft to the delimiter, not the global index itself.
+	// 左子树大小是切割点相对 inLeft 的距离，不能直接用全局下标 delimiterIndex。
+	leftSize := delimiterIndex - inLeft
+
+	// Left postorder takes exactly leftSize values starting at postLeft.
+	// 左后序从 postLeft 起恰好取 leftSize 个值。
+	root.Left = buildPostorderIndex(
+		inorder, inLeft, delimiterIndex,
+		postorder, postLeft, postLeft+leftSize,
+	)
+
+	// Right postorder starts after the left subtree and excludes the current root.
+	// 右后序紧接左后序，并排除当前根所在的末尾位置。
+	root.Right = buildPostorderIndex(
+		inorder, delimiterIndex+1, inRight,
+		postorder, postLeft+leftSize, postRight-1,
+	)
+
+	return root
+}
+
+// 3. Index map and ranges (recommended): locate the root in average O(1), then split half-open intervals by leftSize = k-inLeft.
+// 3. 哈希表 + 区间递归：优化查找；平均 O(1) 定位根，再用 leftSize = k-inLeft 切分左闭右开区间。
 // Time: O(n) expected, Space: O(n+h) = O(n) for the map and the recursion stack.
 // 时间复杂度：平均 O(n)，空间复杂度：O(n+h)=O(n)，由索引表和递归栈产生。
 func buildTreePostOrderOptimized(inorder []int, postorder []int) *TreeNode {
@@ -218,11 +298,23 @@ Take preorder[0] as root and find its position k in the current inorder slice; k
 Left preorder is preorder[1:k+1], taking exactly k elements after the root; right preorder is preorder[k+1:].
 Left inorder is inorder[:k], and right inorder is inorder[k+1:]. Recursively build and attach both children.
 
-解法二：哈希表 + 下标区间 / Method 2: Index Map and Ranges
+解法二：线性查找根 + 下标区间 / Method 2: Linear Lookup and Index Ranges
+思路与解法一相同：preorder[preLeft] 是根，中序线性扫描切割点。
+用左闭右开区间表示同一棵子树，不再切出子切片。
+根仍是 preorder[preLeft]，左子树大小 leftSize=delimiterIndex-inLeft。
+左前序从 preLeft+1 起取 leftSize 个；右前序紧接其后直到 preRight。
+Same idea as method 1: preorder[preLeft] is the root, found by a linear inorder scan.
+Describe the subtree with half-open ranges instead of creating child slices.
+The root remains preorder[preLeft], and leftSize=delimiterIndex-inLeft.
+Left preorder takes leftSize elements starting at preLeft+1; right preorder starts immediately afterward.
+
+解法三：哈希表 + 下标区间 / Method 3: Index Map and Ranges
 用哈希表保存值到全局中序下标。每次用两个左闭右开区间表示同一棵子树。
 根为 preorder[preLeft]，中序位置为 k，左子树大小为 leftSize=k-inLeft。
+区间切分与解法二相同；只是把线性查找换成哈希表。
 Map values to global inorder indices. Use two half-open ranges for the same subtree.
 The root is preorder[preLeft], its inorder index is k, and leftSize=k-inLeft.
+Range splitting matches method 2; only the delimiter search becomes a map lookup.
 
 左前序 / Left preorder:  [preLeft+1, preLeft+1+leftSize)
 右前序 / Right preorder: [preLeft+1+leftSize, preRight)
@@ -236,29 +328,28 @@ The right subtree starts immediately afterward. Inorder boundaries remain the sa
 
 易错点 / Pitfalls
 - 105 和 106 在 LeetCode 上都叫 buildTree，但同一个 Go 包不能重复定义同名函数。
-  本项目给 105 使用 buildTreePreorder 和 buildTreePreorderOptimized；提交 105 时将入口改名为 buildTree。
+  本项目给 105 使用 buildTreePreorder、buildTreePreorderIndex 和 buildTreePreorderOptimized；提交 105 时将入口改名为 buildTree。
   Both problems use buildTree on LeetCode, but a Go package cannot define it twice.
-  Use buildTreePreorder and buildTreePreorderOptimized here; rename the entry to buildTree when submitting 105.
-- 线性切片法 k 是当前切片内的位置；哈希表法 k 是原数组下标，必须减去 inLeft 才是大小。
-  Slice-based k is local, while map-based k is global; subtract inLeft to get the subtree size.
+  Use buildTreePreorder, buildTreePreorderIndex, and buildTreePreorderOptimized here; rename the entry to buildTree when submitting 105.
+- 线性切片法 k 是当前切片内的位置；下标法和哈希表法的切割点是原数组下标，必须减去 inLeft 才是大小。
+  Slice-based k is local, while index-based and map-based delimiters are global; subtract inLeft to get the subtree size.
 - 空区间返回 nil。每次递归排除当前根，规模才会缩小，也不会重复创建根。
   Return nil for an empty range. Excluding the current root makes recursive ranges shrink and avoids duplicate construction.
-- Go 切片不复制元素，两种方法都只读输入，构造新树。
-  Go subslicing does not copy elements. Both methods read inputs and construct a new tree.
+- Go 切片不复制元素，三种方法都只读输入，构造新树。
+  Go subslicing does not copy elements. All three methods read inputs and construct a new tree.
 
 时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高。线性查找版本最坏时间 O(n²)，辅助空间 O(h)。
-哈希表版本平均时间 O(n)，辅助空间 O(n+h)=O(n)。两种版本的输出树都另占 O(n)。
-For n nodes and height h, linear lookup takes O(n²) worst-case time and O(h) auxiliary space.
-Map lookup takes expected O(n) time and O(n+h)=O(n) auxiliary space. Both output trees use O(n) space.
+n 为节点数，h 为树高。线性查找切片与下标两版最坏时间都是 O(n²)，辅助空间 O(h)。
+哈希表版本平均时间 O(n)，辅助空间 O(n+h)=O(n)。三种版本的输出树都另占 O(n)。
+For n nodes and height h, both linear-lookup versions take O(n²) worst-case time and O(h) auxiliary space.
+Map lookup takes expected O(n) time and O(n+h)=O(n) auxiliary space. All three output trees use O(n) space.
 
 练习 / Practice
-105 的两种实现在本段之后，命名为 buildTreePreorder 和 buildTreePreorderOptimized；106 的实现保留在文件前半部分。
-The two 105 implementations follow this section as buildTreePreorder and buildTreePreorderOptimized,
+105 的三种实现按切片、下标、哈希表顺序写在本段之后：buildTreePreorder、buildTreePreorderIndex、buildTreePreorderOptimized；106 的实现保留在文件前半部分。
+The three 105 implementations follow this section as buildTreePreorder, buildTreePreorderIndex, and buildTreePreorderOptimized,
 while the 106 implementations remain in the first half of the file.
 */
 
-// 前序第一个值确定根，中序根左侧的节点数，决定前序中左子树占多少个位置。
 // 1. Linear lookup and slice splitting: take preorder[0] as root, then use its inorder index k as the left-subtree size.
 // 1. 递归切片：前序第一个值是根，用中序位置 k 作为左子树节点数去切前序。
 // Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
@@ -291,8 +382,6 @@ func buildTreePreorder(preorder []int, inorder []int) *TreeNode {
 
 	// Everything after those k nodes belongs to the right subtree.
 	// 前序剩余部分属于右子树，中序则取根右侧部分。
-	//为什么是 preorder[1:k+1]？
-	//下标 0 是根，从 1 开始取 k 个元素，右边界就是 1+k，且不包含右边界。
 	root.Right = buildTreePreorder(
 		preorder[k+1:],
 		inorder[k+1:],
@@ -301,8 +390,74 @@ func buildTreePreorder(preorder []int, inorder []int) *TreeNode {
 	return root
 }
 
-// 2. Index map and ranges: the root is preorder[preLeft]; skip it and take leftSize = k-inLeft preorder elements.
-// 2. 哈希表 + 区间递归：根是 preorder[preLeft]，跳过它再取 leftSize = k-inLeft 个前序元素。
+// 2. Linear lookup and index ranges: split half-open preorder and inorder intervals without creating child slices.
+// 2. 下标区间递归：用左闭右开下标切分前序和中序，切割点仍靠线性查找。
+// Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
+// 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
+func buildTreePreorderIndex(preorder []int, inorder []int) *TreeNode {
+	// Empty input has no subtree to construct.
+	// 输入为空，没有可构造的子树。
+	if len(preorder) == 0 || len(inorder) == 0 {
+		return nil
+	}
+
+	// Keep the half-open invariant [begin, end) on every recursive call.
+	// 每一层都坚持左闭右开区间 [begin, end)。
+	return buildPreorderIndex(preorder, 0, len(preorder), inorder, 0, len(inorder))
+}
+
+// Half-open preorder [preLeft, preRight) and inorder [inLeft, inRight) describe the same subtree.
+// 左闭右开的前序 [preLeft, preRight) 与中序 [inLeft, inRight) 表示同一棵子树。
+// Time: O(n²) worst case, Space: O(h).
+// 时间复杂度：最坏 O(n²)，空间复杂度：O(h)。
+func buildPreorderIndex(preorder []int, preLeft, preRight int, inorder []int, inLeft, inRight int) *TreeNode {
+	// Equal preorder bounds mean this interval has no nodes.
+	// 前序区间两端相等，说明当前子树为空。
+	if preLeft == preRight {
+		return nil
+	}
+
+	// Use preLeft, not 0: this interval may start in the middle of preorder.
+	// 根取 preLeft 处的值，不能写死成下标 0，因为子区间不一定从数组开头开始。
+	rootValue := preorder[preLeft]
+	root := &TreeNode{Val: rootValue}
+
+	// A single-node interval is already a complete leaf.
+	// 区间只剩一个节点，它就是叶子，不必再切分。
+	if preRight-preLeft == 1 {
+		return root
+	}
+
+	// Scan the current inorder interval for the delimiter.
+	// 在当前中序区间里线性查找切割点。
+	delimiterIndex := inLeft
+	for delimiterIndex < inRight && inorder[delimiterIndex] != rootValue {
+		delimiterIndex++
+	}
+
+	// leftSize is the inorder distance from inLeft to the delimiter.
+	// 左子树大小是切割点相对 inLeft 的距离。
+	leftSize := delimiterIndex - inLeft
+
+	// Skip the root at preLeft, then take leftSize preorder values.
+	// 跳过 preLeft 处的根，再取 leftSize 个前序值构造左子树。
+	root.Left = buildPreorderIndex(
+		preorder, preLeft+1, preLeft+1+leftSize,
+		inorder, inLeft, delimiterIndex,
+	)
+
+	// The right subtree starts immediately after the left preorder interval.
+	// 右子树紧接左前序结束处，中序则跳过根的位置。
+	root.Right = buildPreorderIndex(
+		preorder, preLeft+1+leftSize, preRight,
+		inorder, delimiterIndex+1, inRight,
+	)
+
+	return root
+}
+
+// 3. Index map and ranges: the root is preorder[preLeft]; skip it and take leftSize = k-inLeft preorder elements.
+// 3. 哈希表 + 区间递归：根是 preorder[preLeft]，跳过它再取 leftSize = k-inLeft 个前序元素。
 // Time: O(n) expected, Space: O(n+h) = O(n) for the map and the recursion stack.
 // 时间复杂度：平均 O(n)，空间复杂度：O(n+h)=O(n)，由索引表和递归栈产生。
 func buildTreePreorderOptimized(preorder []int, inorder []int) *TreeNode {

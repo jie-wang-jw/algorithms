@@ -374,3 +374,101 @@ func TestPrefixSum(t *testing.T) {
 		t.Errorf("got:\n%s\nwant:\n%s", got, want)
 	}
 }
+
+func TestLandPurchase(t *testing.T) {
+	tests := []struct {
+		name string
+		grid [][]int
+		want int
+	}{
+		{
+			name: "article example",
+			grid: [][]int{
+				{1, 2, 3},
+				{2, 1, 3},
+				{1, 2, 3},
+			},
+			want: 0,
+		},
+		{
+			name: "vertical cut better",
+			grid: [][]int{
+				{1, 2},
+				{3, 4},
+			},
+			want: 2,
+		},
+		{
+			name: "single row",
+			grid: [][]int{{1, 3}},
+			want: 2,
+		},
+		{
+			name: "single column",
+			grid: [][]int{{1}, {3}},
+			want: 2,
+		},
+		{
+			name: "equal halves",
+			grid: [][]int{
+				{5, 5},
+				{5, 5},
+			},
+			want: 0,
+		},
+	}
+
+	landFuncs := []struct {
+		name string
+		fn   func([][]int) int
+	}{
+		{"row and column prefix sums", landPurchasePrefix},
+		{"accumulate while scanning", landPurchaseScan},
+	}
+
+	for _, lf := range landFuncs {
+		t.Run(lf.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := lf.fn(tt.grid); got != tt.want {
+						t.Errorf("%s() = %d, want %d", lf.name, got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestLandPurchaseStdin(t *testing.T) {
+	input := `3 3
+1 2 3
+2 1 3
+1 2 3
+`
+	want := "0\n"
+
+	oldStdin := os.Stdin
+	oldStdout := os.Stdout
+	defer func() {
+		os.Stdin = oldStdin
+		os.Stdout = oldStdout
+	}()
+
+	rIn, wIn, _ := os.Pipe()
+	_, _ = wIn.Write([]byte(input))
+	_ = wIn.Close()
+	os.Stdin = rIn
+
+	rOut, wOut, _ := os.Pipe()
+	os.Stdout = wOut
+
+	landPurchase()
+
+	_ = wOut.Close()
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, rOut)
+	if got := buf.String(); got != want {
+		t.Errorf("got:\n%s\nwant:\n%s", got, want)
+	}
+}

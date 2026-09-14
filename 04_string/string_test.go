@@ -273,3 +273,40 @@ func TestReplaceNumber(t *testing.T) {
 		})
 	}
 }
+
+func TestRightRotateString(t *testing.T) {
+	tests := []struct {
+		name string
+		s    string
+		k    int
+		want string
+	}{
+		{name: "article example", s: "abcdefg", k: 2, want: "fgabcde"},
+		{name: "rotate by one", s: "abc", k: 1, want: "cab"},
+		{name: "rotate by length", s: "abc", k: 3, want: "abc"},
+		{name: "k larger than length", s: "abcd", k: 6, want: "cdab"},
+		{name: "single character", s: "a", k: 1, want: "a"},
+		{name: "empty", s: "", k: 2, want: ""},
+		{name: "two characters", s: "ab", k: 1, want: "ba"},
+	}
+
+	rotateFuncs := []struct {
+		name string
+		fn   func(string, int) string
+	}{
+		{name: "whole then parts", fn: rightRotateString},
+		{name: "parts then whole", fn: rightRotateStringPartsFirst},
+	}
+
+	for _, rf := range rotateFuncs {
+		t.Run(rf.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := rf.fn(tt.s, tt.k); got != tt.want {
+						t.Fatalf("%s(%q, %d) = %q, want %q", rf.name, tt.s, tt.k, got, tt.want)
+					}
+				})
+			}
+		})
+	}
+}
