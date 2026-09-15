@@ -82,54 +82,56 @@ The time complexity is \(O(n)\), and the space complexity is \(O(n)\).
 // 1. 栈保存期待的右括号：直接比较；入栈时换成对应的右括号，之后只做一次字节相等判断。
 // Time: O(n), Space: O(n) for the stack.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. A valid bracket string must have an even number of characters.
+//     有效括号字符串的字符数量一定是偶数。
+//  2. stack stores the closing brackets expected later.
+//     stack 保存之后期待遇到的右括号。
+//  3. Examine every bracket in the string.
+//     依次检查字符串中的每个括号。
+//  4. After '(', the matching closing bracket must be ')'.
+//     遇到 '(' 后，之后必须使用 ')' 与它匹配。
+//  5. After '[', the matching closing bracket must be ']'.
+//     遇到 '[' 后，之后必须使用 ']' 与它匹配。
+//  6. After '{', the matching closing bracket must be '}'.
+//     遇到 '{' 后，之后必须使用 '}' 与它匹配。
+//  7. A closing bracket cannot be matched if the stack is empty.
+//     如果栈为空，当前右括号就没有对应的左括号。
+//  8. The current closing bracket must match the expected bracket.
+//     当前右括号必须与栈顶期待的右括号相同。
+//  9. Remove the matched expected bracket from the stack.
+//     当前括号匹配成功，弹出栈顶元素。
 func isValid(s string) bool {
-	// A valid bracket string must have an even number of characters.
-	// 有效括号字符串的字符数量一定是偶数。
 	if len(s)%2 != 0 {
 		return false
 	}
 
-	// stack stores the closing brackets expected later.
-	// stack 保存之后期待遇到的右括号。
 	stack := make([]byte, 0, len(s)/2)
 
-	// Examine every bracket in the string.
-	// 依次检查字符串中的每个括号。
 	for i := 0; i < len(s); i++ {
 		current := s[i]
 
 		switch current {
 		case '(':
-			// After '(', the matching closing bracket must be ')'.
-			// 遇到 '(' 后，之后必须使用 ')' 与它匹配。
 			stack = append(stack, ')')
 
 		case '[':
-			// After '[', the matching closing bracket must be ']'.
-			// 遇到 '[' 后，之后必须使用 ']' 与它匹配。
 			stack = append(stack, ']')
 
 		case '{':
-			// After '{', the matching closing bracket must be '}'.
-			// 遇到 '{' 后，之后必须使用 '}' 与它匹配。
 			stack = append(stack, '}')
 
 		default:
-			// A closing bracket cannot be matched if the stack is empty.
-			// 如果栈为空，当前右括号就没有对应的左括号。
 			if len(stack) == 0 {
 				return false
 			}
 
-			// The current closing bracket must match the expected bracket.
-			// 当前右括号必须与栈顶期待的右括号相同。
 			top := stack[len(stack)-1]
 			if current != top {
 				return false
 			}
 
-			// Remove the matched expected bracket from the stack.
-			// 当前括号匹配成功，弹出栈顶元素。
 			stack = stack[:len(stack)-1]
 		}
 	}
@@ -141,58 +143,60 @@ func isValid(s string) bool {
 // 2. 哈希表映射：压入左括号本身，闭括号时用映射表换回它期待的左括号。
 // Time: O(n) average, Space: O(n) for the stack plus O(1) for the three-entry table.
 // 时间复杂度：平均 O(n)，空间复杂度：O(n)，由栈产生，外加三条映射表的 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. A valid bracket string must have an even number of characters.
+//     有效括号字符串的字符数量一定是偶数。
+//  2. pairs maps each closing bracket to the opening bracket it must match.
+//     pairs 把每个右括号映射到它必须匹配的左括号。
+//  3. stack stores the opening brackets that are still unmatched.
+//     stack 保存尚未闭合的左括号本身，而不是期待的右括号。
+//  4. Examine every bracket in the string.
+//     依次检查字符串中的每个括号。
+//  5. A lookup miss means the character is an opening bracket.
+//     查不到映射，说明当前字符是左括号。
+//  6. Opening brackets are pushed unchanged; no translation happens here.
+//     左括号原样入栈，此处不做任何转换。
+//  7. A closing bracket cannot be matched if the stack is empty.
+//     如果栈为空，当前右括号就没有对应的左括号。
+//  8. The innermost unmatched opening bracket must be exactly the expected one.
+//     最内层尚未闭合的左括号必须正是当前右括号期待的那一个。
+//  9. The pair is matched, so this opening bracket is no longer pending.
+//     配对成功，该左括号不再处于未闭合状态，弹出栈顶。
+//  10. Any leftover opening bracket was never closed.
+//     栈中剩余的左括号都没有闭合，字符串无效。
 func isValidWithMap(s string) bool {
-	// A valid bracket string must have an even number of characters.
-	// 有效括号字符串的字符数量一定是偶数。
 	if len(s)%2 != 0 {
 		return false
 	}
 
-	// pairs maps each closing bracket to the opening bracket it must match.
-	// pairs 把每个右括号映射到它必须匹配的左括号。
 	pairs := map[byte]byte{
 		')': '(',
 		']': '[',
 		'}': '{',
 	}
 
-	// stack stores the opening brackets that are still unmatched.
-	// stack 保存尚未闭合的左括号本身，而不是期待的右括号。
 	stack := make([]byte, 0, len(s)/2)
 
-	// Examine every bracket in the string.
-	// 依次检查字符串中的每个括号。
 	for i := 0; i < len(s); i++ {
 		current := s[i]
 
-		// A lookup miss means the character is an opening bracket.
-		// 查不到映射，说明当前字符是左括号。
 		expected, isClosing := pairs[current]
 		if !isClosing {
-			// Opening brackets are pushed unchanged; no translation happens here.
-			// 左括号原样入栈，此处不做任何转换。
 			stack = append(stack, current)
 			continue
 		}
 
-		// A closing bracket cannot be matched if the stack is empty.
-		// 如果栈为空，当前右括号就没有对应的左括号。
 		if len(stack) == 0 {
 			return false
 		}
 
-		// The innermost unmatched opening bracket must be exactly the expected one.
-		// 最内层尚未闭合的左括号必须正是当前右括号期待的那一个。
 		if stack[len(stack)-1] != expected {
 			return false
 		}
 
-		// The pair is matched, so this opening bracket is no longer pending.
-		// 配对成功，该左括号不再处于未闭合状态，弹出栈顶。
 		stack = stack[:len(stack)-1]
 	}
 
-	// Any leftover opening bracket was never closed.
-	// 栈中剩余的左括号都没有闭合，字符串无效。
 	return len(stack) == 0
 }

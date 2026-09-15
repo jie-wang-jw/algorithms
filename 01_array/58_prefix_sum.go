@@ -40,9 +40,19 @@ import (
 // 1. 前缀和：预处理出 prefix 数组，之后每次查询只做一次减法。
 // Time: O(n+q) for n values and q queries, Space: O(n) for the nums and prefix arrays.
 // 时间复杂度：O(n+q)（n 为元素数、q 为查询数），空间复杂度：O(n)，由 nums 与 prefix 数组产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Use buffered input because the problem may contain many numbers and queries.
+//     使用缓冲输入，因为题目可能包含大量数字和查询。
+//  2. prefix[i] stores the sum of the first i numbers; prefix[0] is 0.
+//     prefix[i] 表示前 i 个数的和；prefix[0] 固定为 0。
+//  3. Add nums[i] to the previous prefix sum.
+//     在前一个前缀和的基础上加上 nums[i]。
+//  4. Read queries until the input ends.
+//     持续读取查询，直到输入结束。
+//  5. Sum of [left, right] = prefix before right+1 - prefix before left.
+//     闭区间 [left, right] 的和 = right+1 前缀和 - left 前缀和。
 func prefixSum() {
-	// Use buffered input because the problem may contain many numbers and queries.
-	// 使用缓冲输入，因为题目可能包含大量数字和查询。
 	in := bufio.NewReader(os.Stdin)
 
 	var n int
@@ -51,30 +61,22 @@ func prefixSum() {
 	}
 
 	nums := make([]int, n)
-	// prefix[i] stores the sum of the first i numbers; prefix[0] is 0.
-	// prefix[i] 表示前 i 个数的和；prefix[0] 固定为 0。
 	prefix := make([]int, n+1)
 
 	for i := 0; i < n; i++ {
 		if _, err := fmt.Fscan(in, &nums[i]); err != nil {
 			return
 		}
-		// Add nums[i] to the previous prefix sum.
-		// 在前一个前缀和的基础上加上 nums[i]。
 		prefix[i+1] = prefix[i] + nums[i]
 	}
 
 	var left, right int
-	// Read queries until the input ends.
-	// 持续读取查询，直到输入结束。
 	for {
 		_, err := fmt.Fscan(in, &left, &right)
 		if err != nil {
 			break
 		}
 
-		// Sum of [left, right] = prefix before right+1 - prefix before left.
-		// 闭区间 [left, right] 的和 = right+1 前缀和 - left 前缀和。
 		sum := prefix[right+1] - prefix[left]
 		fmt.Println(sum)
 	}
@@ -84,11 +86,15 @@ func prefixSum() {
 // 2. 逐次求和：不做任何预处理，直接累加闭区间 [left, right] 内的每个值。
 // Time: O(right-left+1) per query, Space: O(1).
 // 时间复杂度：每次查询 O(right-left+1)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Accumulate every value in the inclusive query range.
+//     累加闭区间查询范围内的每一个值。
+//  2. Both boundaries are inclusive, so the loop condition uses <=.
+//     闭区间包含左右两端，因此循环条件使用 <=。
 func rangeSumBruteForce(nums []int, left, right int) int {
 	sum := 0
 
-	// Both boundaries are inclusive, so the loop condition uses <=.
-	// 闭区间包含左右两端，因此循环条件使用 <=。
 	for i := left; i <= right; i++ {
 		sum += nums[i]
 	}

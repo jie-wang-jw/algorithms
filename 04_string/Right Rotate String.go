@@ -21,6 +21,17 @@ reversing each block restores letter order inside them. Reduce k modulo n so k l
 先反转长度为 n-k 的前段和长度为 k 的后段，再整体反转，得到同样的右旋结果。
 Reverse the prefix of length n-k and the suffix of length k, then reverse the whole string.
 
+关键逻辑：为什么这样做 / Why This Works
+右旋把后缀放到前缀前面。整体反转会同时交换两段位置并打乱各自内部顺序；
+再反转两段，只恢复字母顺序，保留已经交换好的段顺序。例如 "abcdefg"、k=2：
+整体反转 -> "gfedcba"，再反转前 2 与后 5 -> "fgabcde"。
+先反转两段再整体反转是同一组变换的逆序组合，结果相同。
+Right rotation places the suffix before the prefix. Reversing everything swaps the two blocks
+and scrambles letter order inside each; reversing each block restores only the letters,
+keeping the swapped block order. Example for "abcdefg", k=2:
+full reverse -> "gfedcba", then reverse the first 2 and last 5 -> "fgabcde".
+Reversing parts first and then the whole string is the same transforms in reverse order.
+
 时间与空间复杂度 / Time and Space Complexity
 n 为字节长度。两种解法各做三次线性反转，时间 O(n)。
 Go 中 []byte(s) 副本占 O(n)；反转步骤本身是 O(1) 额外空间。
@@ -28,10 +39,16 @@ For n bytes both methods reverse three ranges, so time is O(n).
 The []byte(s) copy uses O(n) space in Go; the reversals themselves use O(1) extra space.
 */
 
-// 1. Reverse the whole string, then reverse the new prefix of length k and the suffix.
-// 1. 先整体反转，再反转长度为 k 的前段和后面的后缀。
+// 1. Reverse all, then reverse each part
+// 1. 先整体反转，再反转两段
+// Full reverse swaps the two blocks; then reverse each block to restore letter order inside them.
+// 整体反转交换前后两段；再分别反转两段，恢复各自内部字母顺序。
 // Time: O(n), Space: O(n) for the []byte copy.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由 []byte(s) 副本产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Reduce k modulo n so oversized rotations stay in range.
+//     对长度取模，避免 k 大于 n 时下标越界。
 func rightRotateString(s string, k int) string {
 	b := []byte(s)
 	n := len(b)
@@ -45,8 +62,10 @@ func rightRotateString(s string, k int) string {
 	return string(b)
 }
 
-// 2. Reverse the prefix of length n-k and the last k characters, then reverse the whole string.
-// 2. 先反转长度为 n-k 的前段和末尾 k 个字符，再整体反转。
+// 2. Reverse each part, then reverse all
+// 2. 先反转两段，再整体反转
+// Same transforms in reverse order: reverse prefix n-k and suffix k, then the whole string.
+// 同一组变换的逆序组合：先反转前 n-k 与后 k，再整体反转。
 // Time: O(n), Space: O(n) for the []byte copy.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由 []byte(s) 副本产生。
 func rightRotateStringPartsFirst(s string, k int) string {

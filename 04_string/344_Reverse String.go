@@ -27,48 +27,38 @@ code points, such as a base letter plus a combining accent, is still split apart
 For n bytes and u code points: time O(n), auxiliary space O(u) for the rune slice, plus O(n) output.
 */
 
-// 1. Two-pointer in-place byte swap: exchange from both ends until the pointers meet. Recommended.
-// 1. 字节双指针原地交换：从两端向中间交换，直到指针相遇。推荐。
+// 1. Two-pointer in-place byte swap (recommended)
+// 1. 字节双指针原地交换（推荐）
+// Swap from both ends until left meets right. Correct for printable ASCII (one byte per character).
+// 从两端向中间交换，直到指针相遇。本题可打印 ASCII 下一字符一字节，结果正确。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
 func reverseString(s []byte) {
-	// left starts at the first character and right starts at the last character.
-	// left 从第一个字符开始，right 从最后一个字符开始。
 	left, right := 0, len(s)-1
-
-	// Stop when the pointers meet or cross because every pair has been swapped.
-	// 当两个指针相遇或交错时停止，因为所有成对字符都已交换。
 	for left < right {
-		// Swap the characters at the two ends of the current range.
-		// 交换当前区间两端的字符。
 		s[left], s[right] = s[right], s[left]
-		// Move both pointers toward the center.
-		// 两个指针同时向中间移动。
 		left++
 		right--
 	}
 }
 
-// 2. Two-pointer rune swap: multi-byte characters stay intact.
-// 2. rune 双指针：多字节字符不会被拆坏。
+// 2. Two-pointer rune swap
+// 2. rune 双指针
+// Decode to []rune first so multi-byte UTF-8 characters stay intact; cannot meet O(1) space.
+// 先解码成 []rune，多字节 UTF-8 字符不会被拆坏；无法做到 O(1) 空间。
 // Time: O(n), Space: O(u) for the rune slice plus O(n) output.
 // 时间复杂度：O(n)，空间复杂度：rune 切片 O(u)，输出另占 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. []rune(s) decodes UTF-8 so each element is one complete code point, not one byte.
+//     []rune(s) 解码 UTF-8，每个元素是完整码点而不是单个字节。
 func reverseStringUnicode(s string) string {
-	// []rune(s) decodes UTF-8, so every element is one complete code point instead of one byte.
-	// []rune(s) 会解码 UTF-8，因此每个元素都是一个完整码点，而不是一个字节。
 	runes := []rune(s)
-
-	// The two-pointer swap is identical; only the element type changed.
-	// 双指针交换的写法完全相同，只是元素类型变成了 rune。
 	left, right := 0, len(runes)-1
-
 	for left < right {
 		runes[left], runes[right] = runes[right], runes[left]
 		left++
 		right--
 	}
-
-	// Converting back re-encodes each code point as valid UTF-8.
-	// 转换回字符串时，每个码点会被重新编码成合法的 UTF-8。
 	return string(runes)
 }

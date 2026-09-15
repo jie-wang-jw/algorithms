@@ -46,15 +46,17 @@ Auxiliary space is O(h); the output tree uses O(n). Go slices are views, so meth
 // 1. 递归切片：在当前切片中找最大值，再对左右两侧子数组递归构造。
 // Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
 // 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty range produces no node.
+//     空区间不能构造节点。
+//  2. The largest value in this slice becomes the current root.
+//     当前切片中的最大值就是这一层的根。
 func constructMaximumBinaryTree(nums []int) *TreeNode {
-	// An empty range produces no node.
-	// 空区间不能构造节点。
 	if len(nums) == 0 {
 		return nil
 	}
 
-	// The largest value in this slice becomes the current root.
-	// 当前切片中的最大值就是这一层的根。
 	maxIndex := 0
 	for i := 1; i < len(nums); i++ {
 		if nums[i] > nums[maxIndex] {
@@ -80,9 +82,15 @@ func constructMaximumBinaryTreeIndex(nums []int) *TreeNode {
 // 左闭右开区间 [left, right) 表示要构造成一棵最大二叉树的子数组。
 // Time: O(n²) worst case, Space: O(h).
 // 时间复杂度：最坏 O(n²)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Equal bounds mean this interval is empty.
+//     两端相等表示当前区间为空。
+//  2. Left child uses values strictly left of the maximum.
+//     左子树使用最大值左侧的区间。
+//  3. Right child uses values strictly right of the maximum.
+//     右子树使用最大值右侧的区间。
 func constructMaximumBinaryTreeRange(nums []int, left, right int) *TreeNode {
-	// Equal bounds mean this interval is empty.
-	// 两端相等表示当前区间为空。
 	if left >= right {
 		return nil
 	}
@@ -95,11 +103,7 @@ func constructMaximumBinaryTreeRange(nums []int, left, right int) *TreeNode {
 	}
 
 	root := &TreeNode{Val: nums[maxIndex]}
-	// Left child uses values strictly left of the maximum.
-	// 左子树使用最大值左侧的区间。
 	root.Left = constructMaximumBinaryTreeRange(nums, left, maxIndex)
-	// Right child uses values strictly right of the maximum.
-	// 右子树使用最大值右侧的区间。
 	root.Right = constructMaximumBinaryTreeRange(nums, maxIndex+1, right)
 	return root
 }

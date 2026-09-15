@@ -118,15 +118,17 @@ The three implementations appear below in the order of the numbered methods abov
 // 1. 递归比较镜像位置：推荐；从根的两个孩子出发，交叉比较外侧与内侧。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree is symmetric.
+//     空树是对称的。
+//  2. Check whether the two subtrees mirror each other.
+//     判断左右子树彼此是否互为镜像。
 func isSymmetric(root *TreeNode) bool {
-	// An empty tree is symmetric.
-	// 空树是对称的。
 	if root == nil {
 		return true
 	}
 
-	// Check whether the two subtrees mirror each other.
-	// 判断左右子树彼此是否互为镜像。
 	return isMirror(root.Left, root.Right)
 }
 
@@ -134,27 +136,29 @@ func isSymmetric(root *TreeNode) bool {
 // 交叉比较镜像位置：外侧 left.Left 对 right.Right，内侧 left.Right 对 right.Left，而不是同方向比较。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Both mirrored positions are empty, so they match.
+//     两个对应位置都没有节点，匹配成功。
+//  2. After excluding both nil, either nil means a structural mismatch.
+//     已排除同时为空；此时若有一个为空，就说明结构不匹配。
+//  3. Both nodes exist; their values must match.
+//     两个节点都存在，它们的值必须相同。
+//  4. Mirror reflection reverses directions: left matches right.
+//     镜像会反转方向，因此左孩子要与另一侧的右孩子比较。
 func isMirror(left, right *TreeNode) bool {
-	// Both mirrored positions are empty, so they match.
-	// 两个对应位置都没有节点，匹配成功。
 	if left == nil && right == nil {
 		return true
 	}
 
-	// After excluding both nil, either nil means a structural mismatch.
-	// 已排除同时为空；此时若有一个为空，就说明结构不匹配。
 	if left == nil || right == nil {
 		return false
 	}
 
-	// Both nodes exist; their values must match.
-	// 两个节点都存在，它们的值必须相同。
 	if left.Val != right.Val {
 		return false
 	}
 
-	// Mirror reflection reverses directions: left matches right.
-	// 镜像会反转方向，因此左孩子要与另一侧的右孩子比较。
 	return isMirror(left.Left, right.Right) &&
 		isMirror(left.Right, right.Left)
 }
@@ -163,42 +167,44 @@ func isMirror(left, right *TreeNode) bool {
 // 2. 队列迭代：成对入队、成对出队，每轮取出相邻两个节点作为一对镜像位置。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Consecutive nodes form pairs of mirrored positions.
+//     队列中相邻的两个节点组成一对镜像位置。
+//  2. The queue length is always even, so take two nodes together.
+//     队列长度始终为偶数，每次取出两个节点。
+//  3. Only this pair is confirmed; other pairs still need checking.
+//     这里只确认当前一对匹配，其他对仍需继续检查。
+//  4. Short-circuit evaluation prevents nil pointer access.
+//     短路求值保证先排除空指针，再比较节点值。
+//  5. Enqueue the outer pair, followed by the inner pair.
+//     将外侧一对、内侧一对依次加入队列。
+//  6. All pairs matched; an empty tree also reaches this return.
+//     所有对应位置都匹配；空树也会直接走到这里。
 func isSymmetricIterative(root *TreeNode) bool {
-	// Consecutive nodes form pairs of mirrored positions.
-	// 队列中相邻的两个节点组成一对镜像位置。
 	var queue []*TreeNode
 	if root != nil {
 		queue = append(queue, root.Left, root.Right)
 	}
 
 	for len(queue) > 0 {
-		// The queue length is always even, so take two nodes together.
-		// 队列长度始终为偶数，每次取出两个节点。
 		left, right := queue[0], queue[1]
 		queue = queue[2:]
 
-		// Only this pair is confirmed; other pairs still need checking.
-		// 这里只确认当前一对匹配，其他对仍需继续检查。
 		if left == nil && right == nil {
 			continue
 		}
 
-		// Short-circuit evaluation prevents nil pointer access.
-		// 短路求值保证先排除空指针，再比较节点值。
 		if left == nil || right == nil || left.Val != right.Val {
 			return false
 		}
 
-		// Enqueue the outer pair, followed by the inner pair.
-		// 将外侧一对、内侧一对依次加入队列。
 		queue = append(queue,
 			left.Left, right.Right,
 			left.Right, right.Left,
 		)
 	}
 
-	// All pairs matched; an empty tree also reaches this return.
-	// 所有对应位置都匹配；空树也会直接走到这里。
 	return true
 }
 
@@ -206,42 +212,44 @@ func isSymmetricIterative(root *TreeNode) bool {
 // 3. 栈迭代：配对规则不变，但栈顶是后压入的右侧候选，下面一个才是左侧候选。
 // Time: O(n), Space: O(h) for the stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. The root lies on the axis, so start from its two children as one pair.
+//     根位于中心轴上，因此直接把它的两个孩子作为第一对入栈。
+//  2. The top is the later-pushed node, so it is the right-side candidate.
+//     栈顶是后压入的节点，对应右侧候选；它下面一个才是左侧候选。
+//  3. This pair matches, but the remaining pairs still need checking.
+//     这一对匹配了，但其余的对仍然必须继续检查。
+//  4. Short-circuit evaluation rules out nil before reading Val.
+//     短路求值先排除空指针，再读取节点值。
+//  5. Push the outer pair, then the inner pair, keeping partners adjacent.
+//     先压外侧一对，再压内侧一对，让同一对始终相邻。
+//  6. Every mirrored pair matched; an empty tree also reaches this return.
+//     所有镜像位置都匹配；空树也会直接走到这里。
 func isSymmetricStack(root *TreeNode) bool {
-	// The root lies on the axis, so start from its two children as one pair.
-	// 根位于中心轴上，因此直接把它的两个孩子作为第一对入栈。
 	var stack []*TreeNode
 	if root != nil {
 		stack = append(stack, root.Left, root.Right)
 	}
 
 	for len(stack) > 0 {
-		// The top is the later-pushed node, so it is the right-side candidate.
-		// 栈顶是后压入的节点，对应右侧候选；它下面一个才是左侧候选。
 		last := len(stack) - 1
 		left, right := stack[last-1], stack[last]
 		stack = stack[:last-1]
 
-		// This pair matches, but the remaining pairs still need checking.
-		// 这一对匹配了，但其余的对仍然必须继续检查。
 		if left == nil && right == nil {
 			continue
 		}
 
-		// Short-circuit evaluation rules out nil before reading Val.
-		// 短路求值先排除空指针，再读取节点值。
 		if left == nil || right == nil || left.Val != right.Val {
 			return false
 		}
 
-		// Push the outer pair, then the inner pair, keeping partners adjacent.
-		// 先压外侧一对，再压内侧一对，让同一对始终相邻。
 		stack = append(stack,
 			left.Left, right.Right,
 			left.Right, right.Left,
 		)
 	}
 
-	// Every mirrored pair matched; an empty tree also reaches this return.
-	// 所有镜像位置都匹配；空树也会直接走到这里。
 	return true
 }

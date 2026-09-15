@@ -30,13 +30,17 @@ n 为节点数。三种解法时间都是 O(n)。解法一、二辅助空间 O(1
 n is the node count. All three take O(n) time. Methods 1 and 2 use O(1) auxiliary space; method 3 uses O(n) call-stack space.
 */
 
-// 1. Delete on the original list: strip matching heads, then skip matching successors from a predecessor.
-// 1. 直接在原链表上删除：先摘掉连续匹配的头节点，再由前驱跳过匹配的后继。
+// 1. Delete on the original list
+// 1. 直接在原链表上删除
+// Strip matching heads first; then from predecessor cur, skip matching successors and stay put after a skip.
+// 先摘掉连续匹配的头；再由前驱 cur 跳过匹配后继，跳过后停在 cur。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Stay at cur: the successor that slid in may also equal val.
+//     停在 cur：补上来的后继仍可能等于 val。
 func removeElementsDirect(head *ListNode, val int) *ListNode {
-	// A matching head has no predecessor, so move head forward until it is kept or the list is empty.
-	// 匹配的头节点没有前驱，只能把 head 不断后移，直到留下的头不是 val，或链表为空。
 	for head != nil && head.Val == val {
 		head = head.Next
 	}
@@ -44,8 +48,6 @@ func removeElementsDirect(head *ListNode, val int) *ListNode {
 	cur := head
 	for cur != nil && cur.Next != nil {
 		if cur.Next.Val == val {
-			// Skip the matching successor; stay at cur because the new successor may also equal val.
-			// 跳过匹配的后继，并停在 cur，因为补上来的节点仍可能等于 val。
 			cur.Next = cur.Next.Next
 		} else {
 			cur = cur.Next
@@ -54,8 +56,10 @@ func removeElementsDirect(head *ListNode, val int) *ListNode {
 	return head
 }
 
-// 2. Dummy head (recommended): every real node has a predecessor, so deletion uses one loop.
-// 2. 虚拟头节点：推荐；每个真实节点都有前驱，删除只需一套逻辑。
+// 2. Dummy head (recommended)
+// 2. 虚拟头节点（推荐）
+// Dummy gives every real node a predecessor so deletion uses one loop; stay at cur after a skip.
+// 虚拟头让每个真实节点都有前驱，删除只需一套逻辑；跳过后停在 cur。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
 func removeElements(head *ListNode, val int) *ListNode {
@@ -71,8 +75,10 @@ func removeElements(head *ListNode, val int) *ListNode {
 	return dummy.Next
 }
 
-// 3. Recursion: drop a matching head, otherwise keep it and recurse on the suffix.
-// 3. 递归：头等于 val 就丢掉，否则保留头并递归处理后继。
+// 3. Recursion
+// 3. 递归
+// Drop a matching head; otherwise keep it and reconnect to the cleaned suffix.
+// 头等于 val 就丢掉；否则保留头并接到清理后的后缀上。
 // Time: O(n), Space: O(n) for the call stack.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由递归栈产生。
 func removeElementsRecursive(head *ListNode, val int) *ListNode {

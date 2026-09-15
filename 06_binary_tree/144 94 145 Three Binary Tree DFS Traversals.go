@@ -97,9 +97,19 @@ Because the stack is LIFO, push the right child before the left child.
 // 1. 前序专用迭代：先访问根，再先压右孩子、后压左孩子，利用后进先出让左孩子先出栈。
 // Time: O(n), Space: O(h) for the stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由显式栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has no traversal result.
+//     空树没有遍历结果。
+//  2. Pop the top node.
+//     弹出栈顶节点。
+//  3. Visit the root before its children.
+//     在左右子节点之前访问根节点。
+//  4. Push right first so it is processed after the left child.
+//     先压入右子节点，使它在左子节点之后处理。
+//  5. Push left last so it is processed next.
+//     后压入左子节点，使它下一步被处理。
 func preorderTraversal(root *TreeNode) []int {
-	// An empty tree has no traversal result.
-	// 空树没有遍历结果。
 	if root == nil {
 		return []int{}
 	}
@@ -108,24 +118,16 @@ func preorderTraversal(root *TreeNode) []int {
 	stack := []*TreeNode{root}
 
 	for len(stack) > 0 {
-		// Pop the top node.
-		// 弹出栈顶节点。
 		last := len(stack) - 1
 		node := stack[last]
 		stack = stack[:last]
 
-		// Visit the root before its children.
-		// 在左右子节点之前访问根节点。
 		result = append(result, node.Val)
 
-		// Push right first so it is processed after the left child.
-		// 先压入右子节点，使它在左子节点之后处理。
 		if node.Right != nil {
 			stack = append(stack, node.Right)
 		}
 
-		// Push left last so it is processed next.
-		// 后压入左子节点，使它下一步被处理。
 		if node.Left != nil {
 			stack = append(stack, node.Left)
 		}
@@ -138,6 +140,10 @@ func preorderTraversal(root *TreeNode) []int {
 // 2. 前序递归：在两次递归之前记录根。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Root → Left → Right
+//     根 → 左 → 右
 func preorderTraversalRecursive(root *TreeNode) []int {
 	result := make([]int, 0)
 
@@ -147,8 +153,6 @@ func preorderTraversalRecursive(root *TreeNode) []int {
 			return
 		}
 
-		// Root → Left → Right
-		// 根 → 左 → 右
 		result = append(result, node.Val)
 		traverse(node.Left)
 		traverse(node.Right)
@@ -194,16 +198,20 @@ The recursive version likewise records the root after the left call returns and 
 // 1. 中序专用迭代：沿左侧压栈，弹出时记录根，再进入右子树。
 // Time: O(n), Space: O(h) for the stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由显式栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Continue while an unexplored node or a saved ancestor remains.
+//     只要还有未探索节点或栈中还有祖先节点，就继续处理。
+//  2. Reach the leftmost node and save every ancestor on the path.
+//     不断向左移动，并保存路径上的每个祖先节点。
+//  3. Visit the root after its left subtree.
+//     左子树处理完成后访问根节点。
 func inorderTraversal(root *TreeNode) []int {
 	result := make([]int, 0)
 	stack := make([]*TreeNode, 0)
 	current := root
 
-	// Continue while an unexplored node or a saved ancestor remains.
-	// 只要还有未探索节点或栈中还有祖先节点，就继续处理。
 	for current != nil || len(stack) > 0 {
-		// Reach the leftmost node and save every ancestor on the path.
-		// 不断向左移动，并保存路径上的每个祖先节点。
 		for current != nil {
 			stack = append(stack, current)
 			current = current.Left
@@ -213,8 +221,6 @@ func inorderTraversal(root *TreeNode) []int {
 		current = stack[last]
 		stack = stack[:last]
 
-		// Visit the root after its left subtree.
-		// 左子树处理完成后访问根节点。
 		result = append(result, current.Val)
 		current = current.Right
 	}
@@ -226,6 +232,10 @@ func inorderTraversal(root *TreeNode) []int {
 // 2. 中序递归：在两次递归之间记录根。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Left -> Root -> Right
+//     左 -> 根 -> 右
 func inorderTraversalRecursive(root *TreeNode) []int {
 	result := make([]int, 0)
 
@@ -235,8 +245,6 @@ func inorderTraversalRecursive(root *TreeNode) []int {
 			return
 		}
 
-		// Left -> Root -> Right
-		// 左 -> 根 -> 右
 		traverse(node.Left)
 		result = append(result, node.Val)
 		traverse(node.Right)
@@ -271,6 +279,17 @@ Recursion needs no reversal: record the root only after both subtree calls have 
 // 1. 后序迭代：先用栈得到“根、右、左”，再整体反转为“左、右、根”。
 // Time: O(n), Space: O(h) for the stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由显式栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Temporarily record nodes in root-right-left order.
+//     暂时按照“根、右、左”的顺序记录节点。
+//  2. Push left before right so right is processed first.
+//     先压入左子节点、再压入右子节点，使右子节点先处理。
+//  3. Reverse root-right-left into left-right-root.
+//     将“根、右、左”反转为“左、右、根”。
+//  4. // 项目代码更简洁
+//     // More concise for project code.
+//     slices.Reverse(result)
 func postorderTraversal(root *TreeNode) []int {
 	if root == nil {
 		return []int{}
@@ -284,12 +303,8 @@ func postorderTraversal(root *TreeNode) []int {
 		node := stack[last]
 		stack = stack[:last]
 
-		// Temporarily record nodes in root-right-left order.
-		// 暂时按照“根、右、左”的顺序记录节点。
 		result = append(result, node.Val)
 
-		// Push left before right so right is processed first.
-		// 先压入左子节点、再压入右子节点，使右子节点先处理。
 		if node.Left != nil {
 			stack = append(stack, node.Left)
 		}
@@ -298,15 +313,9 @@ func postorderTraversal(root *TreeNode) []int {
 		}
 	}
 
-	// Reverse root-right-left into left-right-root.
-	// 将“根、右、左”反转为“左、右、根”。
 	for left, right := 0, len(result)-1; left < right; left, right = left+1, right-1 {
 		result[left], result[right] = result[right], result[left]
 	}
-	/*	// 项目代码更简洁
-		// More concise for project code.
-		slices.Reverse(result)
-	*/
 
 	return result
 }
@@ -315,6 +324,10 @@ func postorderTraversal(root *TreeNode) []int {
 // 2. 后序递归：在两次递归之后记录根。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Left -> Right -> Root
+//     左 -> 右 -> 根
 func postorderTraversalRecursive(root *TreeNode) []int {
 	result := make([]int, 0)
 
@@ -324,8 +337,6 @@ func postorderTraversalRecursive(root *TreeNode) []int {
 			return
 		}
 
-		// Left -> Right -> Root
-		// 左 -> 右 -> 根
 		traverse(node.Left)
 		traverse(node.Right)
 		result = append(result, node.Val)
@@ -383,12 +394,18 @@ plus their nil markers, up to n in the worst case. The output takes a further O(
 // 3. 前序统一迭代：节点后紧跟 nil 表示只记录；入栈次序为右、左、根+nil。
 // Time: O(n), Space: O(h) for the marked stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由带 nil 标记的栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Never push a nil child; nil is reserved as the record marker.
+//     不要压入空孩子，nil 已经被约定为“待记录”标记。
+//  2. A nil marker means the node underneath it is ready to be recorded.
+//     弹出 nil 标记，说明它下面那个节点已经可以记录了。
+//  3. Push in reverse of root-left-right so the root pops first.
+//     按“根、左、右”的逆序入栈，使根最先弹出。
 func preorderTraversalUnified(root *TreeNode) []int {
 	result := make([]int, 0)
 	stack := []*TreeNode{}
 
-	// Never push a nil child; nil is reserved as the record marker.
-	// 不要压入空孩子，nil 已经被约定为“待记录”标记。
 	if root != nil {
 		stack = append(stack, root)
 	}
@@ -398,8 +415,6 @@ func preorderTraversalUnified(root *TreeNode) []int {
 		node := stack[last]
 		stack = stack[:last]
 
-		// A nil marker means the node underneath it is ready to be recorded.
-		// 弹出 nil 标记，说明它下面那个节点已经可以记录了。
 		if node == nil {
 			last = len(stack) - 1
 			node = stack[last]
@@ -408,8 +423,6 @@ func preorderTraversalUnified(root *TreeNode) []int {
 			continue
 		}
 
-		// Push in reverse of root-left-right so the root pops first.
-		// 按“根、左、右”的逆序入栈，使根最先弹出。
 		if node.Right != nil {
 			stack = append(stack, node.Right)
 		}
@@ -426,6 +439,12 @@ func preorderTraversalUnified(root *TreeNode) []int {
 // 3. 中序统一迭代：同一条 nil 标记规则，入栈次序为右、根+nil、左。
 // Time: O(n), Space: O(h) for the marked stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由带 nil 标记的栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. The same marker rule applies to all three orders.
+//     三种顺序共用同一条标记规则。
+//  2. Push in reverse of left-root-right, placing the root between its children.
+//     按“左、根、右”的逆序入栈，让根夹在两个孩子之间。
 func inorderTraversalUnified(root *TreeNode) []int {
 	result := make([]int, 0)
 	stack := []*TreeNode{}
@@ -439,8 +458,6 @@ func inorderTraversalUnified(root *TreeNode) []int {
 		node := stack[last]
 		stack = stack[:last]
 
-		// The same marker rule applies to all three orders.
-		// 三种顺序共用同一条标记规则。
 		if node == nil {
 			last = len(stack) - 1
 			node = stack[last]
@@ -449,8 +466,6 @@ func inorderTraversalUnified(root *TreeNode) []int {
 			continue
 		}
 
-		// Push in reverse of left-root-right, placing the root between its children.
-		// 按“左、根、右”的逆序入栈，让根夹在两个孩子之间。
 		if node.Right != nil {
 			stack = append(stack, node.Right)
 		}
@@ -467,6 +482,10 @@ func inorderTraversalUnified(root *TreeNode) []int {
 // 3. 后序统一迭代：同一条 nil 标记规则，入栈次序为根+nil、右、左，因此不必再反转结果。
 // Time: O(n), Space: O(h) for the marked stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由带 nil 标记的栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Push in reverse of left-right-root, so no final reversal is needed.
+//     按“左、右、根”的逆序入栈，因此不需要最后再反转结果。
 func postorderTraversalUnified(root *TreeNode) []int {
 	result := make([]int, 0)
 	stack := []*TreeNode{}
@@ -488,8 +507,6 @@ func postorderTraversalUnified(root *TreeNode) []int {
 			continue
 		}
 
-		// Push in reverse of left-right-root, so no final reversal is needed.
-		// 按“左、右、根”的逆序入栈，因此不需要最后再反转结果。
 		stack = append(stack, node, nil)
 		if node.Right != nil {
 			stack = append(stack, node.Right)
@@ -555,43 +572,45 @@ or a panic partway through, leaves a damaged structure behind.
 // 4. 前序 Morris：借用前驱右指针当线索，第一次到达就记录，走完左子树后再拆掉线索。
 // Time: O(n), Space: O(1) auxiliary; right pointers are rewritten temporarily.
 // 时间复杂度：O(n)，空间复杂度：辅助 O(1)，会临时改写右指针。
+//
+// 步骤与要点 / Steps and notes:
+//  1. No left subtree means nothing to wait for, so record and move right.
+//     没有左子树就不需要等待，直接记录并转向右边。
+//  2. Walk to the inorder predecessor: rightmost node of the left subtree.
+//     找中序前驱：左子树中一直沿 Right 走到底的节点。
+//  3. The second condition detects a thread we built earlier and avoids a cycle.
+//     第二个条件识别之前建立的线索，避免顺着线索绕回自己造成死循环。
+//  4. First arrival: preorder records the root before its left subtree.
+//     第一次到达：前序在进入左子树之前记录根。
+//  5. Store the return path inside an unused nil pointer.
+//     把返回路径写进一个原本为空的右指针里。
+//  6. Second arrival: the left subtree is finished, so restore the tree.
+//     第二次到达：左子树已经走完，拆掉线索还原原树。
 func preorderTraversalMorris(root *TreeNode) []int {
 	result := make([]int, 0)
 	current := root
 
 	for current != nil {
-		// No left subtree means nothing to wait for, so record and move right.
-		// 没有左子树就不需要等待，直接记录并转向右边。
 		if current.Left == nil {
 			result = append(result, current.Val)
 			current = current.Right
 			continue
 		}
 
-		// Walk to the inorder predecessor: rightmost node of the left subtree.
-		// 找中序前驱：左子树中一直沿 Right 走到底的节点。
 		predecessor := current.Left
 
-		// The second condition detects a thread we built earlier and avoids a cycle.
-		// 第二个条件识别之前建立的线索，避免顺着线索绕回自己造成死循环。
 		for predecessor.Right != nil && predecessor.Right != current {
 			predecessor = predecessor.Right
 		}
 
 		if predecessor.Right == nil {
-			// First arrival: preorder records the root before its left subtree.
-			// 第一次到达：前序在进入左子树之前记录根。
 			result = append(result, current.Val)
 
-			// Store the return path inside an unused nil pointer.
-			// 把返回路径写进一个原本为空的右指针里。
 			predecessor.Right = current
 			current = current.Left
 			continue
 		}
 
-		// Second arrival: the left subtree is finished, so restore the tree.
-		// 第二次到达：左子树已经走完，拆掉线索还原原树。
 		predecessor.Right = nil
 		current = current.Right
 	}
@@ -603,13 +622,19 @@ func preorderTraversalMorris(root *TreeNode) []int {
 // 4. 中序 Morris：走法与前序相同，但第二次到达、左子树走完后才记录。
 // Time: O(n), Space: O(1) auxiliary; right pointers are rewritten temporarily.
 // 时间复杂度：O(n)，空间复杂度：辅助 O(1)，会临时改写右指针。
+//
+// 步骤与要点 / Steps and notes:
+//  1. With no left subtree, the current node is already the next inorder value.
+//     没有左子树时，当前节点就是下一个中序值。
+//  2. First arrival: build the thread and descend without recording yet.
+//     第一次到达：建立线索并深入左子树，此时还不能记录。
+//  3. Second arrival: remove the thread, then record the root after its left subtree.
+//     第二次到达：先拆掉线索，再在左子树之后记录根，符合“左、根、右”。
 func inorderTraversalMorris(root *TreeNode) []int {
 	result := make([]int, 0)
 	current := root
 
 	for current != nil {
-		// With no left subtree, the current node is already the next inorder value.
-		// 没有左子树时，当前节点就是下一个中序值。
 		if current.Left == nil {
 			result = append(result, current.Val)
 			current = current.Right
@@ -622,15 +647,11 @@ func inorderTraversalMorris(root *TreeNode) []int {
 		}
 
 		if predecessor.Right == nil {
-			// First arrival: build the thread and descend without recording yet.
-			// 第一次到达：建立线索并深入左子树，此时还不能记录。
 			predecessor.Right = current
 			current = current.Left
 			continue
 		}
 
-		// Second arrival: remove the thread, then record the root after its left subtree.
-		// 第二次到达：先拆掉线索，再在左子树之后记录根，符合“左、根、右”。
 		predecessor.Right = nil
 		result = append(result, current.Val)
 		current = current.Right

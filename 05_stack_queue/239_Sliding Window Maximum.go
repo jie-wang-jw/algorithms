@@ -155,49 +155,59 @@ Therefore,the front of the deque always represents the maximum value in the curr
 // 1. 单调递减队列：推荐；删除过期队首和不大于当前值的队尾，队首始终是窗口最大值。
 // Time: O(n), Space: O(k) for the deque plus O(n-k+1) output.
 // 时间复杂度：O(n)，空间复杂度：队列 O(k)，输出 O(n-k+1)。
+//
+// 步骤与要点 / Steps and notes:
+//
+//  1. deque stores indices instead of values.
+//     deque 保存数组下标，而不是直接保存数字。
+//
+//     The corresponding values remain in decreasing order.
+//     这些下标对应的数字保持单调递减。
+//
+//  2. There are len(nums)-k+1 complete windows.
+//     一共有 len(nums)-k+1 个完整窗口。
+//
+//  3. i is the right boundary of the current window.
+//     i 是当前窗口的右边界。
+//
+//  4. Step 1: remove indices that have left the window.
+//     第一步：删除已经离开当前窗口的下标。
+//
+//     The valid window starts at i-k+1, so indices <= i-k are expired.
+//     当前窗口从 i-k+1 开始，因此下标 <= i-k 的元素已经过期。
+//
+//  5. Step 2: remove weaker candidates from the back.
+//     第二步：从队尾删除不可能成为最大值的候选元素。
+//
+//     nums[i] is at least as large and will leave the window later.
+//     nums[i] 不小于这些元素，而且会更晚离开窗口。
+//
+//  6. Step 3: append the current index.
+//     第三步：将当前下标加入队尾。
+//
+//  7. The first complete window is formed when i reaches k-1.
+//     当 i 到达 k-1 时，第一个完整窗口形成。
+//
+//  8. The front always represents the current maximum.
+//     队首始终对应当前窗口的最大值。
 func maxSlidingWindow(nums []int, k int) []int {
-	// deque stores indices instead of values.
-	// deque 保存数组下标，而不是直接保存数字。
-	//
-	// The corresponding values remain in decreasing order.
-	// 这些下标对应的数字保持单调递减。
 	deque := make([]int, 0, k)
 
-	// There are len(nums)-k+1 complete windows.
-	// 一共有 len(nums)-k+1 个完整窗口。
 	result := make([]int, 0, len(nums)-k+1)
 
-	// i is the right boundary of the current window.
-	// i 是当前窗口的右边界。
 	for i := range nums {
-		// Step 1: remove indices that have left the window.
-		// 第一步：删除已经离开当前窗口的下标。
-		//
-		// The valid window starts at i-k+1, so indices <= i-k are expired.
-		// 当前窗口从 i-k+1 开始，因此下标 <= i-k 的元素已经过期。
 		for len(deque) > 0 && deque[0] <= i-k {
 			deque = deque[1:]
 		}
 
-		// Step 2: remove weaker candidates from the back.
-		// 第二步：从队尾删除不可能成为最大值的候选元素。
-		//
-		// nums[i] is at least as large and will leave the window later.
-		// nums[i] 不小于这些元素，而且会更晚离开窗口。
 		for len(deque) > 0 &&
 			nums[deque[len(deque)-1]] <= nums[i] {
 			deque = deque[:len(deque)-1]
 		}
 
-		// Step 3: append the current index.
-		// 第三步：将当前下标加入队尾。
 		deque = append(deque, i)
 
-		// The first complete window is formed when i reaches k-1.
-		// 当 i 到达 k-1 时，第一个完整窗口形成。
 		if i >= k-1 {
-			// The front always represents the current maximum.
-			// 队首始终对应当前窗口的最大值。
 			result = append(result, nums[deque[0]])
 		}
 	}
@@ -209,20 +219,22 @@ func maxSlidingWindow(nums []int, k int) []int {
 // 2. 逐窗口暴力扫描：每个窗口重新扫描 k 个元素，不复用上一窗口的信息。
 // Time: O((n-k+1)k), Space: O(1) auxiliary plus O(n-k+1) output.
 // 时间复杂度：O((n-k+1)k)，空间复杂度：辅助 O(1)，输出 O(n-k+1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. There are len(nums)-k+1 complete windows.
+//     一共有 len(nums)-k+1 个完整窗口。
+//  2. left is the window's left boundary; left+k <= len(nums) keeps the window inside the array.
+//     left 是窗口左边界；left+k <= len(nums) 保证窗口完整落在数组内。
+//  3. Seed with the leftmost value so no neutral element is needed.
+//     用窗口最左元素作为初值，就不必设定一个人为的极小初值。
+//  4. Rescan the remaining k-1 values, reusing nothing from the previous window.
+//     重新扫描剩下的 k-1 个元素，完全不复用上一个窗口的结果。
 func maxSlidingWindowBruteForce(nums []int, k int) []int {
-	// There are len(nums)-k+1 complete windows.
-	// 一共有 len(nums)-k+1 个完整窗口。
 	result := make([]int, 0, len(nums)-k+1)
 
-	// left is the window's left boundary; left+k <= len(nums) keeps the window inside the array.
-	// left 是窗口左边界；left+k <= len(nums) 保证窗口完整落在数组内。
 	for left := 0; left+k <= len(nums); left++ {
-		// Seed with the leftmost value so no neutral element is needed.
-		// 用窗口最左元素作为初值，就不必设定一个人为的极小初值。
 		best := nums[left]
 
-		// Rescan the remaining k-1 values, reusing nothing from the previous window.
-		// 重新扫描剩下的 k-1 个元素，完全不复用上一个窗口的结果。
 		for j := left + 1; j < left+k; j++ {
 			best = max(best, nums[j])
 		}
@@ -249,9 +261,11 @@ func (h windowMaxHeap) Len() int {
 // 只比较数值，让较大值更接近堆顶，从而形成大顶堆。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Only the value is compared; equal values may sit in either order.
+//     只比较数值，数值相等时两者先后顺序不确定。
 func (h windowMaxHeap) Less(i, j int) bool {
-	// Only the value is compared; equal values may sit in either order.
-	// 只比较数值，数值相等时两者先后顺序不确定。
 	return h[i][0] > h[j][0]
 }
 
@@ -267,9 +281,11 @@ func (h windowMaxHeap) Swap(i, j int) {
 // 把新元素追加到底层切片末尾；heap.Push 随后用 Less 和 Swap 上浮。
 // Time: amortized O(1) for the append. Space: O(1) extra.
 // 时间复杂度：追加均摊 O(1)。空间复杂度：额外 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. The pointer receiver is required because appending may reallocate the slice.
+//     必须使用指针接收者，因为 append 可能重新分配底层数组。
 func (h *windowMaxHeap) Push(x any) {
-	// The pointer receiver is required because appending may reallocate the slice.
-	// 必须使用指针接收者，因为 append 可能重新分配底层数组。
 	*h = append(*h, x.([2]int))
 }
 
@@ -277,16 +293,18 @@ func (h *windowMaxHeap) Push(x any) {
 // 删除底层切片末尾元素；container/heap 调用前已把原堆顶移到末尾并修好剩余堆。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Save the element that will be returned.
+//     保存即将返回的元素。
+//  2. Remove the last element from the slice.
+//     从切片中删除最后一个元素。
 func (h *windowMaxHeap) Pop() any {
 	old := *h
 	last := len(old) - 1
 
-	// Save the element that will be returned.
-	// 保存即将返回的元素。
 	value := old[last]
 
-	// Remove the last element from the slice.
-	// 从切片中删除最后一个元素。
 	*h = old[:last]
 
 	return value
@@ -296,34 +314,42 @@ func (h *windowMaxHeap) Pop() any {
 // 3. 惰性删除的大顶堆：每轮插入当前下标，只弹出过期堆顶；辅助空间是 O(n) 而不是 O(k)。
 // Time: O(n log n), Space: O(n) for the heap because lazy deletion can retain expired entries.
 // 时间复杂度：O(n log n)，空间复杂度：O(n)，由堆产生，因为惰性删除让堆规模由 n 而不是 k 决定。
+//
+// 步骤与要点 / Steps and notes:
+//
+//  1. An empty literal is already a valid heap, so heap.Init is unnecessary.
+//     空字面量本身就是合法的堆，因此不需要调用 heap.Init。
+//
+//  2. i is the right boundary of the current window.
+//     i 是当前窗口的右边界。
+//
+//  3. Insert the current element together with its index.
+//     把当前元素和它的下标一起插入堆中。
+//
+//  4. Drop expired roots only; expired entries buried deeper stay until they surface.
+//     只弹出过期的堆顶；埋在堆内部的过期元素等浮到堆顶时再处理。
+//
+//     The index just inserted satisfies i > i-k for k >= 1, so the heap cannot be emptied.
+//     刚插入的下标满足 i > i-k（k >= 1），所以这个循环不会掏空堆。
+//
+//  5. The first complete window is formed when i reaches k-1.
+//     当 i 到达 k-1 时，第一个完整窗口形成。
+//
+//  6. Every window element is still in the heap, so a valid root is the window maximum.
+//     窗口内的元素都还在堆中，因此有效的堆顶就是窗口最大值。
 func maxSlidingWindowHeap(nums []int, k int) []int {
-	// An empty literal is already a valid heap, so heap.Init is unnecessary.
-	// 空字面量本身就是合法的堆，因此不需要调用 heap.Init。
 	h := &windowMaxHeap{}
 
 	result := make([]int, 0, len(nums)-k+1)
 
-	// i is the right boundary of the current window.
-	// i 是当前窗口的右边界。
 	for i, value := range nums {
-		// Insert the current element together with its index.
-		// 把当前元素和它的下标一起插入堆中。
 		heap.Push(h, [2]int{value, i})
 
-		// Drop expired roots only; expired entries buried deeper stay until they surface.
-		// 只弹出过期的堆顶；埋在堆内部的过期元素等浮到堆顶时再处理。
-		//
-		// The index just inserted satisfies i > i-k for k >= 1, so the heap cannot be emptied.
-		// 刚插入的下标满足 i > i-k（k >= 1），所以这个循环不会掏空堆。
 		for (*h)[0][1] <= i-k {
 			heap.Pop(h)
 		}
 
-		// The first complete window is formed when i reaches k-1.
-		// 当 i 到达 k-1 时，第一个完整窗口形成。
 		if i >= k-1 {
-			// Every window element is still in the heap, so a valid root is the window maximum.
-			// 窗口内的元素都还在堆中，因此有效的堆顶就是窗口最大值。
 			result = append(result, (*h)[0][0])
 		}
 	}
@@ -335,33 +361,41 @@ func maxSlidingWindowHeap(nums []int, k int) []int {
 // 4. 分块预处理前后缀最大值：长度 k 的窗口最多跨两块，因此 max(suffix[left], prefix[right]) 就是窗口最大值。
 // Time: O(n), Space: O(n) for the prefix and suffix arrays.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由前后缀数组产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. prefix[i] is the maximum from the start of i's block through i.
+//     suffix[i] is the maximum from i through the end of i's block.
+//     prefix[i] 是 i 所在块的起点到 i 的最大值。
+//     suffix[i] 是 i 到该块终点的最大值。
+//  2. A block start has no earlier element in its own block.
+//     块起点在本块内没有更早的元素，因此直接取自身。
+//  3. Extend the running maximum within the same block.
+//     在同一个块内继续累积最大值。
+//  4. A block end, or the array end for a trailing partial block, starts a new run.
+//     块终点，或末尾不足一整块时的数组末端，都要重新开始累积。
+//  5. Extend the running maximum backward within the same block.
+//     在同一个块内向左继续累积最大值。
+//  6. A length-k window spans at most two adjacent blocks.
+//     长度恰为 k 的窗口最多跨越两个相邻块。
+//  7. suffix[left] covers left to its block end, prefix[right] covers right's block start to right.
+//     The two ranges meet exactly at the block boundary and never reach outside the window.
+//     suffix[left] 覆盖 left 到它所在块的末尾，prefix[right] 覆盖 right 所在块的开头到 right。
+//     两段正好在块边界相接，也都不会越出窗口。
 func maxSlidingWindowBlocks(nums []int, k int) []int {
-	// prefix[i] is the maximum from the start of i's block through i.
-	// suffix[i] is the maximum from i through the end of i's block.
-	// prefix[i] 是 i 所在块的起点到 i 的最大值。
-	// suffix[i] 是 i 到该块终点的最大值。
 	prefix, suffix := make([]int, len(nums)), make([]int, len(nums))
 
 	for i, value := range nums {
 		if i%k == 0 {
-			// A block start has no earlier element in its own block.
-			// 块起点在本块内没有更早的元素，因此直接取自身。
 			prefix[i] = value
 		} else {
-			// Extend the running maximum within the same block.
-			// 在同一个块内继续累积最大值。
 			prefix[i] = max(prefix[i-1], value)
 		}
 	}
 
 	for i := len(nums) - 1; i >= 0; i-- {
 		if i == len(nums)-1 || (i+1)%k == 0 {
-			// A block end, or the array end for a trailing partial block, starts a new run.
-			// 块终点，或末尾不足一整块时的数组末端，都要重新开始累积。
 			suffix[i] = nums[i]
 		} else {
-			// Extend the running maximum backward within the same block.
-			// 在同一个块内向左继续累积最大值。
 			suffix[i] = max(suffix[i+1], nums[i])
 		}
 	}
@@ -369,14 +403,8 @@ func maxSlidingWindowBlocks(nums []int, k int) []int {
 	result := make([]int, 0, len(nums)-k+1)
 
 	for left := 0; left+k <= len(nums); left++ {
-		// A length-k window spans at most two adjacent blocks.
-		// 长度恰为 k 的窗口最多跨越两个相邻块。
 		right := left + k - 1
 
-		// suffix[left] covers left to its block end, prefix[right] covers right's block start to right.
-		// The two ranges meet exactly at the block boundary and never reach outside the window.
-		// suffix[left] 覆盖 left 到它所在块的末尾，prefix[right] 覆盖 right 所在块的开头到 right。
-		// 两段正好在块边界相接，也都不会越出窗口。
 		result = append(result, max(suffix[left], prefix[right]))
 	}
 

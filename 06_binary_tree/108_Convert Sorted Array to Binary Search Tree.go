@@ -50,15 +50,17 @@ func sortedArrayToBST(nums []int) *TreeNode {
 // 左闭右开区间 [left, right) 构造成一棵平衡二叉搜索树。
 // Time: O(n), Space: O(log n).
 // 时间复杂度：O(n)，空间复杂度：O(log n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty half-open range: no node.
+//     空的左闭右开区间：不建节点。
+//  2. Midpoint root keeps left and right halves size-balanced.
+//     中点作根，左右半段长度差至多为 1。
 func sortedArrayToBSTRange(nums []int, left, right int) *TreeNode {
-	// Empty half-open range: no node.
-	// 空的左闭右开区间：不建节点。
 	if left >= right {
 		return nil
 	}
 
-	// Midpoint root keeps left and right halves size-balanced.
-	// 中点作根，左右半段长度差至多为 1。
 	mid := left + (right-left)/2
 	root := &TreeNode{Val: nums[mid]}
 	root.Left = sortedArrayToBSTRange(nums, left, mid)
@@ -70,13 +72,15 @@ func sortedArrayToBSTRange(nums []int, left, right int) *TreeNode {
 // 2. 递归切片：取当前切片中点为根，再用左右两半的视图继续构造。
 // Time: O(n), Space: O(log n) plus O(n) for the output tree.
 // 时间复杂度：O(n)，空间复杂度：O(log n)，输出树另占 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Same midpoint idea; slice views avoid copying element storage.
+//     同样取中点；切片视图不会复制底层元素。
 func sortedArrayToBSTSlice(nums []int) *TreeNode {
 	if len(nums) == 0 {
 		return nil
 	}
 
-	// Same midpoint idea; slice views avoid copying element storage.
-	// 同样取中点；切片视图不会复制底层元素。
 	mid := len(nums) / 2
 	root := &TreeNode{Val: nums[mid]}
 	root.Left = sortedArrayToBSTSlice(nums[:mid])

@@ -65,34 +65,42 @@ I also skip duplicate values to avoid returning the same triplet multiple times.
 // 1. 排序 + 双指针：固定第一个数，再在右侧用左右指针寻找另外两个数。推荐。
 // Time: O(n²), Space: O(log n+r) including the sort stack and r triplets.
 // 时间复杂度：O(n²)，空间复杂度：O(log n+r)，含排序栈与结果。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Sorting puts duplicates together and gives pointer movement a direction.
+//     排序后相同数字会相邻，也方便根据总和大小移动双指针。
+//  2. i fixes the first number a. Stop before the last two positions because left and right still need one position each.
+//     i 固定第一个数 a。i 最多到倒数第三个位置，因为后面还要给 left 和 right 各留一个位置。
+//  3. If a is positive, all later values are also positive, so the sum cannot be 0.
+//     如果 a 已经大于 0，后面的数字只会更大，总和不可能再等于 0。
+//  4. Skip a duplicate a because it would generate the same triplets again.
+//     当前 a 和前一个 a 相同时跳过，否则会重复生成相同三元组。
+//  5. Search for b and c in the sorted range to the right of i.
+//     在 i 右侧的有序区间中寻找 b 和 c。
+//  6. A valid triplet has been found.
+//     找到一个满足 a+b+c=0 的三元组。
+//  7. Skip every copy of b and c because this value combination is already recorded.
+//     当前 b、c 组合已经记录，跳过它们的所有重复值以避免重复答案。
+//  8. The sum is too large; move right leftward to use a smaller c.
+//     总和太大，right 左移，换一个更小的 c。
+//  9. The sum is too small; move left rightward to use a larger b.
+//     总和太小，left 右移，换一个更大的 b。
 func threeSum(nums []int) [][]int {
-	// Sorting puts duplicates together and gives pointer movement a direction.
-	// 排序后相同数字会相邻，也方便根据总和大小移动双指针。
 	sort.Ints(nums)
 
 	res := [][]int{}
 
-	/*
-		i fixes the first number a. Stop before the last two positions because left and right still need one position each.
-		i 固定第一个数 a。i 最多到倒数第三个位置，因为后面还要给 left 和 right 各留一个位置。
-	*/
 	for i := 0; i < len(nums)-2; i++ {
 		a := nums[i]
 
-		// If a is positive, all later values are also positive, so the sum cannot be 0.
-		// 如果 a 已经大于 0，后面的数字只会更大，总和不可能再等于 0。
 		if a > 0 {
 			break
 		}
 
-		// Skip a duplicate a because it would generate the same triplets again.
-		// 当前 a 和前一个 a 相同时跳过，否则会重复生成相同三元组。
 		if i > 0 && a == nums[i-1] {
 			continue
 		}
 
-		// Search for b and c in the sorted range to the right of i.
-		// 在 i 右侧的有序区间中寻找 b 和 c。
 		left, right := i+1, len(nums)-1
 
 		for left < right {
@@ -100,12 +108,8 @@ func threeSum(nums []int) [][]int {
 			sum := a + b + c
 
 			if sum == 0 {
-				// A valid triplet has been found.
-				// 找到一个满足 a+b+c=0 的三元组。
 				res = append(res, []int{a, b, c})
 
-				// Skip every copy of b and c because this value combination is already recorded.
-				// 当前 b、c 组合已经记录，跳过它们的所有重复值以避免重复答案。
 				for left < right && nums[left] == b {
 					left++
 				}
@@ -114,12 +118,8 @@ func threeSum(nums []int) [][]int {
 					right--
 				}
 			} else if sum > 0 {
-				// The sum is too large; move right leftward to use a smaller c.
-				// 总和太大，right 左移，换一个更小的 c。
 				right--
 			} else {
-				// The sum is too small; move left rightward to use a larger b.
-				// 总和太小，left 右移，换一个更大的 b。
 				left++
 			}
 		}
@@ -132,42 +132,46 @@ func threeSum(nums []int) [][]int {
 // 2. 固定一个数 + 哈希：复用两数之和，先查 b=-a-c 再插入 c。
 // Time: O(n²) expected, Space: O(n+r) auxiliary plus O(r) output.
 // 时间复杂度：期望 O(n²)，空间复杂度：辅助 O(n+r)，结果另占 O(r)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Sorting is not needed to find triplets, but it makes each answer come out in ascending order.
+//     排序不是找答案的必要条件，但能让每个答案本身保持升序，方便当作去重的 key。
+//  2. recorded stores answers that have already been appended, keyed by their sorted values.
+//     recorded 以有序三元组为 key，保存已经加入结果的答案。
+//  3. Later values are all at least as large as a, so a positive a can never reach 0.
+//     后面的数字都不小于 a，因此 a 大于 0 时总和不可能再等于 0。
+//  4. A repeated a would only regenerate the triplets found for the previous a.
+//     重复的 a 只会重新生成上一个 a 已经找到的三元组。
+//  5. seen holds the values between i and the current c, which are the candidates for b.
+//     seen 保存位于 i 和当前 c 之间的数值，它们是 b 的候选。
+//  6. a + b + c = 0, so the partner we need is b = -a-c.
+//     要满足 a+b+c=0，需要的另一个数就是 b = -a-c。
+//  7. b sits at an index between i and c, so the key is already ascending.
+//     b 所在的下标位于 i 和 c 之间，因此 key 本身就是升序的。
+//  8. Insert after lookup so one position cannot supply both b and c.
+//     查询之后再插入，避免同一位置同时充当 b 和 c。
 func threeSumHash(nums []int) [][]int {
-	// Sorting is not needed to find triplets, but it makes each answer come out in ascending order.
-	// 排序不是找答案的必要条件，但能让每个答案本身保持升序，方便当作去重的 key。
 	sort.Ints(nums)
 
 	result := [][]int{}
 
-	// recorded stores answers that have already been appended, keyed by their sorted values.
-	// recorded 以有序三元组为 key，保存已经加入结果的答案。
 	recorded := make(map[[3]int]bool)
 
 	for i, a := range nums {
-		// Later values are all at least as large as a, so a positive a can never reach 0.
-		// 后面的数字都不小于 a，因此 a 大于 0 时总和不可能再等于 0。
 		if a > 0 {
 			break
 		}
 
-		// A repeated a would only regenerate the triplets found for the previous a.
-		// 重复的 a 只会重新生成上一个 a 已经找到的三元组。
 		if i > 0 && a == nums[i-1] {
 			continue
 		}
 
-		// seen holds the values between i and the current c, which are the candidates for b.
-		// seen 保存位于 i 和当前 c 之间的数值，它们是 b 的候选。
 		seen := make(map[int]bool)
 
 		for _, c := range nums[i+1:] {
-			// a + b + c = 0, so the partner we need is b = -a-c.
-			// 要满足 a+b+c=0，需要的另一个数就是 b = -a-c。
 			b := -a - c
 
 			if seen[b] {
-				// b sits at an index between i and c, so the key is already ascending.
-				// b 所在的下标位于 i 和 c 之间，因此 key 本身就是升序的。
 				key := [3]int{a, b, c}
 				if !recorded[key] {
 					recorded[key] = true
@@ -175,8 +179,6 @@ func threeSumHash(nums []int) [][]int {
 				}
 			}
 
-			// Insert after lookup so one position cannot supply both b and c.
-			// 查询之后再插入，避免同一位置同时充当 b 和 c。
 			seen[c] = true
 		}
 	}

@@ -65,27 +65,29 @@ Recursion uses O(h) space; iteration uses O(1).
 // 1. 递归：两个目标都在左就搜左，都在右就搜右，否则当前节点就是分叉点。
 // Time: O(h), Space: O(h).
 // 时间复杂度：O(h)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty tree has no ancestor.
+//     空树没有祖先。
+//  2. Both targets are smaller than root, so the LCA must lie in the left subtree.
+//     两个目标都比当前值小，LCA 一定在左子树。
+//  3. Both targets are larger than root, so the LCA must lie in the right subtree.
+//     两个目标都比当前值大，LCA 一定在右子树。
+//  4. Split found: p and q diverge here, or root equals p or q.
+//     找到分叉：p、q 分居两侧，或当前节点就是 p / q。
 func lowestCommonAncestorBST(root, p, q *TreeNode) *TreeNode {
-	// Empty tree has no ancestor.
-	// 空树没有祖先。
 	if root == nil {
 		return nil
 	}
 
-	// Both targets are smaller than root, so the LCA must lie in the left subtree.
-	// 两个目标都比当前值小，LCA 一定在左子树。
 	if root.Val > p.Val && root.Val > q.Val {
 		return lowestCommonAncestorBST(root.Left, p, q)
 	}
 
-	// Both targets are larger than root, so the LCA must lie in the right subtree.
-	// 两个目标都比当前值大，LCA 一定在右子树。
 	if root.Val < p.Val && root.Val < q.Val {
 		return lowestCommonAncestorBST(root.Right, p, q)
 	}
 
-	// Split found: p and q diverge here, or root equals p or q.
-	// 找到分叉：p、q 分居两侧，或当前节点就是 p / q。
 	return root
 }
 
@@ -93,18 +95,20 @@ func lowestCommonAncestorBST(root, p, q *TreeNode) *TreeNode {
 // 2. 迭代：推荐；按大小原地走向左或右，直到当前节点夹在 p 与 q 之间。
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Same three-way decision as the recursive version, without a call stack.
+//     与递归版相同的三分支判断，但不使用调用栈。
+//  2. First node that is not strictly outside both targets is the LCA.
+//     第一个不再严格落在两个目标同一侧之外的节点，就是 LCA。
 func lowestCommonAncestorBSTIterative(root, p, q *TreeNode) *TreeNode {
 	cur := root
 	for cur != nil {
-		// Same three-way decision as the recursive version, without a call stack.
-		// 与递归版相同的三分支判断，但不使用调用栈。
 		if cur.Val > p.Val && cur.Val > q.Val {
 			cur = cur.Left
 		} else if cur.Val < p.Val && cur.Val < q.Val {
 			cur = cur.Right
 		} else {
-			// First node that is not strictly outside both targets is the LCA.
-			// 第一个不再严格落在两个目标同一侧之外的节点，就是 LCA。
 			return cur
 		}
 	}

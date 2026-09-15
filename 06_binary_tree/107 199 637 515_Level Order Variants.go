@@ -29,6 +29,12 @@ Track the maximum while scanning one captured level.
 // 1. 自底向上层序：先按从上到下分层，再反转层与层的顺序。
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Reuse the standard top-down level-order result.
+//     复用标准的自上而下分层结果。
+//  2. Reverse only the outer slice; each level stays left-to-right.
+//     只反转外层切片；每一层内部仍保持从左到右。
 func levelOrderBottom(root *TreeNode) [][]int {
 	levels := levelOrder(root)
 	for left, right := 0, len(levels)-1; left < right; left, right = left+1, right-1 {
@@ -41,6 +47,14 @@ func levelOrderBottom(root *TreeNode) [][]int {
 // 2. 右视图：每一层固定数量中的最后一个节点，就是该层最右侧的值。
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has no visible values from the right.
+//     空树从右侧看不到任何节点。
+//  2. Capture the current level size before enqueuing children.
+//     先固定本层节点数，再入队孩子，避免把下层混进本层。
+//  3. Overwrite last on every dequeue; the final write is the rightmost node.
+//     每次出队都覆盖 last；最后一次写入就是该层最右侧节点。
 func rightSideView(root *TreeNode) []int {
 	if root == nil {
 		return []int{}
@@ -71,6 +85,12 @@ func rightSideView(root *TreeNode) []int {
 // 3. 层平均值：用 float64 把该层总和除以固定的层节点数。
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. sum accumulates only the nodes already counted in levelSize.
+//     sum 只累加已经计入 levelSize 的本层节点。
+//  2. float64 avoids truncating the average with integer division.
+//     使用 float64，避免整数除法截断平均值。
 func averageOfLevels(root *TreeNode) []float64 {
 	if root == nil {
 		return []float64{}
@@ -101,6 +121,10 @@ func averageOfLevels(root *TreeNode) []float64 {
 // 4. 每行最大值：在固定的一层里用当前最大值逐个比较。
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Seed best with the first node on this level before scanning the rest.
+//     先用本层第一个节点初始化 best，再扫描其余节点。
 func largestValues(root *TreeNode) []int {
 	if root == nil {
 		return []int{}

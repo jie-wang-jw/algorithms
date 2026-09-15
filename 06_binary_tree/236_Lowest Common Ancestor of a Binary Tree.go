@@ -53,9 +53,15 @@ The parent-pointer version takes O(n) time and O(n) space.
 // 1. 后序递归：推荐；左右都找到目标，或当前节点就是 p/q，则当前节点是 LCA。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty branch, or this node is p/q: stop and report upward.
+//     空分支，或当前就是 p/q：停止并向上回报。
+//  2. Targets found on both sides: this node is the lowest common ancestor.
+//     左右都找到目标：当前节点就是最近公共祖先。
+//  3. Only one side hit: both targets lie in that subtree (or only one was under this node).
+//     只有一侧非空：两个目标都在那一侧（或本子树只覆盖其中一个）。
 func lowestCommonAncestor(root, p, q *TreeNode) *TreeNode {
-	// Empty branch, or this node is p/q: stop and report upward.
-	// 空分支，或当前就是 p/q：停止并向上回报。
 	if root == nil || root == p || root == q {
 		return root
 	}
@@ -63,14 +69,10 @@ func lowestCommonAncestor(root, p, q *TreeNode) *TreeNode {
 	left := lowestCommonAncestor(root.Left, p, q)
 	right := lowestCommonAncestor(root.Right, p, q)
 
-	// Targets found on both sides: this node is the lowest common ancestor.
-	// 左右都找到目标：当前节点就是最近公共祖先。
 	if left != nil && right != nil {
 		return root
 	}
 
-	// Only one side hit: both targets lie in that subtree (or only one was under this node).
-	// 只有一侧非空：两个目标都在那一侧（或本子树只覆盖其中一个）。
 	if left != nil {
 		return left
 	}
@@ -81,13 +83,17 @@ func lowestCommonAncestor(root, p, q *TreeNode) *TreeNode {
 // 2. 父指针：先记录 p 到根的路径，再从 q 向上走到这条路径上。
 // Time: O(n), Space: O(n).
 // 时间复杂度：O(n)，空间复杂度：O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. BFS/level walk to record every node's parent until both p and q are known.
+//     层序记录每个节点的父指针，直到 p、q 都已入表。
+//  2. Mark the path from p to the root, then climb from q until a marked ancestor appears.
+//     先标记 p 到根的路径，再从 q 向上爬，遇到已标记的祖先即为 LCA。
 func lowestCommonAncestorParents(root, p, q *TreeNode) *TreeNode {
 	if root == nil {
 		return nil
 	}
 
-	// BFS/level walk to record every node's parent until both p and q are known.
-	// 层序记录每个节点的父指针，直到 p、q 都已入表。
 	parent := map[*TreeNode]*TreeNode{root: nil}
 	queue := []*TreeNode{root}
 	for len(queue) > 0 {
@@ -108,8 +114,6 @@ func lowestCommonAncestorParents(root, p, q *TreeNode) *TreeNode {
 		}
 	}
 
-	// Mark the path from p to the root, then climb from q until a marked ancestor appears.
-	// 先标记 p 到根的路径，再从 q 向上爬，遇到已标记的祖先即为 LCA。
 	seen := map[*TreeNode]bool{}
 	for cur := p; cur != nil; cur = parent[cur] {
 		seen[cur] = true

@@ -65,27 +65,29 @@ cur = next       // cur 往前走
 // 1. 迭代双指针：prev 是已反转部分的头，cur 是未处理部分的头，每轮反转一条指针。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+// 1. prev starts as nil because the new tail must point to nil.
+//    prev 初始为 nil，因为反转后的尾节点应该指向 nil。
+// 2. Save the original next node before changing cur.Next.
+//    修改 cur.Next 前先保存原来的下一个节点，防止后半段链表丢失。
+// 3. Reverse the current link so cur points to the processed part.
+//    反转当前指针，让 cur 指向已经处理好的部分。
+// 4. Move prev and cur one node forward in the original list.
+//    prev 和 cur 沿原链表各向前移动一个节点。
+// 5. cur is nil and prev points to the last original node, now the new head.
+//    此时 cur 为 nil，prev 指向原链表尾节点，也就是新头节点。
 func reverseList(head *ListNode) *ListNode {
-	// prev starts as nil because the new tail must point to nil.
-	// prev 初始为 nil，因为反转后的尾节点应该指向 nil。
 	var prev *ListNode
 	cur := head
 
 	for cur != nil {
-		// Save the original next node before changing cur.Next.
-		// 修改 cur.Next 前先保存原来的下一个节点，防止后半段链表丢失。
 		next := cur.Next
-		// Reverse the current link so cur points to the processed part.
-		// 反转当前指针，让 cur 指向已经处理好的部分。
 		cur.Next = prev
-		// Move prev and cur one node forward in the original list.
-		// prev 和 cur 沿原链表各向前移动一个节点。
 		prev = cur
 		cur = next
 	}
 
-	// cur is nil and prev points to the last original node, now the new head.
-	// 此时 cur 为 nil，prev 指向原链表尾节点，也就是新头节点。
 	return prev
 }
 
@@ -93,26 +95,28 @@ func reverseList(head *ListNode) *ListNode {
 // 2. 从后向前递归：先递归反转后半段，再把 head 接到末尾。
 // Time: O(n), Space: O(n) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由递归调用栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty list or a single-node list is already reversed.
+//     空链表或只有一个节点的链表，本身就是反转结果。
+//  2. Reverse the list after head and keep its new head.
+//     先反转 head 后面的链表，并保存后半段反转后的新头节点。
+//  3. Before: head -> head.Next. After: head.Next -> head.
+//     原来是 head -> head.Next，现在改成 head.Next -> head。
+//  4. head becomes the new tail, so its Next must be nil.
+//     head 变成新的尾节点，因此它的 Next 必须设为 nil。
+//  5. The head of the reversed tail is also the head of the whole result.
+//     后半段的新头节点，也是整个反转链表的新头节点。
 func reverseList2(head *ListNode) *ListNode {
-	// An empty list or a single-node list is already reversed.
-	// 空链表或只有一个节点的链表，本身就是反转结果。
 	if head == nil || head.Next == nil {
 		return head
 	}
 
-	// Reverse the list after head and keep its new head.
-	// 先反转 head 后面的链表，并保存后半段反转后的新头节点。
 	newHead := reverseList2(head.Next)
 
-	// Before: head -> head.Next. After: head.Next -> head.
-	// 原来是 head -> head.Next，现在改成 head.Next -> head。
 	head.Next.Next = head
-	// head becomes the new tail, so its Next must be nil.
-	// head 变成新的尾节点，因此它的 Next 必须设为 nil。
 	head.Next = nil
 
-	// The head of the reversed tail is also the head of the whole result.
-	// 后半段的新头节点，也是整个反转链表的新头节点。
 	return newHead
 }
 
@@ -120,31 +124,33 @@ func reverseList2(head *ListNode) *ListNode {
 // 3. 从前往后递归：把迭代版的 prev 和 cur 直接当作递归参数传递。
 // Time: O(n), Space: O(n) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由递归调用栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. reverse reverses exactly one link per call; prev always heads the finished part.
+//     reverse 每层只反转一条指针；prev 始终是已经反转好的那部分的头节点。
+//  2. An empty unprocessed part means prev already heads the complete result.
+//     未处理部分为空，说明 prev 就是完整反转结果的头节点。
+//  3. Save the original next node before changing cur.Next.
+//     修改 cur.Next 前先保存原来的下一个节点，防止后半段链表丢失。
+//  4. Reverse the current link so cur points to the processed part.
+//     反转当前指针，让 cur 指向已经处理好的部分。
+//  5. cur has joined the reversed part, so it becomes the next level's prev.
+//     cur 已经并入已反转部分，因此它就是下一层的 prev。
+//  6. The new tail must point to nil, so the first prev is nil.
+//     反转后的尾节点必须指向 nil，因此第一层的 prev 为 nil。
 func reverseListFromFront(head *ListNode) *ListNode {
-	// reverse reverses exactly one link per call; prev always heads the finished part.
-	// reverse 每层只反转一条指针；prev 始终是已经反转好的那部分的头节点。
 	var reverse func(prev, cur *ListNode) *ListNode
 
 	reverse = func(prev, cur *ListNode) *ListNode {
-		// An empty unprocessed part means prev already heads the complete result.
-		// 未处理部分为空，说明 prev 就是完整反转结果的头节点。
 		if cur == nil {
 			return prev
 		}
 
-		// Save the original next node before changing cur.Next.
-		// 修改 cur.Next 前先保存原来的下一个节点，防止后半段链表丢失。
 		next := cur.Next
-		// Reverse the current link so cur points to the processed part.
-		// 反转当前指针，让 cur 指向已经处理好的部分。
 		cur.Next = prev
 
-		// cur has joined the reversed part, so it becomes the next level's prev.
-		// cur 已经并入已反转部分，因此它就是下一层的 prev。
 		return reverse(cur, next)
 	}
 
-	// The new tail must point to nil, so the first prev is nil.
-	// 反转后的尾节点必须指向 nil，因此第一层的 prev 为 nil。
 	return reverse(nil, head)
 }

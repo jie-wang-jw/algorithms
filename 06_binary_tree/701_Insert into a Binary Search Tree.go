@@ -49,15 +49,17 @@ For height h, both take O(h) time. Recursion uses O(h) space; iteration uses O(1
 // 1. 递归：空孩子处新建节点，否则进入有序的一侧并把返回的子树接回去。
 // Time: O(h), Space: O(h).
 // 时间复杂度：O(h)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty link: this is the insertion site.
+//     空链接：这里就是插入点。
+//  2. Attach on the side that preserves BST order, then return the unchanged root.
+//     挂到能保持 BST 有序的一侧，再返回（子树根仍是）当前根。
 func insertIntoBST(root *TreeNode, val int) *TreeNode {
-	// Empty link: this is the insertion site.
-	// 空链接：这里就是插入点。
 	if root == nil {
 		return &TreeNode{Val: val}
 	}
 
-	// Attach on the side that preserves BST order, then return the unchanged root.
-	// 挂到能保持 BST 有序的一侧，再返回（子树根仍是）当前根。
 	if root.Val > val {
 		root.Left = insertIntoBST(root.Left, val)
 	} else {
@@ -70,11 +72,17 @@ func insertIntoBST(root *TreeNode, val int) *TreeNode {
 // 2. 迭代：推荐；走到空插入点，把新节点接到父节点对应的一侧。
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty tree: the new node is the root.
+//     空树：新节点就是根。
+//  2. Next left is empty: attach here; otherwise keep walking left.
+//     左孩子为空则挂上；否则继续向左。
+//  3. Symmetric case on the right spine.
+//     右链上的对称情况。
 func insertIntoBSTIterative(root *TreeNode, val int) *TreeNode {
 	node := &TreeNode{Val: val}
 
-	// Empty tree: the new node is the root.
-	// 空树：新节点就是根。
 	if root == nil {
 		return node
 	}
@@ -82,16 +90,12 @@ func insertIntoBSTIterative(root *TreeNode, val int) *TreeNode {
 	cur := root
 	for cur != nil {
 		if cur.Val > val {
-			// Next left is empty: attach here; otherwise keep walking left.
-			// 左孩子为空则挂上；否则继续向左。
 			if cur.Left == nil {
 				cur.Left = node
 				return root
 			}
 			cur = cur.Left
 		} else {
-			// Symmetric case on the right spine.
-			// 右链上的对称情况。
 			if cur.Right == nil {
 				cur.Right = node
 				return root

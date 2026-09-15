@@ -105,6 +105,16 @@ The three implementations appear below in the order of the numbered methods abov
 // 1. 递归回溯：推荐；进入时加入路径，叶子且剩余为 0 时复制答案，返回前撤销。
 // Time: O(n+S), Space: O(h) auxiliary plus O(S) output, where S is the total number of integers in all returned paths.
 // 时间复杂度：O(n+S)，空间复杂度：辅助 O(h)，输出另占 O(S)，S 为所有返回路径中整数的总数。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Include this node in the current path.
+//     把当前节点加入路径，并扣除它贡献的值。
+//  2. Copy the elements so later backtracking cannot change this answer.
+//     复制元素，避免后续回溯修改已经保存的答案。
+//  3. Search both branches; one match does not finish the whole search.
+//     两边都要搜索，找到一条不能结束整题。
+//  4. Restore the parent's path before visiting another branch.
+//     返回前恢复父节点的路径，避免干扰其他分支。
 func pathSum(root *TreeNode, targetSum int) [][]int {
 	result := [][]int{}
 	path := []int{}
@@ -115,28 +125,20 @@ func pathSum(root *TreeNode, targetSum int) [][]int {
 			return
 		}
 
-		// Include this node in the current path.
-		// 把当前节点加入路径，并扣除它贡献的值。
 		path = append(path, node.Val)
 		remaining -= node.Val
 
 		if node.Left == nil && node.Right == nil {
 			if remaining == 0 {
-				// Copy the elements so later backtracking cannot change this answer.
-				// 复制元素，避免后续回溯修改已经保存的答案。
 				saved := make([]int, len(path))
 				copy(saved, path)
 				result = append(result, saved)
 			}
 		} else {
-			// Search both branches; one match does not finish the whole search.
-			// 两边都要搜索，找到一条不能结束整题。
 			traverse(node.Left, remaining)
 			traverse(node.Right, remaining)
 		}
 
-		// Restore the parent's path before visiting another branch.
-		// 返回前恢复父节点的路径，避免干扰其他分支。
 		path = path[:len(path)-1]
 	}
 
@@ -148,6 +150,16 @@ func pathSum(root *TreeNode, targetSum int) [][]int {
 // 2. 栈迭代保存独立路径：每个孩子复制父路径前缀，因此不必手动回溯。
 // Time: O(nh) upper bound, Space: O(h²) auxiliary plus O(S) output.
 // 时间复杂度：上界 O(nh)，空间复杂度：辅助上界 O(h²)，输出另占 O(S)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Pop the node together with its sum and independent path.
+//     节点、累计和、独立路径一起出栈。
+//  2. This leaf path is independent and will not be modified again.
+//     这条叶子路径独立保存，之后不会再修改，可以直接收集。
+//  3. Push right before left so the left branch is processed first.
+//     先右后左入栈，使左分支先处理。
+//  4. Give each child its own backing array.
+//     每个孩子分配独立的底层数组，避免兄弟路径相互覆盖。
 func pathSumIterative(root *TreeNode, targetSum int) [][]int {
 	result := [][]int{}
 	if root == nil {
@@ -159,8 +171,6 @@ func pathSumIterative(root *TreeNode, targetSum int) [][]int {
 	paths := [][]int{{root.Val}}
 
 	for len(nodes) > 0 {
-		// Pop the node together with its sum and independent path.
-		// 节点、累计和、独立路径一起出栈。
 		last := len(nodes) - 1
 		node, sum, path := nodes[last], sums[last], paths[last]
 		nodes = nodes[:last]
@@ -169,22 +179,16 @@ func pathSumIterative(root *TreeNode, targetSum int) [][]int {
 
 		if node.Left == nil && node.Right == nil {
 			if sum == targetSum {
-				// This leaf path is independent and will not be modified again.
-				// 这条叶子路径独立保存，之后不会再修改，可以直接收集。
 				result = append(result, path)
 			}
 			continue
 		}
 
-		// Push right before left so the left branch is processed first.
-		// 先右后左入栈，使左分支先处理。
 		for _, child := range []*TreeNode{node.Right, node.Left} {
 			if child == nil {
 				continue
 			}
 
-			// Give each child its own backing array.
-			// 每个孩子分配独立的底层数组，避免兄弟路径相互覆盖。
 			nextPath := make([]int, len(path)+1)
 			copy(nextPath, path)
 			nextPath[len(path)] = child.Val
@@ -202,44 +206,46 @@ func pathSumIterative(root *TreeNode, targetSum int) [][]int {
 // 3. 队列 BFS 保存独立路径：三个同步队列分别保存节点、累计和以及各自的完整路径。
 // Time: O(nh) upper bound, Space: O(wh) auxiliary plus O(S) output.
 // 时间复杂度：上界 O(nh)，空间复杂度：辅助上界 O(wh)，输出另占 O(S)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Matching positions describe one pending state: node, sum, and its own path.
+//     三个队列的相同位置描述同一个待处理状态：节点、累计和以及它自己的路径。
+//  2. Remove the whole state from the front, not just the node.
+//     从队首取出的是整个状态，而不只是节点。
+//  3. A matching sum counts only at a leaf, where the path is complete.
+//     只有叶子处的和相等才算答案，此时路径已经完整。
+//  4. Enqueue left before right; the result order is unrestricted either way.
+//     先左后右入队；本题结果顺序不限，固定顺序只是方便观察。
+//  5. Copying the prefix gives each child an independent backing array.
+//     复制前缀，让每个孩子拥有独立的底层数组，兄弟路径不会互相覆盖。
 func pathSumBFS(root *TreeNode, targetSum int) [][]int {
 	result := [][]int{}
 	if root == nil {
 		return result
 	}
 
-	// Matching positions describe one pending state: node, sum, and its own path.
-	// 三个队列的相同位置描述同一个待处理状态：节点、累计和以及它自己的路径。
 	nodes := []*TreeNode{root}
 	sums := []int{root.Val}
 	paths := [][]int{{root.Val}}
 
 	for len(nodes) > 0 {
-		// Remove the whole state from the front, not just the node.
-		// 从队首取出的是整个状态，而不只是节点。
 		node, sum, path := nodes[0], sums[0], paths[0]
 		nodes = nodes[1:]
 		sums = sums[1:]
 		paths = paths[1:]
 
 		if node.Left == nil && node.Right == nil {
-			// A matching sum counts only at a leaf, where the path is complete.
-			// 只有叶子处的和相等才算答案，此时路径已经完整。
 			if sum == targetSum {
 				result = append(result, path)
 			}
 			continue
 		}
 
-		// Enqueue left before right; the result order is unrestricted either way.
-		// 先左后右入队；本题结果顺序不限，固定顺序只是方便观察。
 		for _, child := range []*TreeNode{node.Left, node.Right} {
 			if child == nil {
 				continue
 			}
 
-			// Copying the prefix gives each child an independent backing array.
-			// 复制前缀，让每个孩子拥有独立的底层数组，兄弟路径不会互相覆盖。
 			nextPath := make([]int, len(path)+1)
 			copy(nextPath, path)
 			nextPath[len(path)] = child.Val

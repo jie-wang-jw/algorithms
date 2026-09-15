@@ -47,6 +47,10 @@ Auxiliary space is O(h) besides O(m) output.
 // 1. 中序递归：推荐；相同值在中序中连成一段，用这一段的长度更新众数列表。
 // Time: O(n), Space: O(h) auxiliary plus O(m) output.
 // 时间复杂度：O(n)，空间复杂度：辅助 O(h)，输出另占 O(m)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Visit root between left and right so equal values stay consecutive.
+//     在左右之间访问根，相同值才会在中序中连成一段。
 func findMode(root *TreeNode) []int {
 	result := []int{}
 	maxCount := 0
@@ -59,8 +63,6 @@ func findMode(root *TreeNode) []int {
 			return
 		}
 		traverse(node.Left)
-		// Visit root between left and right so equal values stay consecutive.
-		// 在左右之间访问根，相同值才会在中序中连成一段。
 		updateMode(node, &prev, &count, &maxCount, &result)
 		traverse(node.Right)
 	}
@@ -97,9 +99,15 @@ func findModeIterative(root *TreeNode) []int {
 // 连续计数更新：累加当前值的次数，再追加或重建众数列表。
 // Time: O(1) amortized, Space: O(1) besides the result slice.
 // 时间复杂度：均摊 O(1)，空间复杂度：除结果切片外 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Same value as predecessor: extend the current run; otherwise start a new run of length 1.
+//     与前驱相同则延续当前段；否则从 1 开始新的一段。
+//  2. Tie for the best frequency: another mode.
+//     与当前最大次数持平：又一个众数。
+//  3. Strictly better frequency: reset the mode list.
+//     次数创新高：清空旧答案，只保留当前值。
 func updateMode(node *TreeNode, prev **TreeNode, count, maxCount *int, result *[]int) {
-	// Same value as predecessor: extend the current run; otherwise start a new run of length 1.
-	// 与前驱相同则延续当前段；否则从 1 开始新的一段。
 	if *prev != nil && node.Val == (*prev).Val {
 		*count++
 	} else {
@@ -107,12 +115,8 @@ func updateMode(node *TreeNode, prev **TreeNode, count, maxCount *int, result *[
 	}
 
 	if *count == *maxCount {
-		// Tie for the best frequency: another mode.
-		// 与当前最大次数持平：又一个众数。
 		*result = append(*result, node.Val)
 	} else if *count > *maxCount {
-		// Strictly better frequency: reset the mode list.
-		// 次数创新高：清空旧答案，只保留当前值。
 		*maxCount = *count
 		*result = []int{node.Val}
 	}

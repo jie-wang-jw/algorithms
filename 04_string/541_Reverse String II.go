@@ -46,44 +46,51 @@ If fewer than k characters remain, I reverse all remaining characters.
 // 1. 按 2k 分组，用双指针反转每组前 min(k, 剩余长度) 个字符。
 // Time: O(n), Space: O(n) for the []byte copy.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由 []byte 副本产生。
+//
+// 步骤与要点 / Steps and notes:
+//
+//  1. The step below is 2k, so a nonpositive k would never advance start and would loop forever.
+//     下面的步长是 2k，k 不是正数时 start 永远不会前进，会造成死循环。
+//
+//     k >= 1 由题目保证，这里只是防御性返回原字符串。
+//     The constraints guarantee k >= 1; this is only a defensive guard.
+//
+//  2. bytes allows in-place character swaps.
+//     bytes 允许我们原地交换字符。
+//
+//  3. start jumps by 2k because only the first k characters of each 2k block change.
+//     start 每次跳过 2k，因为每个 2k 分组只需要处理前 k 个字符。
+//
+//  4. The intended reverse range is [start, start+k-1].
+//     计划反转的闭区间是 [start, start+k-1]。
+//
+//  5. If fewer than k characters remain, clamp right to the last valid index.
+//     如果剩余字符不足 k 个，就把 right 限制在最后一个有效下标。
+//
+//     例如：
+//     s = "abc", k = 5
+//     right = start + k - 1 = 4，但数组最后一个下标是 2。
+//
+//  6. Reverse the selected range by swapping from both ends.
+//     从区间两端向中间交换，完成这一段的反转。
+//
+//  7. Convert the modified byte slice back to a string.
+//     把修改后的字节切片转换回字符串。
 func reverseStr(s string, k int) string {
-	/*
-		The step below is 2k, so a nonpositive k would never advance start and would loop forever.
-		下面的步长是 2k，k 不是正数时 start 永远不会前进，会造成死循环。
-
-		k >= 1 由题目保证，这里只是防御性返回原字符串。
-		The constraints guarantee k >= 1; this is only a defensive guard.
-	*/
 	if k <= 0 {
 		return s
 	}
 
-	// bytes allows in-place character swaps.
-	// bytes 允许我们原地交换字符。
 	bytes := []byte(s)
 
-	// start jumps by 2k because only the first k characters of each 2k block change.
-	// start 每次跳过 2k，因为每个 2k 分组只需要处理前 k 个字符。
 	for start := 0; start < len(bytes); start += 2 * k {
-		// The intended reverse range is [start, start+k-1].
-		// 计划反转的闭区间是 [start, start+k-1]。
 		left := start
 		right := start + k - 1
 
-		/*
-			If fewer than k characters remain, clamp right to the last valid index.
-			如果剩余字符不足 k 个，就把 right 限制在最后一个有效下标。
-
-			例如：
-			s = "abc", k = 5
-			right = start + k - 1 = 4，但数组最后一个下标是 2。
-		*/
 		if right >= len(bytes) {
 			right = len(bytes) - 1
 		}
 
-		// Reverse the selected range by swapping from both ends.
-		// 从区间两端向中间交换，完成这一段的反转。
 		for left < right {
 			bytes[left], bytes[right] = bytes[right], bytes[left]
 			left++
@@ -91,7 +98,5 @@ func reverseStr(s string, k int) string {
 		}
 	}
 
-	// Convert the modified byte slice back to a string.
-	// 把修改后的字节切片转换回字符串。
 	return string(bytes)
 }

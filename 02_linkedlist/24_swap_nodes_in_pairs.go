@@ -62,34 +62,36 @@ cur -> second -> first -> next
 // 1. 虚拟头节点迭代：每对节点重连三条指针，然后移动到下一对。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. dummy keeps a stable node before the possibly changing head.
+//     dummy 在可能变化的头节点前提供一个固定位置。
+//  2. A complete pair exists only when both cur.Next and cur.Next.Next exist.
+//     只有 cur.Next 和 cur.Next.Next 都不为 nil 时，才有完整的一对可以交换。
+//  3. Remember the two nodes before reconnecting any links.
+//     修改指针前，先保存当前这一对的两个节点。
+//  4. 1. first points to the node after the pair. / first 先接到下一组。
+//  5. 2. second points back to first. / second 再指回 first。
+//  6. 3. cur points to the new first node, second. / cur 最后指向交换后的头节点 second。
+//  7. first is now the pair's tail and becomes the predecessor of the next pair.
+//     first 现在是这一对的尾节点，也就是下一对前面的节点。
+//  8. dummy.Next is the possibly updated head of the list.
+//     dummy.Next 是交换后可能已经改变的新头节点。
 func swapPairs(head *ListNode) *ListNode {
-	// dummy keeps a stable node before the possibly changing head.
-	// dummy 在可能变化的头节点前提供一个固定位置。
 	dummy := &ListNode{Next: head}
 	cur := dummy
 
-	// A complete pair exists only when both cur.Next and cur.Next.Next exist.
-	// 只有 cur.Next 和 cur.Next.Next 都不为 nil 时，才有完整的一对可以交换。
 	for cur.Next != nil && cur.Next.Next != nil {
-		// Remember the two nodes before reconnecting any links.
-		// 修改指针前，先保存当前这一对的两个节点。
 		first := cur.Next
 		second := cur.Next.Next
 
-		// 1. first points to the node after the pair. / first 先接到下一组。
 		first.Next = second.Next
-		// 2. second points back to first. / second 再指回 first。
 		second.Next = first
-		// 3. cur points to the new first node, second. / cur 最后指向交换后的头节点 second。
 		cur.Next = second
 
-		// first is now the pair's tail and becomes the predecessor of the next pair.
-		// first 现在是这一对的尾节点，也就是下一对前面的节点。
 		cur = first
 	}
 
-	// dummy.Next is the possibly updated head of the list.
-	// dummy.Next 是交换后可能已经改变的新头节点。
 	return dummy.Next
 }
 
@@ -97,26 +99,28 @@ func swapPairs(head *ListNode) *ListNode {
 // 2. 递归解法：先交换后面的链表，再把当前这一对接到它前面。
 // Time: O(n), Space: O(n) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由递归调用栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Fewer than two nodes leaves nothing to swap, so return the list unchanged.
+//     不足两个节点时无法交换，原样返回即可，这也是递归的终止条件。
+//  2. second becomes the new head of this pair, so save it before changing any link.
+//     second 将成为这一对的新头节点，所以在修改指针前先保存它。
+//  3. head becomes the pair's tail, so it must connect to the already swapped suffix.
+//     head 将成为这一对的尾节点，因此它要连接到已经交换好的后续链表。
+//  4. Complete the swap by pointing second back to head.
+//     让 second 指回 head，完成这一对的交换。
+//  5. second is the new head of the swapped pair.
+//     second 就是交换后这一对的新头节点。
 func swapPairsRecursive(head *ListNode) *ListNode {
-	// Fewer than two nodes leaves nothing to swap, so return the list unchanged.
-	// 不足两个节点时无法交换，原样返回即可，这也是递归的终止条件。
 	if head == nil || head.Next == nil {
 		return head
 	}
 
-	// second becomes the new head of this pair, so save it before changing any link.
-	// second 将成为这一对的新头节点，所以在修改指针前先保存它。
 	second := head.Next
 
-	// head becomes the pair's tail, so it must connect to the already swapped suffix.
-	// head 将成为这一对的尾节点，因此它要连接到已经交换好的后续链表。
 	head.Next = swapPairsRecursive(second.Next)
 
-	// Complete the swap by pointing second back to head.
-	// 让 second 指回 head，完成这一对的交换。
 	second.Next = head
 
-	// second is the new head of the swapped pair.
-	// second 就是交换后这一对的新头节点。
 	return second
 }

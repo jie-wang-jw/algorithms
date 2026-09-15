@@ -49,9 +49,13 @@ In-place versions do not copy the whole tree; the new-tree version allocates nod
 // 1. 前序递归复用 root1：推荐；把值加到 root1，再把左右孩子的合并结果接回去。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. A missing tree contributes nothing; keep the other subtree.
+//     缺了一棵树，合并结果就是另一棵。
+//  2. Both nodes exist, so this position's value is their sum.
+//     两个节点重叠，当前值应写成二者之和。
 func mergeTrees(root1 *TreeNode, root2 *TreeNode) *TreeNode {
-	// A missing tree contributes nothing; keep the other subtree.
-	// 缺了一棵树，合并结果就是另一棵。
 	if root1 == nil {
 		return root2
 	}
@@ -59,8 +63,6 @@ func mergeTrees(root1 *TreeNode, root2 *TreeNode) *TreeNode {
 		return root1
 	}
 
-	// Both nodes exist, so this position's value is their sum.
-	// 两个节点重叠，当前值应写成二者之和。
 	root1.Val += root2.Val
 	root1.Left = mergeTrees(root1.Left, root2.Left)
 	root1.Right = mergeTrees(root1.Right, root2.Right)
@@ -89,6 +91,12 @@ func mergeTreesNew(root1 *TreeNode, root2 *TreeNode) *TreeNode {
 // 3. 队列成对迭代：取出一对同时存在的节点，加值后再按孩子是否存在入队或直接拼接。
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Both left children exist, so they still need to be merged.
+//     左右两棵树的左孩子都在，这对节点还要继续合并。
+//  2. Only the second tree has this child; graft that subtree onto the first tree.
+//     只有第二棵树有这个孩子，直接接到第一棵树上。
 func mergeTreesIterative(root1 *TreeNode, root2 *TreeNode) *TreeNode {
 	if root1 == nil {
 		return root2
@@ -104,8 +112,6 @@ func mergeTreesIterative(root1 *TreeNode, root2 *TreeNode) *TreeNode {
 		queue = queue[2:]
 		node1.Val += node2.Val
 
-		// Both left children exist, so they still need to be merged.
-		// 左右两棵树的左孩子都在，这对节点还要继续合并。
 		if node1.Left != nil && node2.Left != nil {
 			queue = append(queue, node1.Left, node2.Left)
 		}
@@ -113,8 +119,6 @@ func mergeTreesIterative(root1 *TreeNode, root2 *TreeNode) *TreeNode {
 			queue = append(queue, node1.Right, node2.Right)
 		}
 
-		// Only the second tree has this child; graft that subtree onto the first tree.
-		// 只有第二棵树有这个孩子，直接接到第一棵树上。
 		if node1.Left == nil && node2.Left != nil {
 			node1.Left = node2.Left
 		}

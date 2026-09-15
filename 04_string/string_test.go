@@ -5,9 +5,10 @@ import (
 	"testing"
 )
 
+// 步骤与要点 / Steps and notes:
+//  1. Both implementations should remove extra spaces and reverse the word order.
+//     两种实现都应该删除多余空格，并反转单词顺序。
 func TestReverseWords(t *testing.T) {
-	// Both implementations should remove extra spaces and reverse the word order.
-	// 两种实现都应该删除多余空格，并反转单词顺序。
 	tests := []struct {
 		name string
 		s    string
@@ -45,9 +46,10 @@ func TestReverseWords(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Run the same cases against the brute-force and KMP implementations.
+//     使用同一组用例验证暴力匹配和 KMP 两种实现。
 func TestStrStr(t *testing.T) {
-	// Run the same cases against the brute-force and KMP implementations.
-	// 使用同一组用例验证暴力匹配和 KMP 两种实现。
 	tests := []struct {
 		name     string
 		haystack string
@@ -88,9 +90,10 @@ func TestStrStr(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. next[i] stores the longest equal proper prefix and suffix length for s[0:i+1].
+//     next[i] 保存 s[0:i+1] 的最长相等真前缀和真后缀长度。
 func TestGetNext(t *testing.T) {
-	// next[i] stores the longest equal proper prefix and suffix length for s[0:i+1].
-	// next[i] 保存 s[0:i+1] 的最长相等真前缀和真后缀长度。
 	tests := []struct {
 		name string
 		s    string
@@ -115,9 +118,10 @@ func TestGetNext(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. All three solutions should agree on repeated and non-repeated strings.
+//     枚举、双倍字符串和 KMP 三种实现应该得到相同结果。
 func TestRepeatedSubstringPattern(t *testing.T) {
-	// All three solutions should agree on repeated and non-repeated strings.
-	// 枚举、双倍字符串和 KMP 三种实现应该得到相同结果。
 	tests := []struct {
 		name string
 		s    string
@@ -181,9 +185,10 @@ func TestReverseString(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. The rune version must keep multibyte characters intact instead of reversing their bytes.
+//     rune 版本必须保持多字节字符完整，而不是把它们的字节顺序也反转。
 func TestReverseStringUnicode(t *testing.T) {
-	// The rune version must keep multibyte characters intact instead of reversing their bytes.
-	// rune 版本必须保持多字节字符完整，而不是把它们的字节顺序也反转。
 	tests := []struct {
 		name string
 		s    string
@@ -207,6 +212,9 @@ func TestReverseStringUnicode(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. A nonpositive k would make the 2k step loop forever without the guard.
+//     没有保护时，k 不是正数会让步长 2k 的循环无法结束。
 func TestReverseStr(t *testing.T) {
 	tests := []struct {
 		name string
@@ -222,8 +230,6 @@ func TestReverseStr(t *testing.T) {
 		{name: "k equals length", s: "abcd", k: 4, want: "dcba"},
 		{name: "single character", s: "a", k: 2, want: "a"},
 		{name: "empty string", s: "", k: 2, want: ""},
-		// A nonpositive k would make the 2k step loop forever without the guard.
-		// 没有保护时，k 不是正数会让步长 2k 的循环无法结束。
 		{name: "nonpositive k returns input", s: "abcdef", k: 0, want: "abcdef"},
 	}
 

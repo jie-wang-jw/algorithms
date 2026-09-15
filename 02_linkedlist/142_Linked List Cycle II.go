@@ -63,47 +63,45 @@ If fast reaches nil, there is no cycle.
 // 1. Floyd 快慢指针：先找到相遇点，再从头和相遇点同速走到入环点。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Both pointers start at head; slow moves 1 step and fast moves 2 steps.
+//     两个指针都从 head 出发；slow 每次走 1 步，fast 每次走 2 步。
+//  2. fast and fast.Next must both exist before fast can move two steps.
+//     fast 连走两步前，必须确保 fast 和 fast.Next 都不为 nil。
+//  3. Pointer equality means both variables point to the exact same node.
+//     指针相等表示 slow 和 fast 指向内存中的同一个节点，而不只是节点值相同。
+//  4. slow is the first meeting point inside the cycle, not necessarily the entrance.
+//     slow 是快慢指针在环内的第一次相遇点，但它不一定是入环点。
+//  5. 第一次相遇：确认“有环”
+//     First meeting: proves there is a cycle.
+//     第二次相遇：定位“入口”
+//     Second meeting: finds the cycle entrance.
+//  6. After a steps, p1 reaches the entrance and p2 reaches cycle offset (b+a) mod c=0.
+//     走 a 步后 p1 从头到入口，p2 的环内位置为 (b+a) mod c=0，也恰好到入口。
+//  7. Return p1 because after the loop both p1 and p2 point to the cycle entrance.
+//     返回 p1，因为循环结束后 p1 和 p2 都已经指向入环点；此时 p1 不一定还是原来的 head。
+//  8. Reaching nil means the list ends, so no cycle exists.
+//     fast 能走到 nil，说明链表存在终点，因此没有环。
 func detectCycle(head *ListNode) *ListNode {
-	// Both pointers start at head; slow moves 1 step and fast moves 2 steps.
-	// 两个指针都从 head 出发；slow 每次走 1 步，fast 每次走 2 步。
 	slow, fast := head, head
 
-	// fast and fast.Next must both exist before fast can move two steps.
-	// fast 连走两步前，必须确保 fast 和 fast.Next 都不为 nil。
 	for fast != nil && fast.Next != nil {
 		slow = slow.Next
 		fast = fast.Next.Next
 
-		// Pointer equality means both variables point to the exact same node.
-		// 指针相等表示 slow 和 fast 指向内存中的同一个节点，而不只是节点值相同。
 		if slow == fast {
-			// slow is the first meeting point inside the cycle, not necessarily the entrance.
-			// slow 是快慢指针在环内的第一次相遇点，但它不一定是入环点。
 			p1, p2 := head, slow
 
-			/*
-				第一次相遇：确认“有环”
-				First meeting: proves there is a cycle.
-				第二次相遇：定位“入口”
-				Second meeting: finds the cycle entrance.
-			*/
 			for p1 != p2 {
-				// After a steps, p1 reaches the entrance and p2 reaches cycle offset (b+a) mod c=0.
-				// 走 a 步后 p1 从头到入口，p2 的环内位置为 (b+a) mod c=0，也恰好到入口。
 				p1 = p1.Next
 				p2 = p2.Next
 			}
 
-			/*
-				Return p1 because after the loop both p1 and p2 point to the cycle entrance.
-				返回 p1，因为循环结束后 p1 和 p2 都已经指向入环点；此时 p1 不一定还是原来的 head。
-			*/
 			return p1
 		}
 	}
 
-	// Reaching nil means the list ends, so no cycle exists.
-	// fast 能走到 nil，说明链表存在终点，因此没有环。
 	return nil
 }
 
@@ -111,14 +109,18 @@ func detectCycle(head *ListNode) *ListNode {
 // 2. 节点集合法：第一个被重复访问到的节点就是入环点。
 // Time: O(n) expected, Space: O(n) for the set.
 // 时间复杂度：期望 O(n)，空间复杂度：O(n)，由集合产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. The key is the node pointer, not its value, because values may repeat.
+//     键是节点指针而不是节点值，因为不同节点的值可能相同。
+//  2. Nodes before the cycle are never revisited, so the first repeat is the entrance.
+//     入环前的节点不会被重复访问，因此第一个重复出现的节点就是入环点。
+//  3. Reaching nil means the list ends, so no cycle exists.
+//     能走到 nil 说明链表存在终点，因此没有环。
 func detectCycleHash(head *ListNode) *ListNode {
-	// The key is the node pointer, not its value, because values may repeat.
-	// 键是节点指针而不是节点值，因为不同节点的值可能相同。
 	seen := make(map[*ListNode]bool)
 
 	for node := head; node != nil; node = node.Next {
-		// Nodes before the cycle are never revisited, so the first repeat is the entrance.
-		// 入环前的节点不会被重复访问，因此第一个重复出现的节点就是入环点。
 		if seen[node] {
 			return node
 		}
@@ -126,7 +128,5 @@ func detectCycleHash(head *ListNode) *ListNode {
 		seen[node] = true
 	}
 
-	// Reaching nil means the list ends, so no cycle exists.
-	// 能走到 nil 说明链表存在终点，因此没有环。
 	return nil
 }

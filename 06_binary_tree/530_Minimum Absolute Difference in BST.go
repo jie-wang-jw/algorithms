@@ -41,9 +41,15 @@ For n nodes and height h, both take O(n) time and O(h) auxiliary space.
 // 1. 中序递归记录前驱：推荐；最小差只可能出现在中序相邻的两个值之间。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Seed with a large sentinel; real nonnegative gaps will replace it.
+//     先用大哨兵占位，真实的非负差值会把它换掉。
+//  2. First visited node has no predecessor; later nodes update the minimum gap.
+//     第一个访问的节点没有前驱；之后每个节点都用与前驱的差更新答案。
+//  3. Empty or single-node tree: no pair exists.
+//     空树或单节点：不存在可比较的一对。
 func getMinimumDifference(root *TreeNode) int {
-	// Seed with a large sentinel; real nonnegative gaps will replace it.
-	// 先用大哨兵占位，真实的非负差值会把它换掉。
 	minDiff := int(^uint(0) >> 1)
 	var prev *TreeNode
 
@@ -54,8 +60,6 @@ func getMinimumDifference(root *TreeNode) int {
 		}
 		traverse(node.Left)
 
-		// First visited node has no predecessor; later nodes update the minimum gap.
-		// 第一个访问的节点没有前驱；之后每个节点都用与前驱的差更新答案。
 		if prev != nil {
 			diff := node.Val - prev.Val
 			if diff < minDiff {
@@ -68,8 +72,6 @@ func getMinimumDifference(root *TreeNode) int {
 
 	traverse(root)
 
-	// Empty or single-node tree: no pair exists.
-	// 空树或单节点：不存在可比较的一对。
 	if prev == nil || minDiff == int(^uint(0)>>1) {
 		return 0
 	}
@@ -80,6 +82,14 @@ func getMinimumDifference(root *TreeNode) int {
 // 2. 中序迭代：用栈走左、根、右，并把每个节点与前驱比较。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Same large sentinel used by the recursive version.
+//     与递归版相同，先用大哨兵占位。
+//  2. Descend left exactly as in classic iterative inorder.
+//     与经典中序迭代一样，先一路向左压栈。
+//  3. Compare with the previous inorder node once a predecessor exists.
+//     有前驱后，用当前值与前驱值的差更新最小绝对差。
 func getMinimumDifferenceIterative(root *TreeNode) int {
 	minDiff := int(^uint(0) >> 1)
 	stack := []*TreeNode{}

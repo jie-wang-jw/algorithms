@@ -31,6 +31,14 @@ method 1 takes O(n) time and O(w) auxiliary space; method 2 takes O(n) time and 
 // 1. 队列层序：先固定 levelSize，再把每个孩子入队。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty N-ary tree contributes no levels.
+//     空的 N 叉树没有任何层。
+//  2. Capture how many nodes belong to the current level.
+//     固定属于当前层的节点个数。
+//  3. Enqueue every non-nil child; order preserves left-to-right within the next level.
+//     把每个非空孩子入队；顺序保证下一层仍从左到右。
 func naryLevelOrder(root *NaryNode) [][]int {
 	if root == nil {
 		return [][]int{}
@@ -60,6 +68,12 @@ func naryLevelOrder(root *NaryNode) [][]int {
 // 2. 递归按深度分组：深度就是结果下标，第一次到达该层时先追加空子数组。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. First visit to this depth allocates the level slice.
+//     第一次到达该深度时，先为这一层分配切片。
+//  2. Children are visited in order, so each level fills left to right.
+//     按顺序递归孩子，因此每一层仍从左到右填充。
 func naryLevelOrderRecursive(root *NaryNode) [][]int {
 	result := [][]int{}
 

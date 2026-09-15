@@ -74,6 +74,9 @@ func TestBinarySearch(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. keepsOrder is false for the opposing-pointer solution, which may reorder survivors.
+//     相向双指针解法可能改变保留元素的顺序，因此 keepsOrder 为 false。
 func TestRemoveElement(t *testing.T) {
 	tests := []struct {
 		name string
@@ -92,8 +95,6 @@ func TestRemoveElement(t *testing.T) {
 		{"val at tail only", []int{1, 1, 3}, 3, []int{1, 1}},
 	}
 
-	// keepsOrder is false for the opposing-pointer solution, which may reorder survivors.
-	// 相向双指针解法可能改变保留元素的顺序，因此 keepsOrder 为 false。
 	removeFuncs := []struct {
 		name       string
 		fn         func([]int, int) int

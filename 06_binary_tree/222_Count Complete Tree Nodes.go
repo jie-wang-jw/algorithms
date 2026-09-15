@@ -94,15 +94,17 @@ Write the first two yourself, then derive the equal-height test of the third.
 // 1. 普通递归：左右子树节点数相加，再加上当前根。
 // Time: O(n), Space: O(h); completeness makes h = O(log n).
 // 时间复杂度：O(n)，空间复杂度：O(h)，本题完全二叉树使 h=O(log n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has no nodes.
+//     空树没有节点。
+//  2. Count both disjoint subtrees, then include the root.
+//     左右子树都要计数，再加上根节点。
 func countNodes(root *TreeNode) int {
-	// An empty tree has no nodes.
-	// 空树没有节点。
 	if root == nil {
 		return 0
 	}
 
-	// Count both disjoint subtrees, then include the root.
-	// 左右子树都要计数，再加上根节点。
 	leftCount := countNodes(root.Left)
 	rightCount := countNodes(root.Right)
 
@@ -113,9 +115,15 @@ func countNodes(root *TreeNode) int {
 // 2. 层序遍历：每出队一个节点就计数，本题不需要分层。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has no nodes.
+//     空树没有节点。
+//  2. Every node is removed and counted exactly once.
+//     每个节点恰好出队一次，也就恰好计数一次。
+//  3. Enqueue existing children for later counting.
+//     非空孩子入队，等待后续计数。
 func countNodesIterative(root *TreeNode) int {
-	// An empty tree has no nodes.
-	// 空树没有节点。
 	if root == nil {
 		return 0
 	}
@@ -124,14 +132,10 @@ func countNodesIterative(root *TreeNode) int {
 	count := 0
 
 	for len(queue) > 0 {
-		// Every node is removed and counted exactly once.
-		// 每个节点恰好出队一次，也就恰好计数一次。
 		node := queue[0]
 		queue = queue[1:]
 		count++
 
-		// Enqueue existing children for later counting.
-		// 非空孩子入队，等待后续计数。
 		if node.Left != nil {
 			queue = append(queue, node.Left)
 		}
@@ -147,35 +151,37 @@ func countNodesIterative(root *TreeNode) int {
 // 3. 满子树公式：推荐；最左、最右路径等高即可直接返回 2^h-1，不必再进入内部。
 // Time: O(log² n), Space: O(log n) for the recursion stack.
 // 时间复杂度：O(log² n)，空间复杂度：O(log n)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty subtree contributes zero nodes.
+//     空子树贡献 0 个节点。
+//  2. Count nodes along the all-left path.
+//     沿最左路径统计高度，按节点数计。
+//  3. Count nodes along the all-right path.
+//     沿最右路径统计高度，不是求右子树的最大深度。
+//  4. Equal boundary heights imply a perfect subtree because it is complete.
+//     因为树完全，两端等高就说明每层都填满，可以直接套公式。
+//  5. Otherwise, count child subtrees using the same optimization.
+//     当前子树不满，就分别统计左右子树，继续尝试优化。
 func countNodesOptimized(root *TreeNode) int {
-	// An empty subtree contributes zero nodes.
-	// 空子树贡献 0 个节点。
 	if root == nil {
 		return 0
 	}
 
 	leftHeight, rightHeight := 0, 0
 
-	// Count nodes along the all-left path.
-	// 沿最左路径统计高度，按节点数计。
 	for node := root; node != nil; node = node.Left {
 		leftHeight++
 	}
 
-	// Count nodes along the all-right path.
-	// 沿最右路径统计高度，不是求右子树的最大深度。
 	for node := root; node != nil; node = node.Right {
 		rightHeight++
 	}
 
-	// Equal boundary heights imply a perfect subtree because it is complete.
-	// 因为树完全，两端等高就说明每层都填满，可以直接套公式。
 	if leftHeight == rightHeight {
 		return (1 << leftHeight) - 1
 	}
 
-	// Otherwise, count child subtrees using the same optimization.
-	// 当前子树不满，就分别统计左右子树，继续尝试优化。
 	return countNodesOptimized(root.Left) +
 		countNodesOptimized(root.Right) + 1
 }

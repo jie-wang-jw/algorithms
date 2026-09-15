@@ -39,42 +39,47 @@ Both take O(n²) time and O(1) auxiliary space beyond the O(n²) output.
 // 1. 边界收缩法：每轮填完一圈，并且填完一条边就立刻收缩对应边界。
 // Time: O(n²), Space: O(1) auxiliary beyond the O(n²) output matrix.
 // 时间复杂度：O(n²)，除 O(n²) 输出矩阵外辅助空间 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Create an n by n matrix initialized with zeros.
+//     创建一个 n x n 的二维数组，初始值都为 0。
+//  2. These four boundaries describe the unfilled rectangle.
+//     这四个边界围住当前尚未填充的矩形区域。
+//  3. num is the next value to write into the matrix.
+//     num 是下一个要写入矩阵的数字。
+//  4. Fill one outer layer clockwise, then move all boundaries inward.
+//     每轮顺时针填完一层，再把四条边界向内收缩。
+//  5. 1. Fill the top row from left to right. / 从左到右填充 top 行。
+//  6. 2. Fill the right column from top to bottom. / 从上到下填充 right 列。
+//  7. 3. Fill the bottom row from right to left. / 从右到左填充 bottom 行。
+//     Check first because the top row may have used the last remaining row.
+//     先判断是否还有行，因为 top 行可能已经填掉最后一行。
+//  8. 4. Fill the left column from bottom to top. / 从下到上填充 left 列。
+//     Check first because the right column may have used the last remaining column.
+//     先判断是否还有列，因为 right 列可能已经填掉最后一列。
 func generateMatrix(n int) [][]int {
-	// Create an n by n matrix initialized with zeros.
-	// 创建一个 n x n 的二维数组，初始值都为 0。
 	ans := make([][]int, n)
 	for i := range ans {
 		ans[i] = make([]int, n)
 	}
 
-	// These four boundaries describe the unfilled rectangle.
-	// 这四个边界围住当前尚未填充的矩形区域。
 	top, bottom := 0, n-1
 	left, right := 0, n-1
-	// num is the next value to write into the matrix.
-	// num 是下一个要写入矩阵的数字。
 	num := 1
 
-	// Fill one outer layer clockwise, then move all boundaries inward.
-	// 每轮顺时针填完一层，再把四条边界向内收缩。
 	for top <= bottom && left <= right {
-		// 1. Fill the top row from left to right. / 从左到右填充 top 行。
 		for i := left; i <= right; i++ {
 			ans[top][i] = num
 			num++
 		}
 		top++
 
-		// 2. Fill the right column from top to bottom. / 从上到下填充 right 列。
 		for i := top; i <= bottom; i++ {
 			ans[i][right] = num
 			num++
 		}
 		right--
 
-		// 3. Fill the bottom row from right to left. / 从右到左填充 bottom 行。
-		// Check first because the top row may have used the last remaining row.
-		// 先判断是否还有行，因为 top 行可能已经填掉最后一行。
 		if top <= bottom {
 			for i := right; i >= left; i-- {
 				ans[bottom][i] = num
@@ -83,9 +88,6 @@ func generateMatrix(n int) [][]int {
 			bottom--
 		}
 
-		// 4. Fill the left column from bottom to top. / 从下到上填充 left 列。
-		// Check first because the right column may have used the last remaining column.
-		// 先判断是否还有列，因为 right 列可能已经填掉最后一列。
 		if left <= right {
 			for i := bottom; i >= top; i-- {
 				ans[i][left] = num
@@ -102,32 +104,44 @@ func generateMatrix(n int) [][]int {
 // 2. 方向模拟法：按右、下、左、上行走，遇到阻挡就顺时针转向。
 // Time: O(n²), Space: O(1) auxiliary beyond the O(n²) output matrix.
 // 时间复杂度：O(n²)，除 O(n²) 输出矩阵外辅助空间 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Allocate an n by n zero matrix; zeros mark unvisited cells.
+//     分配 n×n 的零矩阵；0 表示尚未填写的格子。
+//  2. The four offsets are ordered clockwise: right, down, left, up.
+//     四个方向偏移按顺时针排列：右、下、左、上。
+//  3. Start at the top-left corner facing right (direction index 0).
+//     从左上角出发，初始朝右（方向下标 0）。
+//  4. Write the next spiral value into the current cell.
+//     把下一个螺旋数字写入当前格子。
+//  5. The last value needs no move, and moving would also find no free cell.
+//     最后一个数字不需要再移动，此时也已经没有空位可走。
+//  6. Look one step ahead in the current direction before committing the move.
+//     先沿当前方向前瞻一步，再决定是否转向。
+//  7. A filled cell is a wall, just like the matrix boundary.
+//     已填写的格子和矩阵边界一样，都表示应该转弯。
+//     Values start at 1, so a zero reliably marks an unvisited cell.
+//     填入的数字从 1 开始，所以 0 可以可靠地表示未访问过的格子。
+//  8. Advance using the (possibly updated) direction.
+//     用可能刚更新过的方向前进一步。
 func generateMatrixSimulation(n int) [][]int {
 	result := make([][]int, n)
 	for i := range result {
 		result[i] = make([]int, n)
 	}
 
-	// The four offsets are ordered clockwise: right, down, left, up.
-	// 四个方向偏移按顺时针排列：右、下、左、上。
 	directions := [4][2]int{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}
 	row, col, direction := 0, 0, 0
 
 	for value := 1; value <= n*n; value++ {
 		result[row][col] = value
 
-		// The last value needs no move, and moving would also find no free cell.
-		// 最后一个数字不需要再移动，此时也已经没有空位可走。
 		if value == n*n {
 			break
 		}
 
 		nextRow, nextCol := row+directions[direction][0], col+directions[direction][1]
 
-		// A filled cell is a wall, just like the matrix boundary.
-		// 已填写的格子和矩阵边界一样，都表示应该转弯。
-		// Values start at 1, so a zero reliably marks an unvisited cell.
-		// 填入的数字从 1 开始，所以 0 可以可靠地表示未访问过的格子。
 		if nextRow < 0 || nextRow >= n || nextCol < 0 || nextCol >= n || result[nextRow][nextCol] != 0 {
 			direction = (direction + 1) % 4
 		}
@@ -143,6 +157,18 @@ func generateMatrixSimulation(n int) [][]int {
 // 3. 逐圈填充法：每圈填四条左闭右开的边，n 为奇数时最后单独填中心格。
 // Time: O(n²), Space: O(1) auxiliary beyond the O(n²) output matrix.
 // 时间复杂度：O(n²)，除 O(n²) 输出矩阵外辅助空间 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. n/2 rings have four full edges; an odd n leaves a single center cell.
+//     共有 n/2 圈拥有完整的四条边；n 为奇数时还会剩下一个中心格。
+//  2. Each edge excludes its ending corner, so every corner belongs to exactly one edge.
+//     每条边不含终点角，因此每个角点只被恰好一条边填写。
+//     Top edge: left to right. / 上边：从左到右。
+//  3. Right edge: top to bottom. / 右边：从上到下。
+//  4. Bottom edge: right to left. / 下边：从右到左。
+//  5. Left edge: bottom to top. / 左边：从下到上。
+//  6. An odd side length leaves one uncovered center cell.
+//     奇数阶矩阵的正中心格不属于任何一圈的四条边，需要单独填写。
 func generateMatrixByLayers(n int) [][]int {
 	result := make([][]int, n)
 	for i := range result {
@@ -151,40 +177,30 @@ func generateMatrixByLayers(n int) [][]int {
 
 	value := 1
 
-	// n/2 rings have four full edges; an odd n leaves a single center cell.
-	// 共有 n/2 圈拥有完整的四条边；n 为奇数时还会剩下一个中心格。
 	for start := 0; start < n/2; start++ {
 		end := n - 1 - start
 
-		// Each edge excludes its ending corner, so every corner belongs to exactly one edge.
-		// 每条边不含终点角，因此每个角点只被恰好一条边填写。
-		// Top edge: left to right. / 上边：从左到右。
 		for col := start; col < end; col++ {
 			result[start][col] = value
 			value++
 		}
 
-		// Right edge: top to bottom. / 右边：从上到下。
 		for row := start; row < end; row++ {
 			result[row][end] = value
 			value++
 		}
 
-		// Bottom edge: right to left. / 下边：从右到左。
 		for col := end; col > start; col-- {
 			result[end][col] = value
 			value++
 		}
 
-		// Left edge: bottom to top. / 左边：从下到上。
 		for row := end; row > start; row-- {
 			result[row][start] = value
 			value++
 		}
 	}
 
-	// An odd side length leaves one uncovered center cell.
-	// 奇数阶矩阵的正中心格不属于任何一圈的四条边，需要单独填写。
 	if n%2 == 1 {
 		result[n/2][n/2] = value
 	}

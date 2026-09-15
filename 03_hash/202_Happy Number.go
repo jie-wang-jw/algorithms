@@ -55,20 +55,22 @@ If I see the same number again, that means we are in a cycle, so it cannot reach
 // 1. 哈希集合判重：中间结果再次出现即进入循环。
 // Time: O(d) for d decimal digits, Space: O(d) for the hash set.
 // 时间复杂度：O(d)（d 为十进制位数），空间复杂度：O(d)，由哈希集合产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. seen records every intermediate number we have processed.
+//     seen 记录已经处理过的每个中间结果。
+//  2. Seeing n again means the transformation is cycling.
+//     再次看到 n，表示后续变化开始循环。
+//  3. Mark the current number before calculating the next one.
+//     计算下一个数字前，先把当前数字标记为已访问。
 func isHappy(n int) bool {
-	// seen records every intermediate number we have processed.
-	// seen 记录已经处理过的每个中间结果。
 	seen := map[int]bool{}
 
 	for n != 1 {
-		// Seeing n again means the transformation is cycling.
-		// 再次看到 n，表示后续变化开始循环。
 		if seen[n] {
 			return false
 		}
 
-		// Mark the current number before calculating the next one.
-		// 计算下一个数字前，先把当前数字标记为已访问。
 		seen[n] = true
 		n = getNext(n)
 	}
@@ -79,22 +81,22 @@ func isHappy(n int) bool {
 // 各位数字平方和：两种解法共用的变换。
 // Time: O(d) for a d-digit argument, Space: O(1).
 // 时间复杂度：O(d)（d 为参数的十进制位数），空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. sum accumulates the square of every extracted digit.
+//     sum 累加每一位数字的平方。
+//  2. I extract each digit using n mod 10, add its square to the sum, and then divide n by 10 to move to the next digit.
+//     使用 n % 10 取出个位数，把它的平方加入 sum，再用 n / 10 删除个位数。
+//  3. Example: 19 % 10 = 9, so digit is the last digit.
+//     例如 19 % 10 = 9，因此 digit 是当前个位数。
+//  4. Integer division removes the last digit: 19 / 10 = 1.
+//     整数除法会去掉个位数：19 / 10 = 1。
 func getNext(n int) int {
-	// sum accumulates the square of every extracted digit.
-	// sum 累加每一位数字的平方。
 	sum := 0
 
-	/*
-		I extract each digit using n mod 10, add its square to the sum, and then divide n by 10 to move to the next digit.
-		使用 n % 10 取出个位数，把它的平方加入 sum，再用 n / 10 删除个位数。
-	*/
 	for n > 0 {
-		// Example: 19 % 10 = 9, so digit is the last digit.
-		// 例如 19 % 10 = 9，因此 digit 是当前个位数。
 		digit := n % 10
 		sum += digit * digit
-		// Integer division removes the last digit: 19 / 10 = 1.
-		// 整数除法会去掉个位数：19 / 10 = 1。
 		n /= 10
 	}
 	return sum
@@ -104,21 +106,23 @@ func getNext(n int) int {
 // 2. 快慢指针判环：把 getNext 当作唯一后继，相遇在 1 即快乐数；不需要哈希集合。
 // Time: O(d) for d decimal digits, Space: O(1).
 // 时间复杂度：O(d)（d 为十进制位数），空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Every number has exactly one successor, so the sequence behaves like a linked list.
+//     每个数字只有一个后继，因此整条变换序列相当于一个链表。
+//     fast starts one step ahead so the loop condition is not satisfied immediately.
+//     fast 先走一步，这样循环条件不会在开始时就成立。
+//  2. fast moves twice as quickly, so it catches slow inside any cycle.
+//     fast 的速度是 slow 的两倍，只要存在环就一定会追上 slow。
+//  3. 1 maps to itself, so meeting at 1 means the number is happy.
+//     1 的后继还是 1，因此在 1 处相遇就说明是快乐数；在其他值相遇则是不含 1 的环。
 func isHappyFloyd(n int) bool {
-	// Every number has exactly one successor, so the sequence behaves like a linked list.
-	// 每个数字只有一个后继，因此整条变换序列相当于一个链表。
-	// fast starts one step ahead so the loop condition is not satisfied immediately.
-	// fast 先走一步，这样循环条件不会在开始时就成立。
 	slow, fast := n, getNext(n)
 
-	// fast moves twice as quickly, so it catches slow inside any cycle.
-	// fast 的速度是 slow 的两倍，只要存在环就一定会追上 slow。
 	for slow != fast {
 		slow = getNext(slow)
 		fast = getNext(getNext(fast))
 	}
 
-	// 1 maps to itself, so meeting at 1 means the number is happy.
-	// 1 的后继还是 1，因此在 1 处相遇就说明是快乐数；在其他值相遇则是不含 1 的环。
 	return slow == 1
 }

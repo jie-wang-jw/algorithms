@@ -55,30 +55,32 @@ Stopping at fast==nil would also move slow one step onto target; the stopping co
 // 1. 快慢指针：一次遍历，让 fast 始终领先 slow 恰好 n 条边。
 // Time: O(L), Space: O(1).
 // 时间复杂度：O(L)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+// 1. dummy makes deleting the original head identical to deleting any other node.
+//    dummy 让“删除原头节点”和“删除普通节点”使用相同逻辑。
+// 2. Advancing fast n links leaves exactly n nodes from slow.Next through fast.
+//    fast 先走 n 条边，使 slow.Next 到 fast（含两端）恰好有 n 个节点。
+// 3. At the last node, those n nodes are the final n nodes, so slow.Next is the target.
+//    fast 到最后节点时，这 n 个节点就是末尾 n 个，所以 slow.Next 是倒数第 n 个。
+// 4. Skip the target node by linking slow directly to the following node.
+//    让 slow 直接连接待删除节点的后一个节点，从而跳过目标节点。
+// 5. The real result starts after dummy.
+//    真正的链表结果从 dummy.Next 开始。
 func removeNthFromEnd(head *ListNode, n int) *ListNode {
-	// dummy makes deleting the original head identical to deleting any other node.
-	// dummy 让“删除原头节点”和“删除普通节点”使用相同逻辑。
 	dummy := &ListNode{Next: head}
 	slow, fast := dummy, dummy
 
-	// Advancing fast n links leaves exactly n nodes from slow.Next through fast.
-	// fast 先走 n 条边，使 slow.Next 到 fast（含两端）恰好有 n 个节点。
 	for range n {
 		fast = fast.Next
 	}
 
-	// At the last node, those n nodes are the final n nodes, so slow.Next is the target.
-	// fast 到最后节点时，这 n 个节点就是末尾 n 个，所以 slow.Next 是倒数第 n 个。
 	for fast.Next != nil {
 		fast = fast.Next
 		slow = slow.Next
 	}
 
-	// Skip the target node by linking slow directly to the following node.
-	// 让 slow 直接连接待删除节点的后一个节点，从而跳过目标节点。
 	slow.Next = slow.Next.Next
-	// The real result starts after dummy.
-	// 真正的链表结果从 dummy.Next 开始。
 	return dummy.Next
 }
 
@@ -86,29 +88,31 @@ func removeNthFromEnd(head *ListNode, n int) *ListNode {
 // 2. 两次遍历：先求出链表长度，再走到待删除节点的前驱。
 // Time: O(L), Space: O(1).
 // 时间复杂度：O(L)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. First pass: count the nodes of the original list.
+//     第一次遍历：统计原链表的节点个数。
+//  2. dummy again gives the original head a predecessor.
+//     dummy 同样为原头节点提供一个前驱。
+//  3. The nth node from the end is the (L-n+1)th from the front,
+//     so its predecessor is exactly L-n links away from dummy.
+//     倒数第 n 个就是正数第 L-n+1 个，因此它的前驱距离 dummy 恰好 L-n 条边。
+//  4. Second pass ended at the predecessor, so skip the target node.
+//     第二次遍历停在前驱位置，直接跳过待删除节点。
 func removeNthFromEndLength(head *ListNode, n int) *ListNode {
-	// First pass: count the nodes of the original list.
-	// 第一次遍历：统计原链表的节点个数。
 	length := 0
 	for node := head; node != nil; node = node.Next {
 		length++
 	}
 
-	// dummy again gives the original head a predecessor.
-	// dummy 同样为原头节点提供一个前驱。
 	dummy := &ListNode{Next: head}
 	prev := dummy
 
-	// The nth node from the end is the (L-n+1)th from the front,
-	// so its predecessor is exactly L-n links away from dummy.
-	// 倒数第 n 个就是正数第 L-n+1 个，因此它的前驱距离 dummy 恰好 L-n 条边。
 	steps := length - n
 	for range steps {
 		prev = prev.Next
 	}
 
-	// Second pass ended at the predecessor, so skip the target node.
-	// 第二次遍历停在前驱位置，直接跳过待删除节点。
 	prev.Next = prev.Next.Next
 	return dummy.Next
 }
@@ -117,18 +121,20 @@ func removeNthFromEndLength(head *ListNode, n int) *ListNode {
 // 3. 栈解法：把所有节点入栈，再弹出 n 个，栈顶就是待删除节点的前驱。
 // Time: O(L), Space: O(L) for the stack.
 // 时间复杂度：O(L)，空间复杂度：O(L)，由栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Pushing dummy too guarantees a predecessor exists even for the head node.
+//     把 dummy 一起入栈，保证即使删除头节点也能取到前驱。
+//  2. Drop the target and all nodes after it; the top is now its predecessor.
+//     去掉目标及其后面的节点，剩余栈顶就是目标前驱。
 func removeNthFromEndStack(head *ListNode, n int) *ListNode {
 	dummy := &ListNode{Next: head}
 
-	// Pushing dummy too guarantees a predecessor exists even for the head node.
-	// 把 dummy 一起入栈，保证即使删除头节点也能取到前驱。
 	stack := []*ListNode{}
 	for node := dummy; node != nil; node = node.Next {
 		stack = append(stack, node)
 	}
 
-	// Drop the target and all nodes after it; the top is now its predecessor.
-	// 去掉目标及其后面的节点，剩余栈顶就是目标前驱。
 	stack = stack[:len(stack)-n]
 	prev := stack[len(stack)-1]
 

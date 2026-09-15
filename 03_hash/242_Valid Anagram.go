@@ -49,30 +49,30 @@ If the two strings are anagrams, all counts should become zero.
 // 1. 固定 26 计数数组：分两次遍历。
 // Time: O(n+m), Space: O(1).
 // 时间复杂度：O(n+m)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Different lengths cannot contain exactly the same characters.
+//     长度不同，就不可能包含数量完全相同的字符。
+//  2. record[0] counts 'a', record[1] counts 'b', and so on.
+//     record[0] 统计 'a'，record[1] 统计 'b'，以此类推。
+//  3. r-'a' converts a lowercase letter into an index from 0 to 25.
+//     r-'a' 把小写字母转换成 0 到 25 的数组下标。
+//  4. Go arrays of the same type are directly comparable.
+//     Go 中相同类型的数组可以直接比较；全为 0 才说明字符数量一致。
 func isAnagram1(s string, t string) bool {
-	/*
-		Different lengths cannot contain exactly the same characters.
-		长度不同，就不可能包含数量完全相同的字符。
-	*/
 	if len(s) != len(t) {
 		return false
 	}
 
-	// record[0] counts 'a', record[1] counts 'b', and so on.
-	// record[0] 统计 'a'，record[1] 统计 'b'，以此类推。
 	record := [26]int{}
 
 	for _, r := range s {
-		// r-'a' converts a lowercase letter into an index from 0 to 25.
-		// r-'a' 把小写字母转换成 0 到 25 的数组下标。
 		record[r-'a']++
 	}
 	for _, r := range t {
 		record[r-'a']--
 	}
 
-	// Go arrays of the same type are directly comparable.
-	// Go 中相同类型的数组可以直接比较；全为 0 才说明字符数量一致。
 	return record == [26]int{}
 }
 
@@ -80,9 +80,15 @@ func isAnagram1(s string, t string) bool {
 // 2. 固定 26 计数数组：一次遍历同时加减。
 // Time: O(n+m), Space: O(1).
 // 时间复杂度：O(n+m)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. This version updates counts for s and t in the same loop.
+//     这个版本在同一个循环中同时更新 s 和 t 的计数。
+//  2. Add the character from s and cancel it with the character from t.
+//     s 中的字符加 1，t 中的字符减 1，相同字符最终会互相抵消。
+//  3. Any nonzero count means one string has extra occurrences of a letter.
+//     任意计数不为 0，都表示某个字母在两个字符串中的数量不同。
 func isAnagram2(s string, t string) bool {
-	// This version updates counts for s and t in the same loop.
-	// 这个版本在同一个循环中同时更新 s 和 t 的计数。
 	if len(s) != len(t) {
 		return false
 	}
@@ -90,15 +96,11 @@ func isAnagram2(s string, t string) bool {
 	record := [26]int{}
 
 	for i := 0; i < len(s); i++ {
-		// Add the character from s and cancel it with the character from t.
-		// s 中的字符加 1，t 中的字符减 1，相同字符最终会互相抵消。
 		record[s[i]-'a']++
 		record[t[i]-'a']--
 	}
 
 	for _, v := range record {
-		// Any nonzero count means one string has extra occurrences of a letter.
-		// 任意计数不为 0，都表示某个字母在两个字符串中的数量不同。
 		if v != 0 {
 			return false
 		}
@@ -111,19 +113,23 @@ func isAnagram2(s string, t string) bool {
 // 3. 排序后比较：字符集不受 26 个字母限制。
 // Time: O(n log n), Space: O(n).
 // 时间复杂度：O(n log n)，空间复杂度：O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Different lengths cannot hold the same multiset of characters.
+//     长度不同，就不可能是同一个字符多重集合。
+//  2. Strings are immutable in Go, so sort byte copies instead.
+//     Go 的 string 不能原地修改，因此排序的是字节副本。
+//  3. Sorting turns each multiset into its one canonical ordering.
+//     排序把每个字符多重集合变成唯一的标准顺序。
+//  4. Equal canonical forms mean equal character counts.
+//     标准顺序相同，说明每个字符的数量都相同。
 func isAnagramSorted(s, t string) bool {
-	// Different lengths cannot hold the same multiset of characters.
-	// 长度不同，就不可能是同一个字符多重集合。
 	if len(s) != len(t) {
 		return false
 	}
 
-	// Strings are immutable in Go, so sort byte copies instead.
-	// Go 的 string 不能原地修改，因此排序的是字节副本。
 	a, b := []byte(s), []byte(t)
 
-	// Sorting turns each multiset into its one canonical ordering.
-	// 排序把每个字符多重集合变成唯一的标准顺序。
 	sort.Slice(a, func(i, j int) bool {
 		return a[i] < a[j]
 	})
@@ -131,8 +137,6 @@ func isAnagramSorted(s, t string) bool {
 		return b[i] < b[j]
 	})
 
-	// Equal canonical forms mean equal character counts.
-	// 标准顺序相同，说明每个字符的数量都相同。
 	return string(a) == string(b)
 }
 
@@ -140,13 +144,19 @@ func isAnagramSorted(s, t string) bool {
 // 4. rune 频次表：按 Unicode 码点统计。
 // Time: O(n+m) expected, Space: O(u) for distinct code points.
 // 时间复杂度：期望 O(n+m)，空间复杂度：O(u)，u 为不同码点数。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Key: one Unicode code point; value: its signed count difference.
+//     key 是一个 Unicode 码点，value 是它在两个字符串中的计数差。
+//  2. Ranging over a string decodes UTF-8, so r is a code point rather than a byte.
+//     range 遍历字符串时会解码 UTF-8，因此 r 是码点而不是单个字节。
+//  3. A nonzero difference means one side has extra occurrences of that code point.
+//     计数差不为 0，说明该码点在某一侧出现得更多。
+//  4. Comparing code points does not apply Unicode normalization.
+//     这里只比较码点，不做 Unicode 规范化，组合字符与预组字符不会自动视为相同。
 func isAnagramUnicode(s, t string) bool {
-	// Key: one Unicode code point; value: its signed count difference.
-	// key 是一个 Unicode 码点，value 是它在两个字符串中的计数差。
 	counts := make(map[rune]int)
 
-	// Ranging over a string decodes UTF-8, so r is a code point rather than a byte.
-	// range 遍历字符串时会解码 UTF-8，因此 r 是码点而不是单个字节。
 	for _, r := range s {
 		counts[r]++
 	}
@@ -155,14 +165,10 @@ func isAnagramUnicode(s, t string) bool {
 	}
 
 	for _, count := range counts {
-		// A nonzero difference means one side has extra occurrences of that code point.
-		// 计数差不为 0，说明该码点在某一侧出现得更多。
 		if count != 0 {
 			return false
 		}
 	}
 
-	// Comparing code points does not apply Unicode normalization.
-	// 这里只比较码点，不做 Unicode 规范化，组合字符与预组字符不会自动视为相同。
 	return true
 }

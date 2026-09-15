@@ -76,24 +76,26 @@ BFS takes O(n) time and O(w) auxiliary space for maximum width w, even while the
 // 1. 前序递归：推荐；先交换左右孩子指针，再分别翻转换位后的两棵子树。
 // Time: O(n), Space: O(h) for the recursion stack; auxiliary space is not O(1).
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生，不能写成 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty subtree is already its own mirror.
+//     空子树的镜像仍是空子树，也是递归的停止条件。
+//  2. Exchange whole subtrees, not just the child values.
+//     交换的是两棵子树的入口，不只是两个孩子的值。
+//  3. Mirror the interiors of both relocated subtrees, exactly once each.
+//     两棵子树虽然换了位置，内部仍需翻转；左右各处理一次。
+//  4. The root stays in place; its subtree has now been fully mirrored.
+//     根的位置不变，以它为根的整棵子树已经完成镜像翻转。
 func invertTree(root *TreeNode) *TreeNode {
-	// An empty subtree is already its own mirror.
-	// 空子树的镜像仍是空子树，也是递归的停止条件。
 	if root == nil {
 		return nil
 	}
 
-	// Exchange whole subtrees, not just the child values.
-	// 交换的是两棵子树的入口，不只是两个孩子的值。
 	root.Left, root.Right = root.Right, root.Left
 
-	// Mirror the interiors of both relocated subtrees, exactly once each.
-	// 两棵子树虽然换了位置，内部仍需翻转；左右各处理一次。
 	invertTree(root.Left)
 	invertTree(root.Right)
 
-	// The root stays in place; its subtree has now been fully mirrored.
-	// 根的位置不变，以它为根的整棵子树已经完成镜像翻转。
 	return root
 }
 
@@ -108,12 +110,14 @@ A recursive return means the entire subtree is finished, not just its root.
 // 2. 后序递归：先翻转左右子树内部，再交换它们的位置。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+// 1. Finish both subtree interiors before exchanging their positions.
+//    先完成两棵子树内部的翻转，再交换它们的位置。
 func invertTreePostorderRecursive(root *TreeNode) *TreeNode {
 	if root == nil {
 		return nil
 	}
-	// Finish both subtree interiors before exchanging their positions.
-	// 先完成两棵子树内部的翻转，再交换它们的位置。
 	invertTreePostorderRecursive(root.Left)
 	invertTreePostorderRecursive(root.Right)
 	root.Left, root.Right = root.Right, root.Left
@@ -135,21 +139,23 @@ which would undo the inversion.
 // 3. 前序迭代：首次到达时交换，压栈后再深入交换后的左子树，出栈后处理另一边。
 // Time: O(n), Space: O(h) for the stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由显式栈产生。
+//
+// 步骤与要点 / Steps and notes:
+// 1. Swap on first arrival, then save the node for the other subtree.
+//    首次到达时交换，保存当前节点以便稍后处理另一棵子树。
+// 2. The swapped left subtree is done; continue with the swapped right.
+//    交换后的左子树已完成，接着进入交换后的右子树。
 func invertTreePreorderIterative(root *TreeNode) *TreeNode {
 	stack := []*TreeNode{}
 	node := root
 	for node != nil || len(stack) > 0 {
 		for node != nil {
-			// Swap on first arrival, then save the node for the other subtree.
-			// 首次到达时交换，保存当前节点以便稍后处理另一棵子树。
 			node.Left, node.Right = node.Right, node.Left
 			stack = append(stack, node)
 			node = node.Left
 		}
 		node = stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
-		// The swapped left subtree is done; continue with the swapped right.
-		// 交换后的左子树已完成，接着进入交换后的右子树。
 		node = node.Right
 	}
 	return root
@@ -171,11 +177,17 @@ Otherwise push the node back to resume after its right subtree. Set node=nil aft
 // 4. 后序迭代：用 prev 记录最近完成的子树根，左右都完成后才交换当前节点。
 // Time: O(n), Space: O(h) for the stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由显式栈产生。
+//
+// 步骤与要点 / Steps and notes:
+// 1. Track subtree completion, not mere arrival.
+//    记录子树完成状态，而不是访问到达状态。
+// 2. Both subtrees are complete; finish their parent.
+//    两棵子树都完成了，现在完成它们的父节点。
+// 3. Resume this parent after completing its right subtree.
+//    保存父节点，右子树完成后还要回来处理。
 func invertTreePostorderIterative(root *TreeNode) *TreeNode {
 	stack := []*TreeNode{}
 	node := root
-	// Track subtree completion, not mere arrival.
-	// 记录子树完成状态，而不是访问到达状态。
 	var prev *TreeNode
 	for node != nil || len(stack) > 0 {
 		for node != nil {
@@ -185,14 +197,10 @@ func invertTreePostorderIterative(root *TreeNode) *TreeNode {
 		node = stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 		if node.Right == nil || node.Right == prev {
-			// Both subtrees are complete; finish their parent.
-			// 两棵子树都完成了，现在完成它们的父节点。
 			node.Left, node.Right = node.Right, node.Left
 			prev = node
 			node = nil
 		} else {
-			// Resume this parent after completing its right subtree.
-			// 保存父节点，右子树完成后还要回来处理。
 			stack = append(stack, node)
 			node = node.Right
 		}
@@ -213,6 +221,10 @@ Front obtains the queue element, Remove returns its stored value, and .(*TreeNod
 // 5. 层序遍历：每个节点出队时交换一次，再将两个孩子入队，不必按层分组。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+// 1. Relocation alone does not mirror the interiors; enqueue both for later work.
+//    子树换位置后内部仍需翻转，因此把两个孩子都入队继续处理。
 func invertTreeLevelOrder(root *TreeNode) *TreeNode {
 	if root == nil {
 		return nil
@@ -222,8 +234,6 @@ func invertTreeLevelOrder(root *TreeNode) *TreeNode {
 	for queue.Len() > 0 {
 		node := queue.Remove(queue.Front()).(*TreeNode)
 		node.Left, node.Right = node.Right, node.Left
-		// Relocation alone does not mirror the interiors; enqueue both for later work.
-		// 子树换位置后内部仍需翻转，因此把两个孩子都入队继续处理。
 		if node.Left != nil {
 			queue.PushBack(node.Left)
 		}

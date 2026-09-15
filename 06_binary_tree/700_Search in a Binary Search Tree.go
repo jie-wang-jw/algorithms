@@ -50,21 +50,23 @@ Recursion uses O(h) space; iteration uses O(1).
 // 1. 递归：推荐；只进入可能含 val 的一侧，并返回这次调用的结果。
 // Time: O(h), Space: O(h).
 // 时间复杂度：O(h)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Miss (nil) or hit: both are valid stopping points.
+//     没找到（空）或命中：两种都是合法终止。
+//  2. Current value is too large; every right-side value is even larger.
+//     当前值偏大，右子树只会更大，只搜左边。
+//  3. Current value is too small; search only the right subtree.
+//     当前值偏小，只搜右子树。
 func searchBST(root *TreeNode, val int) *TreeNode {
-	// Miss (nil) or hit: both are valid stopping points.
-	// 没找到（空）或命中：两种都是合法终止。
 	if root == nil || root.Val == val {
 		return root
 	}
 
-	// Current value is too large; every right-side value is even larger.
-	// 当前值偏大，右子树只会更大，只搜左边。
 	if root.Val > val {
 		return searchBST(root.Left, val)
 	}
 
-	// Current value is too small; search only the right subtree.
-	// 当前值偏小，只搜右子树。
 	return searchBST(root.Right, val)
 }
 
@@ -72,6 +74,10 @@ func searchBST(root *TreeNode, val int) *TreeNode {
 // 2. 迭代：按大小原地走向左或右，有序性已确定路径，不需要回溯栈。
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Equal: return the subtree rooted here.
+//     相等：返回以当前节点为根的子树。
 func searchBSTIterative(root *TreeNode, val int) *TreeNode {
 	for root != nil {
 		if root.Val > val {
@@ -79,8 +85,6 @@ func searchBSTIterative(root *TreeNode, val int) *TreeNode {
 		} else if root.Val < val {
 			root = root.Right
 		} else {
-			// Equal: return the subtree rooted here.
-			// 相等：返回以当前节点为根的子树。
 			return root
 		}
 	}

@@ -88,25 +88,27 @@ The three implementations appear below in the same order as the numbered methods
 // 1. 递归传递剩余目标：先扣除当前值，只有到达叶子且剩余为 0 才成功。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has no root-to-leaf path.
+//     空树没有根到叶子的路径，即使目标为 0 也不能成功。
+//  2. The current value is used; the children must supply the remainder.
+//     当前值已经计入，后面的路径只需要凑剩余目标。
+//  3. Success requires both reaching a leaf and matching the sum.
+//     必须同时满足：已经到叶子，并且剩余目标为 0。
+//  4. Either branch may supply a valid path.
+//     任意一边找到合法路径即可，所以用 ||。
 func hasPathSum(root *TreeNode, targetSum int) bool {
-	// An empty tree has no root-to-leaf path.
-	// 空树没有根到叶子的路径，即使目标为 0 也不能成功。
 	if root == nil {
 		return false
 	}
 
-	// The current value is used; the children must supply the remainder.
-	// 当前值已经计入，后面的路径只需要凑剩余目标。
 	remaining := targetSum - root.Val
 
-	// Success requires both reaching a leaf and matching the sum.
-	// 必须同时满足：已经到叶子，并且剩余目标为 0。
 	if root.Left == nil && root.Right == nil {
 		return remaining == 0
 	}
 
-	// Either branch may supply a valid path.
-	// 任意一边找到合法路径即可，所以用 ||。
 	return hasPathSum(root.Left, remaining) ||
 		hasPathSum(root.Right, remaining)
 }
@@ -115,13 +117,19 @@ func hasPathSum(root *TreeNode, targetSum int) bool {
 // 2. 栈迭代：节点栈与路径和栈同步，每个待处理节点带着从根到它自己的累计和。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Matching positions store a node and its root-to-node sum.
+//     相同下标保存一个节点和从根到该节点的累计和。
+//  2. A matching internal node is not enough; it must be a leaf.
+//     中间节点的和相等还不够，必须是叶子。
+//  3. Extend this path independently for each child.
+//     每个孩子分别延伸当前路径，保存自己的累计和。
 func hasPathSumIterative(root *TreeNode, targetSum int) bool {
 	if root == nil {
 		return false
 	}
 
-	// Matching positions store a node and its root-to-node sum.
-	// 相同下标保存一个节点和从根到该节点的累计和。
 	nodes := []*TreeNode{root}
 	sums := []int{root.Val}
 
@@ -131,15 +139,11 @@ func hasPathSumIterative(root *TreeNode, targetSum int) bool {
 		nodes = nodes[:last]
 		sums = sums[:last]
 
-		// A matching internal node is not enough; it must be a leaf.
-		// 中间节点的和相等还不够，必须是叶子。
 		if node.Left == nil && node.Right == nil &&
 			sum == targetSum {
 			return true
 		}
 
-		// Extend this path independently for each child.
-		// 每个孩子分别延伸当前路径，保存自己的累计和。
 		if node.Right != nil {
 			nodes = append(nodes, node.Right)
 			sums = append(sums, sum+node.Right.Val)
@@ -157,6 +161,12 @@ func hasPathSumIterative(root *TreeNode, targetSum int) bool {
 // 3. 队列 BFS：节点与累计和一起出队，本题不问深度，无需按层循环。
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Remove a node together with its own path sum.
+//     节点与它对应的路径和一起出队。
+//  2. Return as soon as a complete matching path is found.
+//     找到完整且和匹配的根到叶子路径即可返回。
 func hasPathSumBFS(root *TreeNode, targetSum int) bool {
 	if root == nil {
 		return false
@@ -166,14 +176,10 @@ func hasPathSumBFS(root *TreeNode, targetSum int) bool {
 	sums := []int{root.Val}
 
 	for len(nodes) > 0 {
-		// Remove a node together with its own path sum.
-		// 节点与它对应的路径和一起出队。
 		node, sum := nodes[0], sums[0]
 		nodes = nodes[1:]
 		sums = sums[1:]
 
-		// Return as soon as a complete matching path is found.
-		// 找到完整且和匹配的根到叶子路径即可返回。
 		if node.Left == nil && node.Right == nil &&
 			sum == targetSum {
 			return true

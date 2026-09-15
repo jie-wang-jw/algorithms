@@ -82,15 +82,19 @@ The three implementations appear below in the order of the numbered methods abov
 // 1. 正常层序遍历：推荐；每层开始时保存队首，更深层会覆盖答案，最终就是最深层最左值。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. The problem guarantees a nonempty tree.
+//     题目保证树非空，用根节点值初始化答案。
+//  2. The queue front is the leftmost node of this level.
+//     每层开始时，队首就是这一层最左的节点。
+//  3. Enqueue left before right to preserve left-to-right order.
+//     先左后右入队，保持下一层从左到右的顺序。
 func findBottomLeftValue(root *TreeNode) int {
-	// The problem guarantees a nonempty tree.
-	// 题目保证树非空，用根节点值初始化答案。
 	answer := root.Val
 	queue := []*TreeNode{root}
 
 	for len(queue) > 0 {
-		// The queue front is the leftmost node of this level.
-		// 每层开始时，队首就是这一层最左的节点。
 		answer = queue[0].Val
 		levelSize := len(queue)
 
@@ -98,8 +102,6 @@ func findBottomLeftValue(root *TreeNode) int {
 			node := queue[0]
 			queue = queue[1:]
 
-			// Enqueue left before right to preserve left-to-right order.
-			// 先左后右入队，保持下一层从左到右的顺序。
 			if node.Left != nil {
 				queue = append(queue, node.Left)
 			}
@@ -116,6 +118,12 @@ func findBottomLeftValue(root *TreeNode) int {
 // 2. 先左后右的 DFS 递归：只有当前深度严格大于已见最大深度时才更新答案。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Keep the first node encountered at each new deepest level.
+//     每次发现更深的一层，只记录第一次遇到的节点。
+//  2. Visit left first so equal-depth nodes are encountered left to right.
+//     先左后右，保证同一深度先遇到左侧节点。
 func findBottomLeftValueDFS(root *TreeNode) int {
 	answer := root.Val
 	deepest := 0
@@ -126,15 +134,11 @@ func findBottomLeftValueDFS(root *TreeNode) int {
 			return
 		}
 
-		// Keep the first node encountered at each new deepest level.
-		// 每次发现更深的一层，只记录第一次遇到的节点。
 		if depth > deepest {
 			deepest = depth
 			answer = node.Val
 		}
 
-		// Visit left first so equal-depth nodes are encountered left to right.
-		// 先左后右，保证同一深度先遇到左侧节点。
 		traverse(node.Left, depth+1)
 		traverse(node.Right, depth+1)
 	}
@@ -147,6 +151,12 @@ func findBottomLeftValueDFS(root *TreeNode) int {
 // 3. 反向层序遍历：先右后左入队，最后出队的节点就是最深层最左节点。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Visit each level from right to left.
+//     先右后左入队，让每层从右往左访问。
+//  2. The last visited node is the bottom-left node.
+//     最后访问的节点就是最深层最左节点。
 func findBottomLeftValueReverseBFS(root *TreeNode) int {
 	queue := []*TreeNode{root}
 	answer := root.Val
@@ -156,8 +166,6 @@ func findBottomLeftValueReverseBFS(root *TreeNode) int {
 		queue = queue[1:]
 		answer = node.Val
 
-		// Visit each level from right to left.
-		// 先右后左入队，让每层从右往左访问。
 		if node.Right != nil {
 			queue = append(queue, node.Right)
 		}
@@ -166,7 +174,5 @@ func findBottomLeftValueReverseBFS(root *TreeNode) int {
 		}
 	}
 
-	// The last visited node is the bottom-left node.
-	// 最后访问的节点就是最深层最左节点。
 	return answer
 }

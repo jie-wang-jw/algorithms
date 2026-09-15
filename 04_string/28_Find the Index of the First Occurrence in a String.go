@@ -47,45 +47,54 @@ so it checks for an empty string itself: writing next[0] for an empty pattern wo
 // 1. 暴力滑动比较：枚举每个起点。
 // Time: O((n-m+1)m) worst case when m<=n, Space: O(1).
 // 时间复杂度：m<=n 时最坏 O((n-m+1)m)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//
+//  1. If needle is empty, return 0 by convention.
+//     按题目约定，needle 为空时返回 0。
+//
+//  2. If needle is longer than haystack, it cannot match.
+//     needle 比 haystack 更长时，不可能匹配成功。
+//
+//  3. i is the starting position where we try to match needle.
+//     i 表示本轮尝试匹配 needle 的起始位置。
+//
+//     为什么是 i <= len(haystack)-len(needle)?
+//     Because we need enough remaining characters for needle.
+//     因为从 i 开始必须剩下足够多的字符，才能容纳整个 needle。
+//
+//  4. j is the current index inside needle.
+//     j 是当前正在比较的 needle 下标。
+//
+//  5. Compare haystack[i+j] with needle[j] one by one.
+//     从起点 i 开始，逐个比较 haystack[i+j] 和 needle[j]。
+//
+//  6. If j reaches len(needle), the whole needle matched.
+//     j 到达 len(needle)，表示 needle 的所有字符都匹配成功。
+//
+//  7. Tried all starting positions and found no match.
+//     所有可能起点都尝试过，仍然没有找到匹配。
 func strStr(haystack string, needle string) int {
-	// If needle is empty, return 0 by convention.
-	// 按题目约定，needle 为空时返回 0。
 	if len(needle) == 0 {
 		return 0
 	}
 
-	// If needle is longer than haystack, it cannot match.
-	// needle 比 haystack 更长时，不可能匹配成功。
 	if len(needle) > len(haystack) {
 		return -1
 	}
 
-	// i is the starting position where we try to match needle.
-	// i 表示本轮尝试匹配 needle 的起始位置。
-	//
-	// 为什么是 i <= len(haystack)-len(needle)?
-	// Because we need enough remaining characters for needle.
-	// 因为从 i 开始必须剩下足够多的字符，才能容纳整个 needle。
 	for i := 0; i <= len(haystack)-len(needle); i++ {
-		// j is the current index inside needle.
-		// j 是当前正在比较的 needle 下标。
 		j := 0
 
-		// Compare haystack[i+j] with needle[j] one by one.
-		// 从起点 i 开始，逐个比较 haystack[i+j] 和 needle[j]。
 		for j < len(needle) && haystack[i+j] == needle[j] {
 			j++
 		}
 
-		// If j reaches len(needle), the whole needle matched.
-		// j 到达 len(needle)，表示 needle 的所有字符都匹配成功。
 		if j == len(needle) {
 			return i
 		}
 	}
 
-	// Tried all starting positions and found no match.
-	// 所有可能起点都尝试过，仍然没有找到匹配。
 	return -1
 }
 
@@ -101,46 +110,48 @@ When a mismatch happens, it uses the prefix table to move the pattern pointer.
 // 2. KMP 前缀表：主串指针不回退。
 // Time: O(n+m), Space: O(m) for the prefix table.
 // 时间复杂度：O(n+m)，空间复杂度：O(m)，由 next 数组产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty pattern matches at index 0.
+//     空模式串默认匹配在下标 0。
+//  2. Build the prefix table for needle.
+//     为 needle 构造前缀表 next。
+//  3. j means how many characters in needle have been matched.
+//     j 表示 needle 当前已经匹配了多少个字符。
+//  4. i scans haystack from left to right and never moves backward.
+//     i 从左到右扫描 haystack，并且不会回退。
+//  5. Mismatch: fall back j using the prefix table.
+//     不匹配：根据 next 数组回退 j。
+//  6. Match: move j forward.
+//     匹配：j 往前走一步。
+//  7. If j reaches len(needle), the whole needle has been matched.
+//     如果 j 等于 needle 长度，说明整个 needle 匹配完成。
+//  8. No match found.
+//     没有找到匹配。
 func strStr2(haystack string, needle string) int {
-	// Empty pattern matches at index 0.
-	// 空模式串默认匹配在下标 0。
 	if len(needle) == 0 {
 		return 0
 	}
 
-	// Build the prefix table for needle.
-	// 为 needle 构造前缀表 next。
 	next := make([]int, len(needle))
 	getNext(next, needle)
 
-	// j means how many characters in needle have been matched.
-	// j 表示 needle 当前已经匹配了多少个字符。
 	j := 0
 
-	// i scans haystack from left to right and never moves backward.
-	// i 从左到右扫描 haystack，并且不会回退。
 	for i := 0; i < len(haystack); i++ {
-		// Mismatch: fall back j using the prefix table.
-		// 不匹配：根据 next 数组回退 j。
 		for j > 0 && haystack[i] != needle[j] {
 			j = next[j-1]
 		}
 
-		// Match: move j forward.
-		// 匹配：j 往前走一步。
 		if haystack[i] == needle[j] {
 			j++
 		}
 
-		// If j reaches len(needle), the whole needle has been matched.
-		// 如果 j 等于 needle 长度，说明整个 needle 匹配完成。
 		if j == len(needle) {
 			return i - len(needle) + 1
 		}
 	}
 
-	// No match found.
-	// 没有找到匹配。
 	return -1
 }
 
@@ -167,47 +178,45 @@ next[i]: the answer for substring s[0:i+1]. / 到 i 为止这一段的最长相�
 // 前缀表：KMP 相关解法共用。
 // Time: O(m), Space: O(1) beyond the supplied next table.
 // 时间复杂度：O(m)，空间复杂度：除传入的 next 外 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+// 1. An empty pattern has no entries, so writing next[0] would be out of range.
+//    空模式串没有任何表项，写入 next[0] 会越界。
+// 2. j is the current matched prefix length.
+//    j 表示当前已经匹配上的前后缀长度。
+// 3. i is the position whose next value we are computing; j is the reusable prefix length.
+//    			i 是当前要计算 next[i] 的位置；j 是目前可以复用的前缀长度。
+//
+//    		s[i] is the new character, and s[j] is the next character expected by the old prefix.
+//    			s[i] 是新加入的字符，s[j] 是旧前缀接下来期待匹配的字符。
+// 4. If s[i] does not match s[j], the current prefix of length j cannot continue.
+//    			如果 s[i] 和 s[j] 不相同，说明当前长度为 j 的前后缀无法继续扩展。
+//
+//    			Shorten j to the next reusable prefix and try again.
+//    			把 j 缩短到更短的可复用前缀，再继续尝试。
+// 5. next[j-1] finds the longest border within the matched prefix; its suffix is reusable as a prefix.
+//    next[j-1] 找已匹配前缀内部的最长相等前后缀；末尾这段仍能当作开头使用，所以无需从零重试。
+// 6. If the new characters match, the reusable prefix grows by one.
+//    如果新字符匹配，最长相等前后缀长度增加 1。
+// 7. Store the longest equal prefix-suffix length for s[0:i+1].
+//    记录 s[0:i+1] 当前这段的最长相等前后缀长度。
 func getNext(next []int, s string) {
-	// An empty pattern has no entries, so writing next[0] would be out of range.
-	// 空模式串没有任何表项，写入 next[0] 会越界。
 	if len(s) == 0 {
 		return
 	}
 
-	// j is the current matched prefix length.
-	// j 表示当前已经匹配上的前后缀长度。
 	j := 0
 	next[0] = 0
 
-	/*
-			i is the position whose next value we are computing; j is the reusable prefix length.
-			i 是当前要计算 next[i] 的位置；j 是目前可以复用的前缀长度。
-
-		s[i] is the new character, and s[j] is the next character expected by the old prefix.
-			s[i] 是新加入的字符，s[j] 是旧前缀接下来期待匹配的字符。
-	*/
 	for i := 1; i < len(s); i++ {
-		/*
-			If s[i] does not match s[j], the current prefix of length j cannot continue.
-			如果 s[i] 和 s[j] 不相同，说明当前长度为 j 的前后缀无法继续扩展。
-
-			Shorten j to the next reusable prefix and try again.
-			把 j 缩短到更短的可复用前缀，再继续尝试。
-		*/
 		for j > 0 && s[i] != s[j] {
-			// next[j-1] finds the longest border within the matched prefix; its suffix is reusable as a prefix.
-			// next[j-1] 找已匹配前缀内部的最长相等前后缀；末尾这段仍能当作开头使用，所以无需从零重试。
 			j = next[j-1]
 		}
 
-		// If the new characters match, the reusable prefix grows by one.
-		// 如果新字符匹配，最长相等前后缀长度增加 1。
 		if s[i] == s[j] {
 			j++
 		}
 
-		// Store the longest equal prefix-suffix length for s[0:i+1].
-		// 记录 s[0:i+1] 当前这段的最长相等前后缀长度。
 		next[i] = j
 	}
 }

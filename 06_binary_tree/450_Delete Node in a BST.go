@@ -89,29 +89,31 @@ Recursion uses O(h) space; iteration is O(1) besides that leftmost walk.
 // 1. 递归：推荐；按 BST 找到目标后，用空、单孩子或改接后的右子树替换它。
 // Time: O(h), Space: O(h).
 // 时间复杂度：O(h)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Not found: a nil link is reached; leave it unchanged.
+//     没找到：走到空节点，原样返回。
+//  2. Target is in the left subtree; adopt whatever that call returns.
+//     目标在左子树；把递归返回的子树根接回 Left。
+//  3. Target is in the right subtree; adopt the returned right child.
+//     目标在右子树；把递归返回的子树根接回 Right。
+//  4. root.Val == key: rewire this node according to its children.
+//     命中当前节点：按孩子情况改接后返回替换结果。
 func deleteNode(root *TreeNode, key int) *TreeNode {
-	// Not found: a nil link is reached; leave it unchanged.
-	// 没找到：走到空节点，原样返回。
 	if root == nil {
 		return nil
 	}
 
-	// Target is in the left subtree; adopt whatever that call returns.
-	// 目标在左子树；把递归返回的子树根接回 Left。
 	if key < root.Val {
 		root.Left = deleteNode(root.Left, key)
 		return root
 	}
 
-	// Target is in the right subtree; adopt the returned right child.
-	// 目标在右子树；把递归返回的子树根接回 Right。
 	if key > root.Val {
 		root.Right = deleteNode(root.Right, key)
 		return root
 	}
 
-	// root.Val == key: rewire this node according to its children.
-	// 命中当前节点：按孩子情况改接后返回替换结果。
 	return deleteRoot(root)
 }
 
@@ -119,12 +121,20 @@ func deleteNode(root *TreeNode, key int) *TreeNode {
 // 2. 迭代：先找到目标及其父节点，再使用相同的替换规则。
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Walk until the key is found or the search falls off the tree.
+//     向下搜索，直到找到 key 或落到空节点。
+//  2. Key absent: the original tree is unchanged.
+//     键不存在：原树不变。
+//  3. Deleting the original root: the replacement becomes the new root.
+//     删除的是原根：替换结果就是新根。
+//  4. Otherwise hang the replacement on the same side the target occupied.
+//     否则把替换结果挂到父节点原先指向目标的那一侧。
 func deleteNodeIterative(root *TreeNode, key int) *TreeNode {
 	var parent *TreeNode
 	cur := root
 
-	// Walk until the key is found or the search falls off the tree.
-	// 向下搜索，直到找到 key 或落到空节点。
 	for cur != nil && cur.Val != key {
 		parent = cur
 		if key < cur.Val {
@@ -134,22 +144,16 @@ func deleteNodeIterative(root *TreeNode, key int) *TreeNode {
 		}
 	}
 
-	// Key absent: the original tree is unchanged.
-	// 键不存在：原树不变。
 	if cur == nil {
 		return root
 	}
 
 	replacement := deleteRoot(cur)
 
-	// Deleting the original root: the replacement becomes the new root.
-	// 删除的是原根：替换结果就是新根。
 	if parent == nil {
 		return replacement
 	}
 
-	// Otherwise hang the replacement on the same side the target occupied.
-	// 否则把替换结果挂到父节点原先指向目标的那一侧。
 	if parent.Left == cur {
 		parent.Left = replacement
 	} else {
@@ -162,28 +166,30 @@ func deleteNodeIterative(root *TreeNode, key int) *TreeNode {
 // 已找到节点的替换结果：叶子返回 nil，单孩子直接顶上，双孩子把左子树接到右子树最左后再返回右子树。
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Leaf or right-only: the right child (possibly nil) replaces root.
+//     叶子或只有右孩子：右孩子（可能为 nil）直接顶替。
+//  2. Left-only: the left child replaces root.
+//     只有左孩子：左孩子直接顶替。
+//  3. Two children: leftmost of the right subtree is the inorder successor; its Left is empty.
+//     双孩子：右子树最左节点是中序后继，它的左孩子目前一定为空。
+//  4. Hang the deleted node's left subtree under the successor, then lift the whole right subtree.
+//     把被删节点的左子树挂到后继下面，再让整棵右子树上移顶替被删节点。
 func deleteRoot(root *TreeNode) *TreeNode {
-	// Leaf or right-only: the right child (possibly nil) replaces root.
-	// 叶子或只有右孩子：右孩子（可能为 nil）直接顶替。
 	if root.Left == nil {
 		return root.Right
 	}
 
-	// Left-only: the left child replaces root.
-	// 只有左孩子：左孩子直接顶替。
 	if root.Right == nil {
 		return root.Left
 	}
 
-	// Two children: leftmost of the right subtree is the inorder successor; its Left is empty.
-	// 双孩子：右子树最左节点是中序后继，它的左孩子目前一定为空。
 	successor := root.Right
 	for successor.Left != nil {
 		successor = successor.Left
 	}
 
-	// Hang the deleted node's left subtree under the successor, then lift the whole right subtree.
-	// 把被删节点的左子树挂到后继下面，再让整棵右子树上移顶替被删节点。
 	successor.Left = root.Left
 	return root.Right
 }

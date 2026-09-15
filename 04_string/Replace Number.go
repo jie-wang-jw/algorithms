@@ -40,31 +40,33 @@ import (
 // 1. 从左向右用 Builder 构造结果。
 // Time: O(n), Space: O(n) for the Builder buffer.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由 Builder 缓冲区产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Builder appends output efficiently without repeatedly creating new strings.
+//     Builder 可以高效追加内容，避免反复创建新的字符串。
+//  2. The problem contains only lowercase ASCII letters and digits, so byte iteration is enough.
+//     题目只有小写 ASCII 字母和数字，因此按 byte 遍历即可。
+//  3. ASCII digits are in the continuous range from '0' to '9'.
+//     ASCII 数字字符位于连续区间 '0' 到 '9' 中。
+//  4. Replace one digit character with the whole word "number".
+//     遇到一个数字字符，就写入完整单词 "number"。
+//  5. Keep lowercase letters unchanged.
+//     小写字母保持不变，直接写入结果。
+//  6. Build and return the final string.
+//     生成并返回最终字符串。
 func replaceNumber(s string) string {
-	// Builder appends output efficiently without repeatedly creating new strings.
-	// Builder 可以高效追加内容，避免反复创建新的字符串。
 	var builder strings.Builder
 
-	// The problem contains only lowercase ASCII letters and digits, so byte iteration is enough.
-	// 题目只有小写 ASCII 字母和数字，因此按 byte 遍历即可。
 	for i := 0; i < len(s); i++ {
 		ch := s[i]
 
-		// ASCII digits are in the continuous range from '0' to '9'.
-		// ASCII 数字字符位于连续区间 '0' 到 '9' 中。
 		if ch >= '0' && ch <= '9' {
-			// Replace one digit character with the whole word "number".
-			// 遇到一个数字字符，就写入完整单词 "number"。
 			builder.WriteString("number")
 		} else {
-			// Keep lowercase letters unchanged.
-			// 小写字母保持不变，直接写入结果。
 			builder.WriteByte(ch)
 		}
 	}
 
-	// Build and return the final string.
-	// 生成并返回最终字符串。
 	return builder.String()
 }
 
@@ -72,9 +74,23 @@ func replaceNumber(s string) string {
 // 2. 先扩容再从后向前填充：逆序写入 "number"，读出来才是正序。
 // Time: O(n), Space: O(n) for the expanded buffer.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由扩容缓冲区产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Count the digits first so the final length is known before any writing.
+//     先统计数字个数，这样在写入之前就能知道结果的最终长度。
+//  2. Each digit grows from 1 byte to the 6 bytes of "number", so the result needs 5 extra bytes per digit.
+//     每个数字由 1 个字节变成 "number" 的 6 个字节，因此每个数字多占 5 个字节。
+//  3. read consumes the original text from its end; write fills the enlarged buffer from its end.
+//     read 从原文末尾向前读取，write 从扩容后的末尾向前写入。
+//  4. Write "number" backward so that it reads forward in the finished buffer.
+//     逆序写入 "number" 的字节，最终在缓冲区中读出来才是正序。
+//  5. Letters are copied unchanged to the current write position.
+//     字母原样复制到当前写入位置。
+//  6. write stays at or ahead of read: the gap equals 5 times the digits still unread,
+//     so filling backward never overwrites original bytes that have not been read yet.
+//     write 始终不在 read 左侧：两者的距离等于尚未读取部分中数字的个数乘以 5，
+//     因此从后向前填充不会覆盖还没读过的原文字节。
 func replaceNumberBackward(s string) string {
-	// Count the digits first so the final length is known before any writing.
-	// 先统计数字个数，这样在写入之前就能知道结果的最终长度。
 	digits := 0
 	for i := 0; i < len(s); i++ {
 		if s[i] >= '0' && s[i] <= '9' {
@@ -82,38 +98,24 @@ func replaceNumberBackward(s string) string {
 		}
 	}
 
-	// Each digit grows from 1 byte to the 6 bytes of "number", so the result needs 5 extra bytes per digit.
-	// 每个数字由 1 个字节变成 "number" 的 6 个字节，因此每个数字多占 5 个字节。
 	buffer := make([]byte, len(s)+5*digits)
 	copy(buffer, s)
 
-	// read consumes the original text from its end; write fills the enlarged buffer from its end.
-	// read 从原文末尾向前读取，write 从扩容后的末尾向前写入。
 	write := len(buffer) - 1
 
 	for read := len(s) - 1; read >= 0; read-- {
 		ch := buffer[read]
 
 		if ch >= '0' && ch <= '9' {
-			// Write "number" backward so that it reads forward in the finished buffer.
-			// 逆序写入 "number" 的字节，最终在缓冲区中读出来才是正序。
 			for j := len("number") - 1; j >= 0; j-- {
 				buffer[write] = "number"[j]
 				write--
 			}
 		} else {
-			// Letters are copied unchanged to the current write position.
-			// 字母原样复制到当前写入位置。
 			buffer[write] = ch
 			write--
 		}
 
-		/*
-			write stays at or ahead of read: the gap equals 5 times the digits still unread,
-			so filling backward never overwrites original bytes that have not been read yet.
-			write 始终不在 read 左侧：两者的距离等于尚未读取部分中数字的个数乘以 5，
-			因此从后向前填充不会覆盖还没读过的原文字节。
-		*/
 	}
 
 	return string(buffer)

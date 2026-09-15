@@ -77,27 +77,29 @@ For n nodes and height h, both take O(n) time. Recursion uses O(h) space; iterat
 // 1. 递归：推荐；根落在区间外时整侧子树都可以丢掉，只修剪可能合法的一侧。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty subtree contributes nothing.
+//     空子树无需修剪。
+//  2. Root and its entire left subtree are below low; only the right side can remain.
+//     根和整棵左子树都小于 low，合法节点只可能在右子树。
+//  3. Root and its entire right subtree are above high; only the left side can remain.
+//     根和整棵右子树都大于 high，合法节点只可能在左子树。
+//  4. Root is in range; trim both children and reattach the results.
+//     根在区间内：分别修剪左右孩子并接回。
 func trimBST(root *TreeNode, low int, high int) *TreeNode {
-	// Empty subtree contributes nothing.
-	// 空子树无需修剪。
 	if root == nil {
 		return nil
 	}
 
-	// Root and its entire left subtree are below low; only the right side can remain.
-	// 根和整棵左子树都小于 low，合法节点只可能在右子树。
 	if root.Val < low {
 		return trimBST(root.Right, low, high)
 	}
 
-	// Root and its entire right subtree are above high; only the left side can remain.
-	// 根和整棵右子树都大于 high，合法节点只可能在左子树。
 	if root.Val > high {
 		return trimBST(root.Left, low, high)
 	}
 
-	// Root is in range; trim both children and reattach the results.
-	// 根在区间内：分别修剪左右孩子并接回。
 	root.Left = trimBST(root.Left, low, high)
 	root.Right = trimBST(root.Right, low, high)
 	return root
@@ -107,9 +109,15 @@ func trimBST(root *TreeNode, low int, high int) *TreeNode {
 // 2. 迭代：先把根移进区间，再分别删掉左右链上越界的节点。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Slide the root into [low, high], or to nil if the whole tree is out of range.
+//     先把根移进 [low, high]；整棵树都越界则变为 nil。
+//  2. Left spine: any child below low is replaced by that child's right subtree.
+//     左链：小于 low 的左孩子用它的右子树顶替（左子树只会更小）。
+//  3. Right spine: any child above high is replaced by that child's left subtree.
+//     右链：大于 high 的右孩子用它的左子树顶替（右子树只会更大）。
 func trimBSTIterative(root *TreeNode, low int, high int) *TreeNode {
-	// Slide the root into [low, high], or to nil if the whole tree is out of range.
-	// 先把根移进 [low, high]；整棵树都越界则变为 nil。
 	for root != nil && (root.Val < low || root.Val > high) {
 		if root.Val < low {
 			root = root.Right
@@ -121,8 +129,6 @@ func trimBSTIterative(root *TreeNode, low int, high int) *TreeNode {
 		return nil
 	}
 
-	// Left spine: any child below low is replaced by that child's right subtree.
-	// 左链：小于 low 的左孩子用它的右子树顶替（左子树只会更小）。
 	cur := root
 	for cur.Left != nil {
 		if cur.Left.Val < low {
@@ -132,8 +138,6 @@ func trimBSTIterative(root *TreeNode, low int, high int) *TreeNode {
 		}
 	}
 
-	// Right spine: any child above high is replaced by that child's left subtree.
-	// 右链：大于 high 的右孩子用它的左子树顶替（右子树只会更大）。
 	cur = root
 	for cur.Right != nil {
 		if cur.Right.Val > high {

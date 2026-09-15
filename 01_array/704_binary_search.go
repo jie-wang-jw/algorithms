@@ -38,27 +38,29 @@ Time O(log n) with recursion depth O(log n), so the call stack costs O(log n) au
 // 1. 左闭右闭区间 [left, right]：左右边界都可能是答案。
 // Time: O(log n), Space: O(1).
 // 时间复杂度：O(log n)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. The initial search range covers every valid index.
+//     初始搜索范围包含数组的所有有效下标。
+//  2. Use <= because left == right still leaves one candidate to check.
+//     使用 <=，因为 left == right 时仍有一个候选位置需要检查。
+//  3. This form avoids the overflow risk of (left + right) / 2.
+//     这种写法避免 (left + right) / 2 可能产生的整数溢出。
+//  4. mid is too large, so discard mid and everything to its right.
+//     mid 太大，因此丢弃 mid 以及它右侧的区间。
+//  5. mid is too small, so discard mid and everything to its left.
+//     mid 太小，因此丢弃 mid 以及它左侧的区间。
 func search2(nums []int, target int) int {
-	// The initial search range covers every valid index.
-	// 初始搜索范围包含数组的所有有效下标。
 	left := 0
 	right := len(nums) - 1
 
-	// Use <= because left == right still leaves one candidate to check.
-	// 使用 <=，因为 left == right 时仍有一个候选位置需要检查。
 	for left <= right {
-		// This form avoids the overflow risk of (left + right) / 2.
-		// 这种写法避免 (left + right) / 2 可能产生的整数溢出。
 		mid := left + (right-left)/2
 		if nums[mid] == target {
 			return mid
 		} else if nums[mid] > target {
-			// mid is too large, so discard mid and everything to its right.
-			// mid 太大，因此丢弃 mid 以及它右侧的区间。
 			right = mid - 1
 		} else {
-			// mid is too small, so discard mid and everything to its left.
-			// mid 太小，因此丢弃 mid 以及它左侧的区间。
 			left = mid + 1
 		}
 	}
@@ -70,25 +72,27 @@ func search2(nums []int, target int) int {
 // 2. 左闭右开区间 [left, right)：left 包含在内，right 不包含在内。
 // Time: O(log n), Space: O(1).
 // 时间复杂度：O(log n)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. right may equal len(nums) because it is outside the search interval.
+//     right 可以等于 len(nums)，因为它本身不属于搜索区间。
+//  2. Stop when [left, right) becomes empty, which happens at left == right.
+//     当 left == right 时区间为空，所以循环条件是 left < right。
+//  3. mid is excluded, so the new half-open interval is [left, mid).
+//     排除 mid 后，新区间是 [left, mid)，因此 right = mid。
+//  4. mid is too small, so the new interval starts at mid + 1.
+//     mid 太小，新区间从 mid + 1 开始。
 func search1(nums []int, target int) int {
 	left := 0
-	// right may equal len(nums) because it is outside the search interval.
-	// right 可以等于 len(nums)，因为它本身不属于搜索区间。
 	right := len(nums)
 
-	// Stop when [left, right) becomes empty, which happens at left == right.
-	// 当 left == right 时区间为空，所以循环条件是 left < right。
 	for left < right {
 		mid := left + (right-left)/2
 		if nums[mid] == target {
 			return mid
 		} else if nums[mid] > target {
-			// mid is excluded, so the new half-open interval is [left, mid).
-			// 排除 mid 后，新区间是 [left, mid)，因此 right = mid。
 			right = mid
 		} else {
-			// mid is too small, so the new interval starts at mid + 1.
-			// mid 太小，新区间从 mid + 1 开始。
 			left = mid + 1
 		}
 	}
@@ -100,37 +104,39 @@ func search1(nums []int, target int) int {
 // 3. 左闭右闭区间的递归写法：不变量完全相同，只是改用递归表达。
 // Time: O(log n), Space: O(log n) for the recursion stack.
 // 时间复杂度：O(log n)，空间复杂度：O(log n)，由递归调用栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. searchRange looks for target inside the closed interval [left, right].
+//     searchRange 在左闭右闭区间 [left, right] 中查找 target。
+//  2. An empty interval means every candidate position has been excluded.
+//     区间为空，说明所有候选位置都已经被排除。
+//  3. This form avoids the overflow risk of (left + right) / 2.
+//     这种写法避免 (left + right) / 2 可能产生的整数溢出。
+//  4. mid is too large, so recurse into the closed interval [left, mid-1].
+//     mid 太大，因此只在左闭右闭区间 [left, mid-1] 中继续递归。
+//  5. mid is too small, so recurse into the closed interval [mid+1, right].
+//     mid 太小，因此只在左闭右闭区间 [mid+1, right] 中继续递归。
+//  6. The initial closed interval covers every valid index of nums.
+//     初始的左闭右闭区间覆盖 nums 的所有有效下标。
 func searchRecursive(nums []int, target int) int {
-	// searchRange looks for target inside the closed interval [left, right].
-	// searchRange 在左闭右闭区间 [left, right] 中查找 target。
 	var searchRange func(left, right int) int
 
 	searchRange = func(left, right int) int {
-		// An empty interval means every candidate position has been excluded.
-		// 区间为空，说明所有候选位置都已经被排除。
 		if left > right {
 			return -1
 		}
 
-		// This form avoids the overflow risk of (left + right) / 2.
-		// 这种写法避免 (left + right) / 2 可能产生的整数溢出。
 		mid := left + (right-left)/2
 		if nums[mid] == target {
 			return mid
 		}
 
 		if nums[mid] > target {
-			// mid is too large, so recurse into the closed interval [left, mid-1].
-			// mid 太大，因此只在左闭右闭区间 [left, mid-1] 中继续递归。
 			return searchRange(left, mid-1)
 		}
 
-		// mid is too small, so recurse into the closed interval [mid+1, right].
-		// mid 太小，因此只在左闭右闭区间 [mid+1, right] 中继续递归。
 		return searchRange(mid+1, right)
 	}
 
-	// The initial closed interval covers every valid index of nums.
-	// 初始的左闭右闭区间覆盖 nums 的所有有效下标。
 	return searchRange(0, len(nums)-1)
 }

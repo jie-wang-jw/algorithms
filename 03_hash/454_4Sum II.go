@@ -55,27 +55,29 @@ The frequency in the map tells me how many valid tuples we can form.
 // 1. 分组哈希：前两数和存 map，再查找后两数和的相反数。推荐。
 // Time: O(n²) expected, Space: O(n²) for the pair-sum map.
 // 时间复杂度：期望 O(n²)，空间复杂度：O(n²)，由两数和哈希表产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Key: a + b; value: how many index pairs produce that sum.
+//     key 是 a+b，value 是产生这个和的下标组合数量。
+//  2. Do not store only true: duplicate pairs must all be counted.
+//     不能只保存 true，因为不同下标产生的重复组合也必须计数。
+//  3. We need (a+b) + (c+d) = 0, so a+b must equal -(c+d).
+//     要满足总和为 0，a+b 必须等于 -(c+d)。
+//  4. A missing key has value 0 in Go, so it adds nothing automatically.
+//     Go 中不存在的 map key 读取结果为 0，因此无需单独判断是否存在。
 func fourSumCount(A []int, B []int, C []int, D []int) int {
-	// Key: a + b; value: how many index pairs produce that sum.
-	// key 是 a+b，value 是产生这个和的下标组合数量。
 	sumCount := map[int]int{}
 	count := 0
 
 	for _, a := range A {
 		for _, b := range B {
-			// Do not store only true: duplicate pairs must all be counted.
-			// 不能只保存 true，因为不同下标产生的重复组合也必须计数。
 			sumCount[a+b]++
 		}
 	}
 
 	for _, c := range C {
 		for _, d := range D {
-			// We need (a+b) + (c+d) = 0, so a+b must equal -(c+d).
-			// 要满足总和为 0，a+b 必须等于 -(c+d)。
 			need := -(c + d)
-			// A missing key has value 0 in Go, so it adds nothing automatically.
-			// Go 中不存在的 map key 读取结果为 0，因此无需单独判断是否存在。
 			count += sumCount[need]
 		}
 	}
@@ -87,9 +89,23 @@ func fourSumCount(A []int, B []int, C []int, D []int) int {
 // 2. 两组和排序 + 双指针：保留重复次数，命中时累加 x*y。
 // Time: O(n² log(n+1)), Space: O(n²).
 // 时间复杂度：O(n² log(n+1))，空间复杂度：O(n²)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Keep every index combination; deduplicating sums here would lose tuples.
+//     保留每一个下标组合，这里去重会丢掉答案。
+//  2. Sorting gives the two pointers a direction to move in.
+//     排序后双指针才有明确的移动方向。
+//  3. i scans the left sums upward and j scans the right sums downward.
+//     i 从小到大扫描左侧的和，j 从大到小扫描右侧的和。
+//  4. Even the largest remaining right sum is too small for this left sum.
+//     即使配上剩余最大的右侧和仍然偏小，因此放弃当前左侧和。
+//  5. Even the smallest remaining left sum is too large for this right sum.
+//     即使配上剩余最小的左侧和仍然偏大，因此放弃当前右侧和。
+//  6. Equal sums appear in runs after sorting, so measure both runs at once.
+//     排序后相等的和是连续的一段，所以一次量出两侧的整段长度。
+//  7. Multiplicities count independent choices of the two index pairs.
+//     两组下标对可以独立选择，所以重复次数相乘。
 func fourSumCountSorted(a, b, c, d []int) int {
-	// Keep every index combination; deduplicating sums here would lose tuples.
-	// 保留每一个下标组合，这里去重会丢掉答案。
 	leftSums, rightSums := []int{}, []int{}
 
 	for _, x := range a {
@@ -103,29 +119,19 @@ func fourSumCountSorted(a, b, c, d []int) int {
 		}
 	}
 
-	// Sorting gives the two pointers a direction to move in.
-	// 排序后双指针才有明确的移动方向。
 	sort.Ints(leftSums)
 	sort.Ints(rightSums)
 
 	result := 0
 
-	// i scans the left sums upward and j scans the right sums downward.
-	// i 从小到大扫描左侧的和，j 从大到小扫描右侧的和。
 	for i, j := 0, len(rightSums)-1; i < len(leftSums) && j >= 0; {
 		sum := leftSums[i] + rightSums[j]
 
 		if sum < 0 {
-			// Even the largest remaining right sum is too small for this left sum.
-			// 即使配上剩余最大的右侧和仍然偏小，因此放弃当前左侧和。
 			i++
 		} else if sum > 0 {
-			// Even the smallest remaining left sum is too large for this right sum.
-			// 即使配上剩余最小的左侧和仍然偏大，因此放弃当前右侧和。
 			j--
 		} else {
-			// Equal sums appear in runs after sorting, so measure both runs at once.
-			// 排序后相等的和是连续的一段，所以一次量出两侧的整段长度。
 			x, y := leftSums[i], rightSums[j]
 			startI, startJ := i, j
 
@@ -136,8 +142,6 @@ func fourSumCountSorted(a, b, c, d []int) int {
 				j--
 			}
 
-			// Multiplicities count independent choices of the two index pairs.
-			// 两组下标对可以独立选择，所以重复次数相乘。
 			result += (i - startI) * (startJ - j)
 		}
 	}

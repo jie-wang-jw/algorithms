@@ -22,6 +22,14 @@ Scan magazine; for each character, erase one matching byte from a copy of ransom
 Count magazine letters, then decrement for each ransomNote letter; a negative count means magazine is short.
 If ransomNote is longer than magazine, return false immediately.
 
+关键逻辑：为什么这样做 / Why This Works
+magazine 提供可用字母库存；ransomNote 的每个字母都要消耗一次库存。
+计数减到负数，说明某个字母的需求超过了供给。长度检查是剪枝：
+ransomNote 更长时，即使 magazine 字母种类齐全，总数也一定不够。
+Magazine is the available letter inventory; each ransomNote letter spends one unit.
+A negative count means demand exceeded supply for that letter. The length check is pruning:
+if ransomNote is longer, total supply cannot cover demand even when letter kinds match.
+
 时间与空间复杂度 / Time and Space Complexity
 n = len(ransomNote)，m = len(magazine)。暴力法时间 O(n*m)，每次删除还可能移动后缀。
 哈希法时间 O(n+m)。两种辅助空间都是 O(1) 量级；暴力法的副本是 O(n) 字节。
@@ -29,10 +37,16 @@ For lengths n and m, brute force takes O(n*m) time because each erase may shift 
 The frequency array takes O(n+m) time. Auxiliary space is O(1) for the array and O(n) for the brute-force copy.
 */
 
-// 1. Brute-force erase: delete each magazine character from a copy of ransomNote when it matches.
-// 1. 暴力删除：在 ransomNote 的副本里删掉 magazine 中匹配到的字符。
+// 1. Brute-force erase
+// 1. 暴力删除
+// For each magazine letter, erase at most one matching byte from a mutable copy of ransomNote; empty copy means success.
+// 对 magazine 每个字母，在 ransomNote 的可变副本里最多删掉一个相同字节；副本删空即成功。
 // Time: O(n*m), Space: O(n) for the copy.
 // 时间复杂度：O(n*m)，空间复杂度：O(n)，由副本产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Join prefix and suffix to erase note[j]; one magazine letter spends at most one match.
+//     拼接前后缀删掉 note[j]；一个 magazine 字母最多只消耗一次匹配。
 func canConstructBruteForce(ransomNote string, magazine string) bool {
 	note := []byte(ransomNote)
 	for i := 0; i < len(magazine); i++ {
@@ -46,10 +60,20 @@ func canConstructBruteForce(ransomNote string, magazine string) bool {
 	return len(note) == 0
 }
 
-// 2. 26-slot frequency array (recommended): count magazine, then decrement with ransomNote.
-// 2. 26 计数数组：推荐；先统计 magazine，再用 ransomNote 逐个减一。
+// 2. 26-slot frequency array (recommended)
+// 2. 26 计数数组（推荐）
+// Count magazine letters into a 26-slot array, then spend them for ransomNote; a negative count means shortfall.
+// 先把 magazine 字母记进 26 格数组，再按 ransomNote 消耗；减成负数说明不够。
 // Time: O(n+m), Space: O(1).
 // 时间复杂度：O(n+m)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Longer note needs more letters than magazine can possibly supply.
+//     ransomNote 更长时，总需求一定超过 magazine 总供给，可直接失败。
+//  2. Map 'a'..'z' onto slots 0..25.
+//     用 v-'a' 把 'a'..'z' 映射到下标 0..25。
+//  3. Negative means this letter was demanded more times than magazine provided.
+//     变成负数，说明该字母的需求超过了 magazine 的供给。
 func canConstruct(ransomNote string, magazine string) bool {
 	if len(ransomNote) > len(magazine) {
 		return false

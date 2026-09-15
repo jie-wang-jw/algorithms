@@ -27,8 +27,10 @@ n、m 为两条链表长度。两种解法时间 O(n+m)，辅助空间 O(1)。
 For list lengths n and m, both methods take O(n+m) time and O(1) auxiliary space.
 */
 
-// 1. Align the tails by length, then walk both pointers until they meet.
-// 1. 按长度对齐尾部，再让两个指针同步前进直到相遇。
+// 1. Align tails by length, then walk together
+// 1. 按长度对齐尾部，再同步前进
+// Advance the longer list by |lenA-lenB|, then walk both until pointers meet (intersection or both nil).
+// 让较长链表先走 |lenA-lenB|，再同步前进直到指针相等（交点或同为 nil）。
 // Time: O(n+m), Space: O(1).
 // 时间复杂度：O(n+m)，空间复杂度：O(1)。
 func getIntersectionNode(headA, headB *ListNode) *ListNode {
@@ -40,8 +42,6 @@ func getIntersectionNode(headA, headB *ListNode) *ListNode {
 		lenB++
 	}
 
-	// fast walks the longer list first so both pointers line up with the tails.
-	// fast 先走较长的链表，使两个指针距离尾部的剩余长度相同。
 	var fast, slow *ListNode
 	var step int
 	if lenA > lenB {
@@ -54,7 +54,6 @@ func getIntersectionNode(headA, headB *ListNode) *ListNode {
 	for range step {
 		fast = fast.Next
 	}
-
 	for fast != slow {
 		fast = fast.Next
 		slow = slow.Next
@@ -62,10 +61,16 @@ func getIntersectionNode(headA, headB *ListNode) *ListNode {
 	return fast
 }
 
-// 2. Switch to the other list at nil so both pointers travel n+m nodes and meet at the intersection.
-// 2. 走到空时改走另一条链表，两个指针都走 n+m 个节点，并在交点相遇。
+// 2. Switch to the other list at nil
+// 2. 走到空时改走另一条链表
+// Both pointers travel n+m nodes and meet at the intersection, or both become nil if none.
+// 两个指针都走 n+m 个节点，在交点相遇；没有交点时同时变成 nil。
 // Time: O(n+m), Space: O(1).
 // 时间复杂度：O(n+m)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. At nil, continue from the other head so both paths have length n+m.
+//     走到空时改从另一条链表头继续，使两条路径长度都是 n+m。
 func getIntersectionNodeTwoPointers(headA, headB *ListNode) *ListNode {
 	pA, pB := headA, headB
 	for pA != pB {

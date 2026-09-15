@@ -141,9 +141,10 @@ func TestGetNext(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. All four solutions must agree on lowercase input, which is what the problem guarantees.
+//     四种解法在题目保证的小写字母输入上结果必须一致。
 func TestIsAnagram(t *testing.T) {
-	// All four solutions must agree on lowercase input, which is what the problem guarantees.
-	// 四种解法在题目保证的小写字母输入上结果必须一致。
 	tests := []struct {
 		name string
 		s    string
@@ -183,10 +184,11 @@ func TestIsAnagram(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. isAnagram1 and isAnagram2 index a 26-slot array, so only these two solutions accept
+//     characters outside a-z.
+//     isAnagram1 和 isAnagram2 使用 26 格数组下标，因此只有这两种解法能接受 a-z 之外的字符。
 func TestIsAnagramBeyondLowercase(t *testing.T) {
-	// isAnagram1 and isAnagram2 index a 26-slot array, so only these two solutions accept
-	// characters outside a-z.
-	// isAnagram1 和 isAnagram2 使用 26 格数组下标，因此只有这两种解法能接受 a-z 之外的字符。
 	tests := []struct {
 		name string
 		s    string
@@ -221,6 +223,9 @@ func TestIsAnagramBeyondLowercase(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. intersectionSorted sorts its inputs, so hand both solutions copies.
+//     intersectionSorted 会排序输入，因此统一传入副本。
 func TestIntersection(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -249,8 +254,6 @@ func TestIntersection(t *testing.T) {
 		t.Run(inf.name, func(t *testing.T) {
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
-					// intersectionSorted sorts its inputs, so hand both solutions copies.
-					// intersectionSorted 会排序输入，因此统一传入副本。
 					got := inf.fn(copyInts(tt.nums1), copyInts(tt.nums2))
 					sort.Ints(got)
 					sort.Ints(tt.want)
@@ -264,6 +267,9 @@ func TestIntersection(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Both solutions sort their input, so pass a copy each time.
+//     两种解法都会排序输入，因此每次都传入副本。
 func TestThreeSum(t *testing.T) {
 	tests := []struct {
 		name string
@@ -292,8 +298,6 @@ func TestThreeSum(t *testing.T) {
 		t.Run(tf.name, func(t *testing.T) {
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
-					// Both solutions sort their input, so pass a copy each time.
-					// 两种解法都会排序输入，因此每次都传入副本。
 					got := normalizeIntGroups(tf.fn(copyInts(tt.nums)))
 					want := normalizeIntGroups(deepCopyIntGroups(tt.want))
 					if !reflect.DeepEqual(got, want) {
@@ -305,6 +309,11 @@ func TestThreeSum(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Pruning must not stop at nums[i] > target while nums[i] is still negative.
+//     剪枝不能在 nums[i] 仍为负数时就停止，否则会漏掉这个答案。
+//  2. The first value stays below target, so only the pair-level pruning can stop the inner loop.
+//     第一个数没有超过 target，因此只有第二层的剪枝能结束内层循环。
 func TestFourSum(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -315,14 +324,10 @@ func TestFourSum(t *testing.T) {
 		{name: "example", nums: []int{1, 0, -1, 0, -2, 2}, target: 0, want: [][]int{{-2, -1, 1, 2}, {-2, 0, 0, 2}, {-1, 0, 0, 1}}},
 		{name: "all same values deduplicated", nums: []int{2, 2, 2, 2, 2}, target: 8, want: [][]int{{2, 2, 2, 2}}},
 		{name: "negative target", nums: []int{-3, -1, 0, 2, 4, 5}, target: 2, want: [][]int{{-3, -1, 2, 4}}},
-		// Pruning must not stop at nums[i] > target while nums[i] is still negative.
-		// 剪枝不能在 nums[i] 仍为负数时就停止，否则会漏掉这个答案。
 		{name: "negative target with negative first value", nums: []int{-9, -3, -2, 4}, target: -10, want: [][]int{{-9, -3, -2, 4}}},
 		{name: "duplicate heavy input", nums: []int{0, 0, 0, 0, 0, 0}, target: 0, want: [][]int{{0, 0, 0, 0}}},
 		{name: "no quadruplet", nums: []int{1, 2, 3}, target: 6, want: [][]int{}},
 		{name: "all positive above target", nums: []int{5, 6, 7, 8}, target: 4, want: [][]int{}},
-		// The first value stays below target, so only the pair-level pruning can stop the inner loop.
-		// 第一个数没有超过 target，因此只有第二层的剪枝能结束内层循环。
 		{name: "pair pruning stops inner loop", nums: []int{-1, 5, 6, 7, 8}, target: 3, want: [][]int{}},
 		{name: "empty input", nums: []int{}, target: 0, want: [][]int{}},
 	}

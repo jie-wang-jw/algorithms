@@ -75,35 +75,37 @@ The remaining stack forms the final string.
 // 1. 字节切片模拟栈：推荐；当前字符与栈顶相同就弹栈，否则入栈，连锁删除自然完成。
 // Time: O(n), Space: O(n) for the stack, and the result is also at most O(n).
 // 时间复杂度：O(n)，空间复杂度：O(n)，由栈产生，结果最多也是 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. stack stores the characters that remain after processing.
+//     stack 保存处理过程中尚未被删除的字符。
+//  2. Process each character from left to right.
+//     从左到右处理字符串中的每个字符。
+//  3. current is the character currently being processed.
+//     current 是当前正在处理的字符。
+//  4. If the stack is not empty and its top equals current,
+//     the two adjacent duplicate characters should be removed.
+//     如果栈不为空，并且栈顶字符与 current 相同，
+//     说明出现了两个相邻重复字符，需要将它们删除。
+//  5. Pop the top character.
+//     弹出栈顶字符。
+//  6. No duplicate pair is formed, so keep the current character.
+//     当前字符没有形成重复对，因此将它保留下来。
+//  7. Convert the remaining characters back into a string.
+//     将栈中剩余的字符转换回字符串。
 func removeDuplicates(s string) string {
-	// stack stores the characters that remain after processing.
-	// stack 保存处理过程中尚未被删除的字符。
 	stack := make([]byte, 0, len(s))
 
-	// Process each character from left to right.
-	// 从左到右处理字符串中的每个字符。
 	for i := 0; i < len(s); i++ {
-		// current is the character currently being processed.
-		// current 是当前正在处理的字符。
 		current := s[i]
 
-		// If the stack is not empty and its top equals current,
-		// the two adjacent duplicate characters should be removed.
-		// 如果栈不为空，并且栈顶字符与 current 相同，
-		// 说明出现了两个相邻重复字符，需要将它们删除。
 		if len(stack) > 0 && stack[len(stack)-1] == current {
-			// Pop the top character.
-			// 弹出栈顶字符。
 			stack = stack[:len(stack)-1]
 		} else {
-			// No duplicate pair is formed, so keep the current character.
-			// 当前字符没有形成重复对，因此将它保留下来。
 			stack = append(stack, current)
 		}
 	}
 
-	// Convert the remaining characters back into a string.
-	// 将栈中剩余的字符转换回字符串。
 	return string(stack)
 }
 
@@ -111,37 +113,46 @@ func removeDuplicates(s string) string {
 // 2. 快慢指针原地模拟栈：复用字节副本的前部，buffer[:slow] 就是栈，slow 既是写入位置也是栈长度。
 // Time: O(n), Space: O(n), because []byte(s) copies the immutable string; this is not an O(1) in-place algorithm.
 // 时间复杂度：O(n)，空间复杂度：O(n)，因为 []byte(s) 会复制不可变字符串，所以它不是 O(1) 原地算法。
+//
+// 步骤与要点 / Steps and notes:
+//
+//  1. Go strings are immutable, so this conversion copies; the caller's data is never modified.
+//     Go 的字符串不可变，这次转换一定会复制，因此不会修改调用方的数据。
+//
+//  2. slow is both the write position and the stack size; buffer[:slow] is the reduced prefix.
+//     slow 既是写入位置，也是栈长度；buffer[:slow] 就是已读前缀消除后的结果。
+//
+//  3. fast reads the original characters in order.
+//     fast 按顺序读取原始字符。
+//
+//  4. buffer[slow-1] is the stack top, valid only when the stack is nonempty.
+//     buffer[slow-1] 相当于栈顶，只有栈非空时才可以读取。
+//
+//  5. The pair cancels: drop the top and do not write the current character.
+//     两个字符抵消：弹出栈顶，并且不写入当前字符。
+//
+//  6. No pair is formed, so keep the current character on the stack.
+//     没有形成重复对，把当前字符保留在栈上。
+//
+//     slow <= fast always holds, so this write never clobbers an unread character.
+//     slow <= fast 始终成立，所以这次写入不会覆盖尚未读取的字符。
+//
+//  7. Only the first slow bytes survived; the rest of buffer is stale data.
+//     只有前 slow 个字节是结果，buffer 之后的内容是残留数据。
 func removeDuplicatesTwoPointers(s string) string {
-	// Go strings are immutable, so this conversion copies; the caller's data is never modified.
-	// Go 的字符串不可变，这次转换一定会复制，因此不会修改调用方的数据。
 	buffer := []byte(s)
 
-	// slow is both the write position and the stack size; buffer[:slow] is the reduced prefix.
-	// slow 既是写入位置，也是栈长度；buffer[:slow] 就是已读前缀消除后的结果。
 	slow := 0
 
-	// fast reads the original characters in order.
-	// fast 按顺序读取原始字符。
 	for fast := range buffer {
-		// buffer[slow-1] is the stack top, valid only when the stack is nonempty.
-		// buffer[slow-1] 相当于栈顶，只有栈非空时才可以读取。
 		if slow > 0 && buffer[slow-1] == buffer[fast] {
-			// The pair cancels: drop the top and do not write the current character.
-			// 两个字符抵消：弹出栈顶，并且不写入当前字符。
 			slow--
 			continue
 		}
 
-		// No pair is formed, so keep the current character on the stack.
-		// 没有形成重复对，把当前字符保留在栈上。
-		//
-		// slow <= fast always holds, so this write never clobbers an unread character.
-		// slow <= fast 始终成立，所以这次写入不会覆盖尚未读取的字符。
 		buffer[slow] = buffer[fast]
 		slow++
 	}
 
-	// Only the first slow bytes survived; the rest of buffer is stale data.
-	// 只有前 slow 个字节是结果，buffer 之后的内容是残留数据。
 	return string(buffer[:slow])
 }

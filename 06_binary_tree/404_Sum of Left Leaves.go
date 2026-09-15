@@ -87,9 +87,17 @@ The three implementations appear below in the order of the numbered methods abov
 // 1. 递归：从父节点判断左孩子是否为叶子，并且右子树也要继续找左叶子。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree contributes nothing.
+//     空树没有左叶子，返回 0。
+//  2. The left child is a leaf; count its value directly.
+//     左孩子本身是叶子，直接计入它的值。
+//  3. The left child is not a leaf; search deeper.
+//     左孩子不是叶子，继续寻找它下面的左叶子。
+//  4. The right subtree may also contain left leaves.
+//     右子树内部也可能有左叶子，不能跳过。
 func sumOfLeftLeaves(root *TreeNode) int {
-	// An empty tree contributes nothing.
-	// 空树没有左叶子，返回 0。
 	if root == nil {
 		return 0
 	}
@@ -98,18 +106,12 @@ func sumOfLeftLeaves(root *TreeNode) int {
 
 	if root.Left != nil {
 		if root.Left.Left == nil && root.Left.Right == nil {
-			// The left child is a leaf; count its value directly.
-			// 左孩子本身是叶子，直接计入它的值。
 			leftSum = root.Left.Val
 		} else {
-			// The left child is not a leaf; search deeper.
-			// 左孩子不是叶子，继续寻找它下面的左叶子。
 			leftSum = sumOfLeftLeaves(root.Left)
 		}
 	}
 
-	// The right subtree may also contain left leaves.
-	// 右子树内部也可能有左叶子，不能跳过。
 	rightSum := sumOfLeftLeaves(root.Right)
 
 	return leftSum + rightSum
@@ -119,6 +121,14 @@ func sumOfLeftLeaves(root *TreeNode) int {
 // 2. 栈迭代：弹出父节点后，仅当左孩子是叶子才累加，再把非空孩子入栈。
 // Time: O(n), Space: O(h) for the stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Pop a node and inspect its children.
+//     取出一个节点，检查它的孩子。
+//  2. Count only a left child that has no children of its own.
+//     只有左孩子存在且没有自己的孩子，才计入答案。
+//  3. Both subtrees may contain left leaves.
+//     左右子树内部都可能存在左叶子，需要继续检查。
 func sumOfLeftLeavesIterative(root *TreeNode) int {
 	if root == nil {
 		return 0
@@ -128,22 +138,16 @@ func sumOfLeftLeavesIterative(root *TreeNode) int {
 	sum := 0
 
 	for len(stack) > 0 {
-		// Pop a node and inspect its children.
-		// 取出一个节点，检查它的孩子。
 		last := len(stack) - 1
 		node := stack[last]
 		stack = stack[:last]
 
-		// Count only a left child that has no children of its own.
-		// 只有左孩子存在且没有自己的孩子，才计入答案。
 		if node.Left != nil &&
 			node.Left.Left == nil &&
 			node.Left.Right == nil {
 			sum += node.Left.Val
 		}
 
-		// Both subtrees may contain left leaves.
-		// 左右子树内部都可能存在左叶子，需要继续检查。
 		if node.Right != nil {
 			stack = append(stack, node.Right)
 		}
@@ -159,6 +163,14 @@ func sumOfLeftLeavesIterative(root *TreeNode) int {
 // 3. 队列迭代：判断规则与栈版本相同，只是从队首取节点。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Remove the next node from the queue.
+//     从队首取出下一个节点。
+//  2. Determine left-leaf status from its parent.
+//     从父节点判断左孩子是否为叶子。
+//  3. Continue searching both subtrees.
+//     继续检查两棵子树。
 func sumOfLeftLeavesBFS(root *TreeNode) int {
 	if root == nil {
 		return 0
@@ -168,21 +180,15 @@ func sumOfLeftLeavesBFS(root *TreeNode) int {
 	sum := 0
 
 	for len(queue) > 0 {
-		// Remove the next node from the queue.
-		// 从队首取出下一个节点。
 		node := queue[0]
 		queue = queue[1:]
 
-		// Determine left-leaf status from its parent.
-		// 从父节点判断左孩子是否为叶子。
 		if node.Left != nil &&
 			node.Left.Left == nil &&
 			node.Left.Right == nil {
 			sum += node.Left.Val
 		}
 
-		// Continue searching both subtrees.
-		// 继续检查两棵子树。
 		if node.Left != nil {
 			queue = append(queue, node.Left)
 		}

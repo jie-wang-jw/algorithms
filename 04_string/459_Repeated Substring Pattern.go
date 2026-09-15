@@ -62,24 +62,28 @@ Check whether the string can be constructed by repeating one of its substrings.
 // 1. 枚举法：尝试每种能整除 n 的重复单元长度。
 // Time: O(n²) conservative, Space: O(1).
 // 时间复杂度：保守上界 O(n²)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Try every possible substring length.
+//     尝试每一种可能的子串长度。
+//  2. The substring length must divide the whole string length.
+//     子串长度必须能整除整个字符串长度。
+//  3. pattern is the candidate repeated substring.
+//     pattern 是候选的重复子串。
+//  4. Check whether every block equals pattern.
+//     检查每一段是否都等于 pattern。
+//  5. Every block matched the candidate pattern.
+//     每一段都与候选 pattern 相同，说明字符串可由它重复构成。
 func repeatedSubstringPattern(s string) bool {
 	n := len(s)
 
-	// Try every possible substring length.
-	// 尝试每一种可能的子串长度。
 	for length := 1; length <= n/2; length++ {
-		// The substring length must divide the whole string length.
-		// 子串长度必须能整除整个字符串长度。
 		if n%length != 0 {
 			continue
 		}
 
-		// pattern is the candidate repeated substring.
-		// pattern 是候选的重复子串。
 		pattern := s[:length]
 
-		// Check whether every block equals pattern.
-		// 检查每一段是否都等于 pattern。
 		ok := true
 		for start := length; start < n; start += length {
 			if s[start:start+length] != pattern {
@@ -89,8 +93,6 @@ func repeatedSubstringPattern(s string) bool {
 		}
 
 		if ok {
-			// Every block matched the candidate pattern.
-			// 每一段都与候选 pattern 相同，说明字符串可由它重复构成。
 			return true
 		}
 	}
@@ -106,18 +108,20 @@ If s is made of a repeated substring, s appears inside (s+s) after removing the 
 // 2. 双倍字符串查找：去掉 (s+s) 的首尾后仍能找到 s。
 // Time: O(n²) conservative for naive search, Space: O(n) for the doubled string.
 // 时间复杂度：朴素搜索保守上界 O(n²)，空间复杂度：O(n)，由双倍字符串产生。
+//
+// 步骤与要点 / Steps and notes:
+// 1. An empty string has no nonempty unit to repeat, and doubled[1:len-1] would be an invalid slice.
+//    空串没有可重复的非空单元，而且 doubled[1:len-1] 的下标是非法的。
+// 2. Doubling contains every rotation of s.
+//    s+s 包含 s 的所有循环位移结果。
+// 3. Remove both ends so the two trivial copies of s cannot be matched directly.
+//    去掉首尾字符，避免直接匹配原本位于两端的完整 s。
 func repeatedSubstringPattern2(s string) bool {
-	// An empty string has no nonempty unit to repeat, and doubled[1:len-1] would be an invalid slice.
-	// 空串没有可重复的非空单元，而且 doubled[1:len-1] 的下标是非法的。
 	if len(s) == 0 {
 		return false
 	}
 
-	// Doubling contains every rotation of s.
-	// s+s 包含 s 的所有循环位移结果。
 	doubled := s + s
-	// Remove both ends so the two trivial copies of s cannot be matched directly.
-	// 去掉首尾字符，避免直接匹配原本位于两端的完整 s。
 	middle := doubled[1 : len(doubled)-1]
 	return strings.Contains(middle, s)
 }
@@ -134,36 +138,38 @@ If n is divisible by that length, the pattern repeats exactly. / 如果 n 能整
 // 3. KMP 最长相等前后缀：候选周期为 n-L，且必须整除 n。
 // Time: O(n), Space: O(n) for the prefix table.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由前缀表产生。
+//
+// 步骤与要点 / Steps and notes:
+// 1. An empty string has no last prefix-table entry to read, so next[n-1] would panic.
+//    空串没有前缀表的最后一项可读，直接访问 next[n-1] 会越界。
+// 2. Build the prefix table for s.
+//    给 s 构造前缀表。
+// 3. longestPrefixSuffix is the longest prefix length that is also a suffix.
+//    longestPrefixSuffix 是整个字符串的最长相等前后缀长度。
+//    之所以取最后一个，只因为最后一个位置代表的范围是整个字符串。
+// 4. If there is no repeated prefix/suffix, it cannot be built by repetition.
+//    如果没有相等前后缀，就不可能由重复子串组成。
+// 5. patternLength is the smallest possible repeated block length.
+//    patternLength 是可能的最小重复单元长度。
+// 6. If n can be divided by patternLength, s is repeated by that block.
+//    如果总长度能被 patternLength 整除，说明可以完整重复。
 func repeatedSubstringPattern3(s string) bool {
 	n := len(s)
 
-	// An empty string has no last prefix-table entry to read, so next[n-1] would panic.
-	// 空串没有前缀表的最后一项可读，直接访问 next[n-1] 会越界。
 	if n == 0 {
 		return false
 	}
 
-	// Build the prefix table for s.
-	// 给 s 构造前缀表。
 	next := make([]int, n)
 	getNext(next, s)
 
-	// longestPrefixSuffix is the longest prefix length that is also a suffix.
-	// longestPrefixSuffix 是整个字符串的最长相等前后缀长度。
-	// 之所以取最后一个，只因为最后一个位置代表的范围是整个字符串。
 	longestPrefixSuffix := next[n-1]
 
-	// If there is no repeated prefix/suffix, it cannot be built by repetition.
-	// 如果没有相等前后缀，就不可能由重复子串组成。
 	if longestPrefixSuffix == 0 {
 		return false
 	}
 
-	// patternLength is the smallest possible repeated block length.
-	// patternLength 是可能的最小重复单元长度。
 	patternLength := n - longestPrefixSuffix
 
-	// If n can be divided by patternLength, s is repeated by that block.
-	// 如果总长度能被 patternLength 整除，说明可以完整重复。
 	return n%patternLength == 0
 }

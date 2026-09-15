@@ -51,12 +51,14 @@ The array version uses O(n) extra space; recursion and iteration use O(h).
 // 1. 中序数组：先把树转成序列，再检查是否存在非严格递增的相邻元素。
 // Time: O(n), Space: O(n).
 // 时间复杂度：O(n)，空间复杂度：O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Adjacent equals or inversions both invalidate a BST.
+//     相邻相等或逆序都不是合法 BST。
 func isValidBST(root *TreeNode) bool {
 	values := make([]int, 0)
 	collectInorder(root, &values)
 
-	// Adjacent equals or inversions both invalidate a BST.
-	// 相邻相等或逆序都不是合法 BST。
 	for i := 1; i < len(values); i++ {
 		if values[i] <= values[i-1] {
 			return false
@@ -82,6 +84,12 @@ func collectInorder(node *TreeNode, values *[]int) {
 // 2. 中序递归比较前驱：推荐；每个值都必须严格大于刚刚访问过的节点。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Left subtree must already be a valid increasing sequence.
+//     左子树必须已经构成合法递增序列。
+//  2. Current value must be strictly greater than the previous inorder value.
+//     当前值必须严格大于中序前驱。
 func isValidBSTInorder(root *TreeNode) bool {
 	var prev *TreeNode
 	var valid func(*TreeNode) bool
@@ -90,14 +98,10 @@ func isValidBSTInorder(root *TreeNode) bool {
 			return true
 		}
 
-		// Left subtree must already be a valid increasing sequence.
-		// 左子树必须已经构成合法递增序列。
 		if !valid(node.Left) {
 			return false
 		}
 
-		// Current value must be strictly greater than the previous inorder value.
-		// 当前值必须严格大于中序前驱。
 		if prev != nil && node.Val <= prev.Val {
 			return false
 		}
@@ -111,13 +115,15 @@ func isValidBSTInorder(root *TreeNode) bool {
 // 3. 中序迭代：同样用前驱检查，改成显式栈。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Descend left, saving ancestors to visit after the left subtree.
+//     先向左深入，祖先稍后在左子树完成后访问。
 func isValidBSTIterative(root *TreeNode) bool {
 	stack := []*TreeNode{}
 	var prev *TreeNode
 	cur := root
 	for cur != nil || len(stack) > 0 {
-		// Descend left, saving ancestors to visit after the left subtree.
-		// 先向左深入，祖先稍后在左子树完成后访问。
 		for cur != nil {
 			stack = append(stack, cur)
 			cur = cur.Left

@@ -40,6 +40,14 @@ method 3 is O(n) time and O(1) extra pointers.
 // 1. 队列层序：当前层固定区间里的下一个节点就是 next；116 与 117 共用。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Nothing to wire on an empty tree.
+//     空树没有需要连接的 next。
+//  2. Capture levelSize so newly enqueued children stay on the next level.
+//     固定 levelSize，保证新入队的孩子属于下一层。
+//  3. After dequeue, queue[0] is the next same-level node still waiting.
+//     出队后，queue[0] 仍是同层下一个尚未出队的节点。
 func connect(root *Node) *Node {
 	if root == nil {
 		return root
@@ -68,6 +76,10 @@ func connect(root *Node) *Node {
 // connectII 对应 117：102 文章与 116 使用同一套层序逻辑。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Reuse the identical level-order wiring from connect.
+//     直接复用 connect 的同一套层序连线逻辑。
 func connectII(root *Node) *Node {
 	return connect(root)
 }
@@ -85,6 +97,14 @@ func connectRecursive(root *Node) *Node {
 // 使用当前层已经连好的 next，再递归左右子树。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. In a perfect tree every non-leaf has both children, so left.next is always right.
+//     完美二叉树中每个非叶都有两个孩子，因此左孩子的 next 总是右孩子。
+//  2. Cross-parent link needs cur.Next, which preorder already built on this level.
+//     跨父节点的连线依赖 cur.Next；前序保证本层的 next 已经搭好。
+//  3. Recurse after wiring children so deeper levels see completed parent next links.
+//     先连好孩子再递归，使更深层能看到已完成的父层 next。
 func connectTraversal(cur *Node) {
 	if cur == nil {
 		return
@@ -107,6 +127,14 @@ func connectTraversal(cur *Node) {
 // 3. 116 的常数额外空间：沿着 next 走完当前层，同时连接下一层孩子。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. cur is the leftmost node of the current level; stop when it has no children.
+//     cur 是当前层最左节点；没有左孩子说明已到最底层。
+//  2. Walk the whole level through already-built next pointers.
+//     沿着已经连好的 next 横穿整层。
+//  3. Wire across parents when a right neighbor on this level exists.
+//     若本层右侧还有邻居，就把右孩子连到邻居的左孩子。
 func connectConstant(root *Node) *Node {
 	if root == nil {
 		return root

@@ -86,6 +86,14 @@ import (
 // 1. 递归传递路径字符串：把当前值拼到不可变前缀上，每次调用拥有自己的字符串。
 // Time: O(nh), Space: O(h²) auxiliary for retained prefixes plus O(S) output, where S is the total output character count.
 // 时间复杂度：O(nh)，空间复杂度：辅助 O(h²)，由各层同时保留的路径前缀产生，输出另占 O(S)，S 为所有路径字符串的总字符数。
+//
+// 步骤与要点 / Steps and notes:
+//  1. On entry, path ends at the parent; now include this node.
+//     进入时 path 到父节点为止，现在加入当前节点。
+//  2. Only a leaf completes a root-to-leaf path.
+//     只有到达叶子，才形成完整的根到叶子路径。
+//  3. Each call extends its own path without changing the parent's.
+//     每次调用延伸自己的路径，不会修改父调用的路径。
 func binaryTreePaths(root *TreeNode) []string {
 	result := []string{}
 
@@ -95,22 +103,16 @@ func binaryTreePaths(root *TreeNode) []string {
 			return
 		}
 
-		// On entry, path ends at the parent; now include this node.
-		// 进入时 path 到父节点为止，现在加入当前节点。
 		if path != "" {
 			path += "->"
 		}
 		path += strconv.Itoa(node.Val)
 
-		// Only a leaf completes a root-to-leaf path.
-		// 只有到达叶子，才形成完整的根到叶子路径。
 		if node.Left == nil && node.Right == nil {
 			result = append(result, path)
 			return
 		}
 
-		// Each call extends its own path without changing the parent's.
-		// 每次调用延伸自己的路径，不会修改父调用的路径。
 		traverse(node.Left, path)
 		traverse(node.Right, path)
 	}
@@ -123,6 +125,14 @@ func binaryTreePaths(root *TreeNode) []string {
 // 2. 共享切片回溯：进入时加入，叶子处拼接结果，返回前撤销最后一个值。
 // Time: O(n+S), Space: O(h) auxiliary plus O(S) output, where S is the total output character count.
 // 时间复杂度：O(n+S)，空间复杂度：辅助 O(h)，输出另占 O(S)，S 为所有路径字符串的总字符数。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Choose: include this node in the shared path.
+//     做选择：把当前节点加入共享路径。
+//  2. Create a result string independent of later path changes.
+//     生成独立结果字符串，不受之后路径修改的影响。
+//  3. Undo: restore the parent's path before returning.
+//     撤销选择：返回前恢复父节点的路径。
 func binaryTreePathsBacktracking(root *TreeNode) []string {
 	result := []string{}
 	path := []string{}
@@ -133,21 +143,15 @@ func binaryTreePathsBacktracking(root *TreeNode) []string {
 			return
 		}
 
-		// Choose: include this node in the shared path.
-		// 做选择：把当前节点加入共享路径。
 		path = append(path, strconv.Itoa(node.Val))
 
 		if node.Left == nil && node.Right == nil {
-			// Create a result string independent of later path changes.
-			// 生成独立结果字符串，不受之后路径修改的影响。
 			result = append(result, strings.Join(path, "->"))
 		} else {
 			traverse(node.Left)
 			traverse(node.Right)
 		}
 
-		// Undo: restore the parent's path before returning.
-		// 撤销选择：返回前恢复父节点的路径。
 		path = path[:len(path)-1]
 	}
 
@@ -159,14 +163,20 @@ func binaryTreePathsBacktracking(root *TreeNode) []string {
 // 3. 栈迭代：节点栈与路径字符串栈同步，每个待处理节点带着从根到它自己的完整路径。
 // Time: O(nh), Space: O(h²) auxiliary plus O(S) output, where S is the total output character count.
 // 时间复杂度：O(nh)，空间复杂度：辅助 O(h²)，输出另占 O(S)，S 为所有路径字符串的总字符数。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Matching stack positions describe the same pending node.
+//     两个栈的相同位置，对应同一个待处理节点及其完整路径。
+//  2. The stored path is complete when this node is a leaf.
+//     当前节点是叶子时，保存的路径就是完整答案。
+//  3. Push right first so the left branch is processed first.
+//     先压右边，让左分支先出栈处理。
 func binaryTreePathsIterative(root *TreeNode) []string {
 	result := []string{}
 	if root == nil {
 		return result
 	}
 
-	// Matching stack positions describe the same pending node.
-	// 两个栈的相同位置，对应同一个待处理节点及其完整路径。
 	nodes := []*TreeNode{root}
 	paths := []string{strconv.Itoa(root.Val)}
 
@@ -176,15 +186,11 @@ func binaryTreePathsIterative(root *TreeNode) []string {
 		nodes = nodes[:last]
 		paths = paths[:last]
 
-		// The stored path is complete when this node is a leaf.
-		// 当前节点是叶子时，保存的路径就是完整答案。
 		if node.Left == nil && node.Right == nil {
 			result = append(result, path)
 			continue
 		}
 
-		// Push right first so the left branch is processed first.
-		// 先压右边，让左分支先出栈处理。
 		if node.Right != nil {
 			nodes = append(nodes, node.Right)
 			paths = append(paths,

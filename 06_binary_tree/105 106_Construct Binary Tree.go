@@ -113,31 +113,33 @@ then read buildTreePostOrder, buildTreePostOrderIndex, and buildTreePostOrderOpt
 // 1. 递归切片：先理解这一版；后序末尾是根，用中序位置 k 同时切开两组遍历。
 // Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
 // 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty traversal represents an empty subtree.
+//     遍历为空，说明这棵子树不存在。
+//  2. Postorder ends with the current subtree's root.
+//     后序最后一个值就是当前子树的根。
+//  3. Find the root in inorder; k also equals the left subtree size.
+//     在中序中找到根；根前面有 k 个节点，所以左子树大小也是 k。
+//  4. The first k postorder values belong to the left subtree.
+//     后序前 k 个值属于左子树，与左侧中序对应。
+//  5. The remaining values before the root belong to the right subtree.
+//     后序剩下的部分去掉最后的根，就是右子树的后序。
 func buildTreePostOrder(inorder []int, postorder []int) *TreeNode {
-	// An empty traversal represents an empty subtree.
-	// 遍历为空，说明这棵子树不存在。
 	if len(inorder) == 0 {
 		return nil
 	}
 
-	// Postorder ends with the current subtree's root.
-	// 后序最后一个值就是当前子树的根。
 	rootValue := postorder[len(postorder)-1]
 	root := &TreeNode{Val: rootValue}
 
-	// Find the root in inorder; k also equals the left subtree size.
-	// 在中序中找到根；根前面有 k 个节点，所以左子树大小也是 k。
 	k := 0
 	for inorder[k] != rootValue {
 		k++
 	}
 
-	// The first k postorder values belong to the left subtree.
-	// 后序前 k 个值属于左子树，与左侧中序对应。
 	root.Left = buildTreePostOrder(inorder[:k], postorder[:k])
 
-	// The remaining values before the root belong to the right subtree.
-	// 后序剩下的部分去掉最后的根，就是右子树的后序。
 	root.Right = buildTreePostOrder(
 		inorder[k+1:],
 		postorder[k:len(postorder)-1],
@@ -150,15 +152,17 @@ func buildTreePostOrder(inorder []int, postorder []int) *TreeNode {
 // 2. 下标区间递归：用左闭右开下标切分中序和后序，切割点仍靠线性查找。
 // Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
 // 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty input has no subtree to construct.
+//     输入为空，没有可构造的子树。
+//  2. Keep the half-open invariant [begin, end) on every recursive call.
+//     每一层都坚持左闭右开区间 [begin, end)。
 func buildTreePostOrderIndex(inorder []int, postorder []int) *TreeNode {
-	// Empty input has no subtree to construct.
-	// 输入为空，没有可构造的子树。
 	if len(inorder) == 0 || len(postorder) == 0 {
 		return nil
 	}
 
-	// Keep the half-open invariant [begin, end) on every recursive call.
-	// 每一层都坚持左闭右开区间 [begin, end)。
 	return buildPostorderIndex(inorder, 0, len(inorder), postorder, 0, len(postorder))
 }
 
@@ -166,44 +170,46 @@ func buildTreePostOrderIndex(inorder []int, postorder []int) *TreeNode {
 // 左闭右开的中序 [inLeft, inRight) 与后序 [postLeft, postRight) 表示同一棵子树。
 // Time: O(n²) worst case, Space: O(h).
 // 时间复杂度：最坏 O(n²)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Equal postorder bounds mean this interval has no nodes.
+//     后序区间两端相等，说明当前子树为空。
+//  2. The last postorder value is the current subtree root.
+//     后序区间最后一个值就是当前子树的根。
+//  3. A single-node interval is already a complete leaf.
+//     区间只剩一个节点，它就是叶子，不必再切分。
+//  4. Scan the current inorder interval for the delimiter.
+//     在当前中序区间里线性查找切割点。
+//  5. leftSize is the inorder distance from inLeft to the delimiter, not the global index itself.
+//     左子树大小是切割点相对 inLeft 的距离，不能直接用全局下标 delimiterIndex。
+//  6. Left postorder takes exactly leftSize values starting at postLeft.
+//     左后序从 postLeft 起恰好取 leftSize 个值。
+//  7. Right postorder starts after the left subtree and excludes the current root.
+//     右后序紧接左后序，并排除当前根所在的末尾位置。
 func buildPostorderIndex(inorder []int, inLeft, inRight int, postorder []int, postLeft, postRight int) *TreeNode {
-	// Equal postorder bounds mean this interval has no nodes.
-	// 后序区间两端相等，说明当前子树为空。
 	if postLeft == postRight {
 		return nil
 	}
 
-	// The last postorder value is the current subtree root.
-	// 后序区间最后一个值就是当前子树的根。
 	rootValue := postorder[postRight-1]
 	root := &TreeNode{Val: rootValue}
 
-	// A single-node interval is already a complete leaf.
-	// 区间只剩一个节点，它就是叶子，不必再切分。
 	if postRight-postLeft == 1 {
 		return root
 	}
 
-	// Scan the current inorder interval for the delimiter.
-	// 在当前中序区间里线性查找切割点。
 	delimiterIndex := inLeft
 	for delimiterIndex < inRight && inorder[delimiterIndex] != rootValue {
 		delimiterIndex++
 	}
 
-	// leftSize is the inorder distance from inLeft to the delimiter, not the global index itself.
-	// 左子树大小是切割点相对 inLeft 的距离，不能直接用全局下标 delimiterIndex。
 	leftSize := delimiterIndex - inLeft
 
-	// Left postorder takes exactly leftSize values starting at postLeft.
-	// 左后序从 postLeft 起恰好取 leftSize 个值。
 	root.Left = buildPostorderIndex(
 		inorder, inLeft, delimiterIndex,
 		postorder, postLeft, postLeft+leftSize,
 	)
 
-	// Right postorder starts after the left subtree and excludes the current root.
-	// 右后序紧接左后序，并排除当前根所在的末尾位置。
 	root.Right = buildPostorderIndex(
 		inorder, delimiterIndex+1, inRight,
 		postorder, postLeft+leftSize, postRight-1,
@@ -216,9 +222,19 @@ func buildPostorderIndex(inorder []int, inLeft, inRight int, postorder []int, po
 // 3. 哈希表 + 区间递归：优化查找；平均 O(1) 定位根，再用 leftSize = k-inLeft 切分左闭右开区间。
 // Time: O(n) expected, Space: O(n+h) = O(n) for the map and the recursion stack.
 // 时间复杂度：平均 O(n)，空间复杂度：O(n+h)=O(n)，由索引表和递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Unique values map to unique inorder positions.
+//     节点值互不相同，每个值对应唯一的中序位置。
+//  2. Half-open intervals are empty when their boundaries meet.
+//     左闭右开区间的两端相等，表示空子树。
+//  3. The final value in this postorder interval is its root.
+//     当前后序区间最后一个值就是根。
+//  4. Split both traversals using the same left-subtree size.
+//     用相同的左子树节点数切分两组遍历。
+//  5. Exclude the root from both right-subtree intervals.
+//     右子树区间要排除中序中的根和后序末尾的根。
 func buildTreePostOrderOptimized(inorder []int, postorder []int) *TreeNode {
-	// Unique values map to unique inorder positions.
-	// 节点值互不相同，每个值对应唯一的中序位置。
 	positions := make(map[int]int, len(inorder))
 	for i, value := range inorder {
 		positions[value] = i
@@ -226,29 +242,21 @@ func buildTreePostOrderOptimized(inorder []int, postorder []int) *TreeNode {
 
 	var build func(int, int, int, int) *TreeNode
 	build = func(inLeft, inRight, postLeft, postRight int) *TreeNode {
-		// Half-open intervals are empty when their boundaries meet.
-		// 左闭右开区间的两端相等，表示空子树。
 		if inLeft == inRight {
 			return nil
 		}
 
-		// The final value in this postorder interval is its root.
-		// 当前后序区间最后一个值就是根。
 		rootValue := postorder[postRight-1]
 		k := positions[rootValue]
 		leftSize := k - inLeft
 
 		root := &TreeNode{Val: rootValue}
 
-		// Split both traversals using the same left-subtree size.
-		// 用相同的左子树节点数切分两组遍历。
 		root.Left = build(
 			inLeft, k,
 			postLeft, postLeft+leftSize,
 		)
 
-		// Exclude the root from both right-subtree intervals.
-		// 右子树区间要排除中序中的根和后序末尾的根。
 		root.Right = build(
 			k+1, inRight,
 			postLeft+leftSize, postRight-1,
@@ -354,34 +362,36 @@ while the 106 implementations remain in the first half of the file.
 // 1. 递归切片：前序第一个值是根，用中序位置 k 作为左子树节点数去切前序。
 // Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
 // 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty traversals represent an empty subtree.
+//     遍历为空，说明当前子树不存在。
+//  2. Preorder starts with the current subtree's root.
+//     前序第一个值就是当前子树的根。
+//  3. k is the root position and the number of nodes in the left subtree.
+//     k 是根在当前中序切片中的位置，也是左子树节点数。
+//  4. Skip the root, then take exactly k nodes for the left subtree.
+//     跳过前序中的根，再取 k 个节点构造左子树。
+//  5. Everything after those k nodes belongs to the right subtree.
+//     前序剩余部分属于右子树，中序则取根右侧部分。
 func buildTreePreorder(preorder []int, inorder []int) *TreeNode {
-	// Empty traversals represent an empty subtree.
-	// 遍历为空，说明当前子树不存在。
 	if len(preorder) == 0 {
 		return nil
 	}
 
-	// Preorder starts with the current subtree's root.
-	// 前序第一个值就是当前子树的根。
 	rootValue := preorder[0]
 	root := &TreeNode{Val: rootValue}
 
-	// k is the root position and the number of nodes in the left subtree.
-	// k 是根在当前中序切片中的位置，也是左子树节点数。
 	k := 0
 	for inorder[k] != rootValue {
 		k++
 	}
 
-	// Skip the root, then take exactly k nodes for the left subtree.
-	// 跳过前序中的根，再取 k 个节点构造左子树。
 	root.Left = buildTreePreorder(
 		preorder[1:k+1],
 		inorder[:k],
 	)
 
-	// Everything after those k nodes belongs to the right subtree.
-	// 前序剩余部分属于右子树，中序则取根右侧部分。
 	root.Right = buildTreePreorder(
 		preorder[k+1:],
 		inorder[k+1:],
@@ -394,15 +404,17 @@ func buildTreePreorder(preorder []int, inorder []int) *TreeNode {
 // 2. 下标区间递归：用左闭右开下标切分前序和中序，切割点仍靠线性查找。
 // Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.
 // 时间复杂度：最坏 O(n²)，空间复杂度：O(h)，输出树另占 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Empty input has no subtree to construct.
+//     输入为空，没有可构造的子树。
+//  2. Keep the half-open invariant [begin, end) on every recursive call.
+//     每一层都坚持左闭右开区间 [begin, end)。
 func buildTreePreorderIndex(preorder []int, inorder []int) *TreeNode {
-	// Empty input has no subtree to construct.
-	// 输入为空，没有可构造的子树。
 	if len(preorder) == 0 || len(inorder) == 0 {
 		return nil
 	}
 
-	// Keep the half-open invariant [begin, end) on every recursive call.
-	// 每一层都坚持左闭右开区间 [begin, end)。
 	return buildPreorderIndex(preorder, 0, len(preorder), inorder, 0, len(inorder))
 }
 
@@ -410,44 +422,46 @@ func buildTreePreorderIndex(preorder []int, inorder []int) *TreeNode {
 // 左闭右开的前序 [preLeft, preRight) 与中序 [inLeft, inRight) 表示同一棵子树。
 // Time: O(n²) worst case, Space: O(h).
 // 时间复杂度：最坏 O(n²)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Equal preorder bounds mean this interval has no nodes.
+//     前序区间两端相等，说明当前子树为空。
+//  2. Use preLeft, not 0: this interval may start in the middle of preorder.
+//     根取 preLeft 处的值，不能写死成下标 0，因为子区间不一定从数组开头开始。
+//  3. A single-node interval is already a complete leaf.
+//     区间只剩一个节点，它就是叶子，不必再切分。
+//  4. Scan the current inorder interval for the delimiter.
+//     在当前中序区间里线性查找切割点。
+//  5. leftSize is the inorder distance from inLeft to the delimiter.
+//     左子树大小是切割点相对 inLeft 的距离。
+//  6. Skip the root at preLeft, then take leftSize preorder values.
+//     跳过 preLeft 处的根，再取 leftSize 个前序值构造左子树。
+//  7. The right subtree starts immediately after the left preorder interval.
+//     右子树紧接左前序结束处，中序则跳过根的位置。
 func buildPreorderIndex(preorder []int, preLeft, preRight int, inorder []int, inLeft, inRight int) *TreeNode {
-	// Equal preorder bounds mean this interval has no nodes.
-	// 前序区间两端相等，说明当前子树为空。
 	if preLeft == preRight {
 		return nil
 	}
 
-	// Use preLeft, not 0: this interval may start in the middle of preorder.
-	// 根取 preLeft 处的值，不能写死成下标 0，因为子区间不一定从数组开头开始。
 	rootValue := preorder[preLeft]
 	root := &TreeNode{Val: rootValue}
 
-	// A single-node interval is already a complete leaf.
-	// 区间只剩一个节点，它就是叶子，不必再切分。
 	if preRight-preLeft == 1 {
 		return root
 	}
 
-	// Scan the current inorder interval for the delimiter.
-	// 在当前中序区间里线性查找切割点。
 	delimiterIndex := inLeft
 	for delimiterIndex < inRight && inorder[delimiterIndex] != rootValue {
 		delimiterIndex++
 	}
 
-	// leftSize is the inorder distance from inLeft to the delimiter.
-	// 左子树大小是切割点相对 inLeft 的距离。
 	leftSize := delimiterIndex - inLeft
 
-	// Skip the root at preLeft, then take leftSize preorder values.
-	// 跳过 preLeft 处的根，再取 leftSize 个前序值构造左子树。
 	root.Left = buildPreorderIndex(
 		preorder, preLeft+1, preLeft+1+leftSize,
 		inorder, inLeft, delimiterIndex,
 	)
 
-	// The right subtree starts immediately after the left preorder interval.
-	// 右子树紧接左前序结束处，中序则跳过根的位置。
 	root.Right = buildPreorderIndex(
 		preorder, preLeft+1+leftSize, preRight,
 		inorder, delimiterIndex+1, inRight,
@@ -460,9 +474,21 @@ func buildPreorderIndex(preorder []int, preLeft, preRight int, inorder []int, in
 // 3. 哈希表 + 区间递归：根是 preorder[preLeft]，跳过它再取 leftSize = k-inLeft 个前序元素。
 // Time: O(n) expected, Space: O(n+h) = O(n) for the map and the recursion stack.
 // 时间复杂度：平均 O(n)，空间复杂度：O(n+h)=O(n)，由索引表和递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Map each unique value to its inorder index.
+//     保存每个节点值对应的中序下标，避免重复扫描。
+//  2. Both ranges are half-open; equal boundaries mean an empty subtree.
+//     两组区间都左闭右开，边界相等表示空子树。
+//  3. The first preorder value is the root.
+//     当前前序区间的第一个值就是根。
+//  4. k is a global index; subtract the current inorder start.
+//     k 是全局下标，减去当前中序起点才是左子树节点数。
+//  5. Skip the root and take leftSize preorder elements.
+//     跳过根，取 leftSize 个前序元素构造左子树。
+//  6. The right subtree starts immediately after the left subtree.
+//     右子树紧接左子树之后，中序部分则跳过根的位置。
 func buildTreePreorderOptimized(preorder []int, inorder []int) *TreeNode {
-	// Map each unique value to its inorder index.
-	// 保存每个节点值对应的中序下标，避免重复扫描。
 	positions := make(map[int]int, len(inorder))
 	for i, value := range inorder {
 		positions[value] = i
@@ -470,31 +496,21 @@ func buildTreePreorderOptimized(preorder []int, inorder []int) *TreeNode {
 
 	var build func(int, int, int, int) *TreeNode
 	build = func(preLeft, preRight, inLeft, inRight int) *TreeNode {
-		// Both ranges are half-open; equal boundaries mean an empty subtree.
-		// 两组区间都左闭右开，边界相等表示空子树。
 		if preLeft == preRight {
 			return nil
 		}
 
-		// The first preorder value is the root.
-		// 当前前序区间的第一个值就是根。
 		rootValue := preorder[preLeft]
 		k := positions[rootValue]
 
-		// k is a global index; subtract the current inorder start.
-		// k 是全局下标，减去当前中序起点才是左子树节点数。
 		leftSize := k - inLeft
 		root := &TreeNode{Val: rootValue}
 
-		// Skip the root and take leftSize preorder elements.
-		// 跳过根，取 leftSize 个前序元素构造左子树。
 		root.Left = build(
 			preLeft+1, preLeft+1+leftSize,
 			inLeft, k,
 		)
 
-		// The right subtree starts immediately after the left subtree.
-		// 右子树紧接左子树之后，中序部分则跳过根的位置。
 		root.Right = build(
 			preLeft+1+leftSize, preRight,
 			k+1, inRight,

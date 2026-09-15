@@ -59,27 +59,29 @@ Otherwise, I store the current number and continue.
 // 1. 哈希表一次遍历：把见过的数字连同下标存入哈希表，再查找 target-num。推荐。
 // Time: O(n) expected, Space: O(n) for the hash map.
 // 时间复杂度：期望 O(n)，空间复杂度：O(n)，由哈希表产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Key: a seen number; value: its index.
+//     key 是已经见过的数字，value 是该数字的下标。
+//  2. num + need = target.
+//     当前数字 num 需要搭配 need 才能得到 target。
+//  3. ok tells us whether need already exists in the map.
+//     ok 表示 need 是否已经存在于哈希表中。
+//  4. Store after checking so the same element cannot be used twice.
+//     先查找、后存入，避免同一个元素被使用两次。
+//  5. No valid pair was found.
+//     没有找到满足条件的两个数。
 func twoSum(nums []int, target int) []int {
-	// Key: a seen number; value: its index.
-	// key 是已经见过的数字，value 是该数字的下标。
 	seen := map[int]int{}
 
 	for i, num := range nums {
-		// num + need = target.
-		// 当前数字 num 需要搭配 need 才能得到 target。
 		need := target - num
-		// ok tells us whether need already exists in the map.
-		// ok 表示 need 是否已经存在于哈希表中。
 		if j, ok := seen[need]; ok {
 			return []int{j, i}
 		}
-		// Store after checking so the same element cannot be used twice.
-		// 先查找、后存入，避免同一个元素被使用两次。
 		seen[num] = i
 	}
 
-	// No valid pair was found.
-	// 没有找到满足条件的两个数。
 	return nil
 }
 
@@ -87,12 +89,16 @@ func twoSum(nums []int, target int) []int {
 // 2. 暴力双循环：枚举所有 i<j 的下标对，保证不重复使用同一个元素。
 // Time: O(n²), Space: O(1).
 // 时间复杂度：O(n²)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. i selects the first position of the pair.
+//     i 选择数对中的第一个位置。
+//  2. Starting j at i+1 keeps the two positions distinct and avoids checking a pair twice.
+//     j 从 i+1 开始，既保证两个下标不同，也避免同一对被检查两次。
+//  3. Every pair of distinct positions has been tried.
+//     所有不同下标的组合都尝试过了。
 func twoSumBruteForce(nums []int, target int) []int {
-	// i selects the first position of the pair.
-	// i 选择数对中的第一个位置。
 	for i := 0; i < len(nums); i++ {
-		// Starting j at i+1 keeps the two positions distinct and avoids checking a pair twice.
-		// j 从 i+1 开始，既保证两个下标不同，也避免同一对被检查两次。
 		for j := i + 1; j < len(nums); j++ {
 			if nums[i]+nums[j] == target {
 				return []int{i, j}
@@ -100,8 +106,6 @@ func twoSumBruteForce(nums []int, target int) []int {
 		}
 	}
 
-	// Every pair of distinct positions has been tried.
-	// 所有不同下标的组合都尝试过了。
 	return nil
 }
 
@@ -109,43 +113,45 @@ func twoSumBruteForce(nums []int, target int) []int {
 // 3. 排序 + 双指针：必须先把数值和原下标一起复制出来，否则排序会丢失要返回的下标。
 // Time: O(n log n), Space: O(n) for the value-index copy.
 // 时间复杂度：O(n log n)，空间复杂度：O(n)，由数值与下标的副本产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Sorting nums itself would destroy the indices the problem asks for, so copy value and index together.
+//     直接排序 nums 会丢失题目要求返回的下标，所以把数值和原下标一起复制出来。
+//  2. Order by value only; each original index travels with its value.
+//     只按数值排序，每个原下标跟着自己的数值一起移动。
+//  3. left points at the smallest remaining value and right at the largest.
+//     left 指向剩余区间的最小值，right 指向最大值。
+//  4. Return the stored original indices, never the positions after sorting.
+//     返回保存下来的原下标，不能返回排序后的位置。
+//  5. The largest partner is already in use, so this left value can be discarded.
+//     当前左值已经配上了最大的右值仍然偏小，因此可以放弃这个左值。
+//  6. The smallest partner is already in use, so this right value can be discarded.
+//     当前右值已经配上了最小的左值仍然偏大，因此可以放弃这个右值。
+//  7. The two pointers met without finding a pair.
+//     双指针相遇，仍然没有找到答案。
 func twoSumSorted(nums []int, target int) []int {
-	// Sorting nums itself would destroy the indices the problem asks for, so copy value and index together.
-	// 直接排序 nums 会丢失题目要求返回的下标，所以把数值和原下标一起复制出来。
 	pairs := make([][2]int, len(nums))
 	for i, v := range nums {
 		pairs[i] = [2]int{v, i}
 	}
 
-	// Order by value only; each original index travels with its value.
-	// 只按数值排序，每个原下标跟着自己的数值一起移动。
 	sort.Slice(pairs, func(i, j int) bool {
 		return pairs[i][0] < pairs[j][0]
 	})
 
-	// left points at the smallest remaining value and right at the largest.
-	// left 指向剩余区间的最小值，right 指向最大值。
 	left, right := 0, len(pairs)-1
 
 	for left < right {
 		sum := pairs[left][0] + pairs[right][0]
 
 		if sum == target {
-			// Return the stored original indices, never the positions after sorting.
-			// 返回保存下来的原下标，不能返回排序后的位置。
 			return []int{pairs[left][1], pairs[right][1]}
 		} else if sum < target {
-			// The largest partner is already in use, so this left value can be discarded.
-			// 当前左值已经配上了最大的右值仍然偏小，因此可以放弃这个左值。
 			left++
 		} else {
-			// The smallest partner is already in use, so this right value can be discarded.
-			// 当前右值已经配上了最小的左值仍然偏大，因此可以放弃这个右值。
 			right--
 		}
 	}
 
-	// The two pointers met without finding a pair.
-	// 双指针相遇，仍然没有找到答案。
 	return nil
 }

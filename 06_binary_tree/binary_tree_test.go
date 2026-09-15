@@ -9,6 +9,14 @@ import (
 
 // Shared cases let 112 check existence and 113 check every matching path.
 // 共用用例：112 判断是否存在，113 检查所有匹配路径。
+//
+// 步骤与要点 / Steps and notes:
+//  1. A matching prefix is invalid until it reaches a leaf.
+//     前缀和匹配但还未到叶子，不能算作答案。
+//  2. Negative values make pruning after exceeding the target incorrect.
+//     后续负数可以抵消前缀，不能因超过目标就剪枝。
+//  3. Equal value sequences from distinct leaves must remain separate answers.
+//     不同叶子形成的相同值序列也要分别保留，不能去重。
 func pathSumTestCases() []struct {
 	name   string
 	root   *TreeNode
@@ -26,14 +34,10 @@ func pathSumTestCases() []struct {
 		{name: "single match", root: &TreeNode{Val: 5}, target: 5, want: [][]int{{5}}},
 		{name: "single mismatch", root: &TreeNode{Val: 5}, target: 6},
 		{name: "single zero", root: &TreeNode{Val: 0}, target: 0, want: [][]int{{0}}},
-		// A matching prefix is invalid until it reaches a leaf.
-		// 前缀和匹配但还未到叶子，不能算作答案。
 		{name: "internal match only", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}}, target: 1},
 		{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, target: 6, want: [][]int{{1, 2, 3}}},
 		{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, target: 6, want: [][]int{{1, 2, 3}}},
 		{name: "right branch only", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 3}}, target: 4, want: [][]int{{1, 3}}},
-		// Negative values make pruning after exceeding the target incorrect.
-		// 后续负数可以抵消前缀，不能因超过目标就剪枝。
 		{name: "negative child", root: &TreeNode{Val: 5, Right: &TreeNode{Val: -3}}, target: 2, want: [][]int{{5, -3}}},
 		{name: "negative target", root: &TreeNode{Val: -2, Left: &TreeNode{Val: -3}}, target: -5, want: [][]int{{-2, -3}}},
 		{name: "zero sum path", root: &TreeNode{Val: 1, Left: &TreeNode{Val: -1}}, target: 0, want: [][]int{{1, -1}}},
@@ -45,8 +49,6 @@ func pathSumTestCases() []struct {
 				Right: &TreeNode{Val: 8, Left: &TreeNode{Val: 13}, Right: &TreeNode{Val: 4, Left: &TreeNode{Val: 5}, Right: &TreeNode{Val: 1}}}},
 			target: 22, want: [][]int{{5, 4, 11, 2}, {5, 8, 4, 5}},
 		},
-		// Equal value sequences from distinct leaves must remain separate answers.
-		// 不同叶子形成的相同值序列也要分别保留，不能去重。
 		{name: "duplicate paths", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 2}}, target: 3, want: [][]int{{1, 2}, {1, 2}}},
 		{name: "different path lengths", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 0, Right: &TreeNode{Val: 2}}}, target: 3, want: [][]int{{1, 2}, {1, 0, 2}}},
 	}
@@ -75,6 +77,9 @@ func TestHasPathSum(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Sort only the outer slice: order within each root-to-leaf path matters.
+//     只排序外层路径列表，不能改变每条路径内部从根到叶子的顺序。
 func TestPathSum(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -88,8 +93,6 @@ func TestPathSum(t *testing.T) {
 		t.Run(implementation.name, func(t *testing.T) {
 			for _, tt := range pathSumTestCases() {
 				t.Run(tt.name, func(t *testing.T) {
-					// Sort only the outer slice: order within each root-to-leaf path matters.
-					// 只排序外层路径列表，不能改变每条路径内部从根到叶子的顺序。
 					got := slices.Clone(implementation.fn(tt.root, tt.target))
 					want := slices.Clone(tt.want)
 					slices.SortFunc(got, slices.Compare[[]int])
@@ -103,6 +106,11 @@ func TestPathSum(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Reuse explicit traversal fixtures, not traversals computed by another solution.
+//     复用已经明确写出的遍历用例，不用另一个算法临时生成期望值。
+//  2. Compare complete structures, including nil-child positions.
+//     比较完整树结构，包括空孩子位置，不只检查根节点值。
 func TestBuildTree(t *testing.T) {
 	implementations := []struct {
 		name     string
@@ -118,8 +126,6 @@ func TestBuildTree(t *testing.T) {
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// Reuse explicit traversal fixtures, not traversals computed by another solution.
-			// 复用已经明确写出的遍历用例，不用另一个算法临时生成期望值。
 			tests := traversalTestCases()
 			tests = append(tests,
 				traversalTestCase{name: "textbook example",
@@ -137,8 +143,6 @@ func TestBuildTree(t *testing.T) {
 					}
 					beforeFirst, beforeSecond := slices.Clone(first), slices.Clone(second)
 					got := implementation.fn(first, second)
-					// Compare complete structures, including nil-child positions.
-					// 比较完整树结构，包括空孩子位置，不只检查根节点值。
 					if !reflect.DeepEqual(got, tt.root) {
 						t.Fatalf("constructed tree differs from expected structure: got %#v, want %#v", got, tt.root)
 					}
@@ -151,6 +155,15 @@ func TestBuildTree(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. The problem guarantees a nonempty tree; do not invent a nil-root result.
+//     题目保证树非空，不为 nil 根杜撰返回值；每种实现使用新树。
+//  2. A bottom-left node can itself be a right child.
+//     最深层最左节点也可能是右孩子，不能按“左叶子”理解。
+//  3. A deeper node takes precedence over a shallower node farther left.
+//     更深层优先，不能一直沿根的左边走到头就返回。
+//  4. Same-depth nodes must not overwrite the leftmost answer; values do not decide position.
+//     同层右节点不能覆盖最左答案；最左值也不必是最小值。
 func TestFindBottomLeftValue(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -162,8 +175,6 @@ func TestFindBottomLeftValue(t *testing.T) {
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// The problem guarantees a nonempty tree; do not invent a nil-root result.
-			// 题目保证树非空，不为 nil 根杜撰返回值；每种实现使用新树。
 			tests := []struct {
 				name string
 				root *TreeNode
@@ -174,12 +185,8 @@ func TestFindBottomLeftValue(t *testing.T) {
 				{name: "single negative", root: &TreeNode{Val: -9}, want: -9},
 				{name: "two level example", root: &TreeNode{Val: 2, Left: &TreeNode{Val: 1}, Right: &TreeNode{Val: 3}}, want: 1},
 				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: 3},
-				// A bottom-left node can itself be a right child.
-				// 最深层最左节点也可能是右孩子，不能按“左叶子”理解。
 				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: 3},
 				{
-					// A deeper node takes precedence over a shallower node farther left.
-					// 更深层优先，不能一直沿根的左边走到头就返回。
 					name: "deeper right subtree example",
 					root: &TreeNode{Val: 1,
 						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 4}},
@@ -192,8 +199,6 @@ func TestFindBottomLeftValue(t *testing.T) {
 					want: 8,
 				},
 				{
-					// Same-depth nodes must not overwrite the leftmost answer; values do not decide position.
-					// 同层右节点不能覆盖最左答案；最左值也不必是最小值。
 					name: "full level leftmost not minimum",
 					root: &TreeNode{Val: 0,
 						Left:  &TreeNode{Val: 1, Left: &TreeNode{Val: 90}, Right: &TreeNode{Val: -5}},
@@ -224,6 +229,19 @@ func TestFindBottomLeftValue(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Each implementation receives fresh trees.
+//     每种实现使用独立的新树。
+//  2. A root has no parent, so even a leaf root is not a left leaf.
+//     根没有父节点，所以即使根是叶子，也不是左叶子。
+//  3. Only the final node of the left chain is a leaf.
+//     左链只有末尾是叶子，不能累加中间的左孩子。
+//  4. Being in the left subtree does not make a right child a left leaf.
+//     位于整棵树左侧，也不能把其中的右叶子算作左叶子。
+//  5. Left-leaf status depends on the immediate parent, not the root.
+//     左叶子身份取决于直接父节点，与它在根的哪一侧无关。
+//  6. Negative left-leaf values must be included without filtering.
+//     负数左叶子也要按真实值累加，不能过滤掉。
 func TestSumOfLeftLeaves(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -235,16 +253,12 @@ func TestSumOfLeftLeaves(t *testing.T) {
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// Each implementation receives fresh trees.
-			// 每种实现使用独立的新树。
 			tests := []struct {
 				name string
 				root *TreeNode
 				want int
 			}{
 				{name: "empty tree", want: 0},
-				// A root has no parent, so even a leaf root is not a left leaf.
-				// 根没有父节点，所以即使根是叶子，也不是左叶子。
 				{name: "single root", root: &TreeNode{Val: 9}, want: 0},
 				{name: "left leaf", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 7}}, want: 7},
 				{name: "right leaf excluded", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 7}}, want: 0},
@@ -253,20 +267,14 @@ func TestSumOfLeftLeaves(t *testing.T) {
 					root: &TreeNode{Val: 3, Left: &TreeNode{Val: 9}, Right: &TreeNode{Val: 20, Left: &TreeNode{Val: 15}, Right: &TreeNode{Val: 7}}},
 					want: 24,
 				},
-				// Only the final node of the left chain is a leaf.
-				// 左链只有末尾是叶子，不能累加中间的左孩子。
 				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 20, Left: &TreeNode{Val: 3}}}, want: 3},
 				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: 0},
 				{
-					// Being in the left subtree does not make a right child a left leaf.
-					// 位于整棵树左侧，也不能把其中的右叶子算作左叶子。
 					name: "left child has only right child",
 					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 20, Right: &TreeNode{Val: 3}}},
 					want: 0,
 				},
 				{
-					// Left-leaf status depends on the immediate parent, not the root.
-					// 左叶子身份取决于直接父节点，与它在根的哪一侧无关。
 					name: "left leaf inside right subtree",
 					root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Left: &TreeNode{Val: 8}}},
 					want: 8,
@@ -279,8 +287,6 @@ func TestSumOfLeftLeaves(t *testing.T) {
 					want: 10,
 				},
 				{
-					// Negative left-leaf values must be included without filtering.
-					// 负数左叶子也要按真实值累加，不能过滤掉。
 					name: "negative and positive leaves",
 					root: &TreeNode{Val: 1, Left: &TreeNode{Val: -7}, Right: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}},
 					want: -4,
@@ -298,6 +304,17 @@ func TestSumOfLeftLeaves(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Rebuild inputs for each implementation to keep the checks independent.
+//     每种实现重新创建输入树，让测试彼此独立。
+//  2. A height difference of one is allowed; symmetry is not required.
+//     高度差为 1 仍然平衡，不要求左右对称。
+//  3. The root passes, but imbalance in its left subtree must propagate upward.
+//     根节点高度差为 1，但左子树内部失衡，必须向上传递失败。
+//  4. A balanced left subtree must not hide an unbalanced right subtree.
+//     左子树平衡也不能提前成功，右子树内部仍可能失衡。
+//  5. Identical values do not mean identical node heights: map keys must be pointers.
+//     相同值的不同节点高度可能不同，高度表不能用节点值作为 key。
 func TestIsBalanced(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -309,8 +326,6 @@ func TestIsBalanced(t *testing.T) {
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// Rebuild inputs for each implementation to keep the checks independent.
-			// 每种实现重新创建输入树，让测试彼此独立。
 			tests := []struct {
 				name string
 				root *TreeNode
@@ -323,8 +338,6 @@ func TestIsBalanced(t *testing.T) {
 				{name: "left chain difference two", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: false},
 				{name: "right chain difference two", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: false},
 				{
-					// A height difference of one is allowed; symmetry is not required.
-					// 高度差为 1 仍然平衡，不要求左右对称。
 					name: "balanced example",
 					root: &TreeNode{Val: 3, Left: &TreeNode{Val: 9}, Right: &TreeNode{Val: 20, Left: &TreeNode{Val: 15}, Right: &TreeNode{Val: 7}}},
 					want: true,
@@ -337,8 +350,6 @@ func TestIsBalanced(t *testing.T) {
 					want: true,
 				},
 				{
-					// The root passes, but imbalance in its left subtree must propagate upward.
-					// 根节点高度差为 1，但左子树内部失衡，必须向上传递失败。
 					name: "hidden left imbalance",
 					root: &TreeNode{Val: 1,
 						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 3, Left: &TreeNode{Val: 4}}},
@@ -346,8 +357,6 @@ func TestIsBalanced(t *testing.T) {
 					want: false,
 				},
 				{
-					// A balanced left subtree must not hide an unbalanced right subtree.
-					// 左子树平衡也不能提前成功，右子树内部仍可能失衡。
 					name: "hidden right imbalance",
 					root: &TreeNode{Val: 1,
 						Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3}},
@@ -355,8 +364,6 @@ func TestIsBalanced(t *testing.T) {
 					want: false,
 				},
 				{
-					// Identical values do not mean identical node heights: map keys must be pointers.
-					// 相同值的不同节点高度可能不同，高度表不能用节点值作为 key。
 					name: "equal values unequal heights",
 					root: &TreeNode{Val: 1,
 						Left:  &TreeNode{Val: 1},
@@ -375,6 +382,17 @@ func TestIsBalanced(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Build fresh trees for each implementation.
+//     每种实现使用独立的测试树。
+//  2. A node with one child is not a leaf: do not collect a partial path.
+//     只有一个孩子的节点不是叶子，不能收集尚未走完的路径。
+//  3. Sibling branches must restore the shared prefix after each leaf.
+//     每个叶子返回后都要恢复公共前缀，不能把上个分支带到兄弟路径里。
+//  4. Distinct leaf paths may have identical text; retain both occurrences.
+//     不同叶子的路径文字可以相同，必须保留两次，不能当集合去重。
+//  5. Sort copies: result order is unrestricted, but duplicates still count.
+//     排序副本后比较：忽略返回顺序，但保留重复路径的次数。
 func TestBinaryTreePaths(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -386,8 +404,6 @@ func TestBinaryTreePaths(t *testing.T) {
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// Build fresh trees for each implementation.
-			// 每种实现使用独立的测试树。
 			tests := []struct {
 				name string
 				root *TreeNode
@@ -401,13 +417,9 @@ func TestBinaryTreePaths(t *testing.T) {
 					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Right: &TreeNode{Val: 5}}, Right: &TreeNode{Val: 3}},
 					want: []string{"1->2->5", "1->3"},
 				},
-				// A node with one child is not a leaf: do not collect a partial path.
-				// 只有一个孩子的节点不是叶子，不能收集尚未走完的路径。
 				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: []string{"1->2->3"}},
 				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: []string{"1->2->3"}},
 				{
-					// Sibling branches must restore the shared prefix after each leaf.
-					// 每个叶子返回后都要恢复公共前缀，不能把上个分支带到兄弟路径里。
 					name: "four leaves backtracking",
 					root: &TreeNode{Val: 1,
 						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 4}, Right: &TreeNode{Val: 5}},
@@ -420,8 +432,6 @@ func TestBinaryTreePaths(t *testing.T) {
 					want: []string{"-10->0", "-10->12->-3"},
 				},
 				{
-					// Distinct leaf paths may have identical text; retain both occurrences.
-					// 不同叶子的路径文字可以相同，必须保留两次，不能当集合去重。
 					name: "duplicate path strings",
 					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}, Right: &TreeNode{Val: 2}},
 					want: []string{"1->2", "1->2"},
@@ -429,8 +439,6 @@ func TestBinaryTreePaths(t *testing.T) {
 			}
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
-					// Sort copies: result order is unrestricted, but duplicates still count.
-					// 排序副本后比较：忽略返回顺序，但保留重复路径的次数。
 					got := slices.Clone(implementation.fn(tt.root))
 					want := slices.Clone(tt.want)
 					slices.Sort(got)
@@ -453,6 +461,15 @@ type traversalTestCase struct {
 	postorder []int
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Counts near full-level boundaries exercise both the formula and recursive splitting.
+//     满层边界附近的数量，同时检验直接套公式和递归拆分两种情况。
+//  2. Level-order array positions 2*i+1 and 2*i+2 are the children of i.
+//     连续层序数组中，i 的左右孩子下标是 2*i+1、2*i+2，天然构成完全二叉树。
+//     Allocate fresh nodes for each run; repeated values must not affect the count.
+//     每次创建新节点；使用重复值，确保统计节点数量而不是不同值数量。
+//  3. The construction size is the expected count, independent of any solution.
+//     构造时的节点数就是期望结果，不依赖任何待测算法计算答案。
 func TestCountNodes(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -462,8 +479,6 @@ func TestCountNodes(t *testing.T) {
 		{name: "iterative", fn: countNodesIterative},
 		{name: "optimized", fn: countNodesOptimized},
 	}
-	// Counts near full-level boundaries exercise both the formula and recursive splitting.
-	// 满层边界附近的数量，同时检验直接套公式和递归拆分两种情况。
 	tests := []struct {
 		name string
 		size int
@@ -488,10 +503,6 @@ func TestCountNodes(t *testing.T) {
 		t.Run(implementation.name, func(t *testing.T) {
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
-					// Level-order array positions 2*i+1 and 2*i+2 are the children of i.
-					// 连续层序数组中，i 的左右孩子下标是 2*i+1、2*i+2，天然构成完全二叉树。
-					// Allocate fresh nodes for each run; repeated values must not affect the count.
-					// 每次创建新节点；使用重复值，确保统计节点数量而不是不同值数量。
 					nodes := make([]TreeNode, tt.size)
 					for i := range nodes {
 						nodes[i].Val = i % 3
@@ -506,8 +517,6 @@ func TestCountNodes(t *testing.T) {
 					if len(nodes) > 0 {
 						root = &nodes[0]
 					}
-					// The construction size is the expected count, independent of any solution.
-					// 构造时的节点数就是期望结果，不依赖任何待测算法计算答案。
 					if got := implementation.fn(root); got != tt.size {
 						t.Fatalf("countNodes() = %d, want %d", got, tt.size)
 					}
@@ -517,15 +526,31 @@ func TestCountNodes(t *testing.T) {
 	}
 }
 
+// traversalTestCases covers ordinary, skewed, and Morris-threading trees.
+// traversalTestCases 覆盖普通二叉树、偏斜树及 Morris 线索恢复。
+//
+// Ordinary tree / 普通二叉树：
+//
+//	     1
+//	   /   \
+//	  2     3
+//	 / \     \
+//	4   5     6
+//
+// Right-skewed and left-skewed trees both use 1 -> 2 -> 3.
+// 右偏树和左偏树都使用 1 -> 2 -> 3，分别只连接右孩子或左孩子。
+//
+// Morris threading walks the left subtree's long right boundary twice and must restore it.
+// Morris 线索会重复走左子树的较长右边界，必须完整还原：
+//
+//	   5
+//	 /   \
+//	2     8
+//	 \   /
+//	  3 6
+//	   \
+//	    4
 func traversalTestCases() []traversalTestCase {
-	// Ordinary tree:
-	// 普通二叉树：
-	//
-	//          1
-	//        /   \
-	//       2     3
-	//      / \     \
-	//     4   5     6
 	ordinary := &TreeNode{
 		Val: 1,
 		Left: &TreeNode{
@@ -539,31 +564,16 @@ func traversalTestCases() []traversalTestCase {
 		},
 	}
 
-	// Right-skewed tree: 1 -> 2 -> 3.
-	// 右偏树：1 -> 2 -> 3。
 	rightSkewed := &TreeNode{
 		Val:   1,
 		Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}},
 	}
 
-	// Left-skewed tree: 1 -> 2 -> 3.
-	// 左偏树：1 -> 2 -> 3。
 	leftSkewed := &TreeNode{
 		Val:  1,
 		Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}},
 	}
 
-	// The left subtree has a long right boundary, which Morris threading walks twice
-	// and must fully restore afterwards.
-	// 左子树有一条较长的右边界，Morris 线索会重复走这条边界，并且必须完整还原。
-	//
-	//         5
-	//       /   \
-	//      2     8
-	//       \   /
-	//        3 6
-	//         \
-	//          4
 	longRightBoundary := &TreeNode{
 		Val:   5,
 		Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3, Right: &TreeNode{Val: 4}}},
@@ -580,10 +590,13 @@ func traversalTestCases() []traversalTestCase {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Morris traversal borrows nil right pointers as temporary threads.
+//     Every thread must be removed before returning, or the tree stays corrupted.
+//     Morris 遍历借用空右指针作为临时线索，返回前必须全部拆除，否则树会被永久改坏。
+//  2. Each call builds identical fresh trees, so an untouched copy is the expectation.
+//     每次调用都会构造完全相同的新树，因此未被遍历的那一份就是期望结构。
 func TestMorrisRestoresTree(t *testing.T) {
-	// Morris traversal borrows nil right pointers as temporary threads.
-	// Every thread must be removed before returning, or the tree stays corrupted.
-	// Morris 遍历借用空右指针作为临时线索，返回前必须全部拆除，否则树会被永久改坏。
 	implementations := []struct {
 		name string
 		fn   func(*TreeNode) []int
@@ -594,8 +607,6 @@ func TestMorrisRestoresTree(t *testing.T) {
 
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// Each call builds identical fresh trees, so an untouched copy is the expectation.
-			// 每次调用都会构造完全相同的新树，因此未被遍历的那一份就是期望结构。
 			traversed := traversalTestCases()
 			untouched := traversalTestCases()
 
@@ -611,6 +622,13 @@ func TestMorrisRestoresTree(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Fresh trees keep implementations independent even if one mistakenly mutates input.
+//     每种实现使用新树，即使某种实现误改输入，也不会干扰另一种实现。
+//  2. Equal level values do not imply mirrored nil positions.
+//     每层值相同，也可能因为空节点位置不对称而失败。
+//  3. A nil/nil outer pair must not hide a later inner mismatch.
+//     外侧同时为空时只能继续，不能漏掉随后内侧的值不匹配。
 func TestIsSymmetric(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -622,8 +640,6 @@ func TestIsSymmetric(t *testing.T) {
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// Fresh trees keep implementations independent even if one mistakenly mutates input.
-			// 每种实现使用新树，即使某种实现误改输入，也不会干扰另一种实现。
 			tests := []struct {
 				name string
 				root *TreeNode
@@ -642,8 +658,6 @@ func TestIsSymmetric(t *testing.T) {
 					want: true,
 				},
 				{
-					// Equal level values do not imply mirrored nil positions.
-					// 每层值相同，也可能因为空节点位置不对称而失败。
 					name: "same direction is not a mirror",
 					root: &TreeNode{Val: 1,
 						Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3}},
@@ -658,8 +672,6 @@ func TestIsSymmetric(t *testing.T) {
 					want: true,
 				},
 				{
-					// A nil/nil outer pair must not hide a later inner mismatch.
-					// 外侧同时为空时只能继续，不能漏掉随后内侧的值不匹配。
 					name: "nil outer pair before inner mismatch",
 					root: &TreeNode{Val: 1,
 						Left:  &TreeNode{Val: 2, Right: &TreeNode{Val: 3}},
@@ -685,6 +697,11 @@ func TestIsSymmetric(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Depth counts nodes on one path, regardless of values or direction changes.
+//     深度数的是一条路径上的节点，与节点值、左右转向无关。
+//  2. Seven nodes occupy only three levels: count layers, not nodes.
+//     七个节点只有三层：检查是否错误地按节点数累加深度。
 func TestMaxDepth(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -717,15 +734,11 @@ func TestMaxDepth(t *testing.T) {
 				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: 3},
 				{name: "right chain", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2, Right: &TreeNode{Val: 3}}}, want: 3},
 				{
-					// Depth counts nodes on one path, regardless of values or direction changes.
-					// 深度数的是一条路径上的节点，与节点值、左右转向无关。
 					name: "zigzag equal values",
 					root: &TreeNode{Val: 0, Left: &TreeNode{Val: 0, Right: &TreeNode{Val: 0, Left: &TreeNode{Val: 0}}}},
 					want: 4,
 				},
 				{
-					// Seven nodes occupy only three levels: count layers, not nodes.
-					// 七个节点只有三层：检查是否错误地按节点数累加深度。
 					name: "full three levels",
 					root: &TreeNode{Val: 1,
 						Left:  &TreeNode{Val: 2, Left: &TreeNode{Val: 4}, Right: &TreeNode{Val: 5}},
@@ -744,6 +757,15 @@ func TestMaxDepth(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Build fresh inputs for each implementation.
+//     每种实现使用独立的新树，避免用例之间相互影响。
+//  2. A missing child is not a leaf and cannot shorten the path.
+//     缺失的孩子不是叶子，不能通过空的一侧缩短路径。
+//  3. A left-first DFS leaf need not be the nearest leaf.
+//     先沿左侧找到的叶子不一定最近，还要比较右侧浅叶子。
+//  4. Repeated values and changing directions do not change path length.
+//     重复值和左右转向不影响路径长度，每个真实节点都要计数。
 func TestMinDepth(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -754,8 +776,6 @@ func TestMinDepth(t *testing.T) {
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// Build fresh inputs for each implementation.
-			// 每种实现使用独立的新树，避免用例之间相互影响。
 			tests := []struct {
 				name string
 				root *TreeNode
@@ -763,8 +783,6 @@ func TestMinDepth(t *testing.T) {
 			}{
 				{name: "empty tree", want: 0},
 				{name: "single node", root: &TreeNode{Val: 1}, want: 1},
-				// A missing child is not a leaf and cannot shorten the path.
-				// 缺失的孩子不是叶子，不能通过空的一侧缩短路径。
 				{name: "left child only", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2}}, want: 2},
 				{name: "right child only", root: &TreeNode{Val: 1, Right: &TreeNode{Val: 2}}, want: 2},
 				{name: "left chain", root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}}, want: 3},
@@ -776,8 +794,6 @@ func TestMinDepth(t *testing.T) {
 					want: 2,
 				},
 				{
-					// A left-first DFS leaf need not be the nearest leaf.
-					// 先沿左侧找到的叶子不一定最近，还要比较右侧浅叶子。
 					name: "shallow right leaf",
 					root: &TreeNode{Val: 1, Left: &TreeNode{Val: 2, Left: &TreeNode{Val: 3}}, Right: &TreeNode{Val: 4}},
 					want: 2,
@@ -790,8 +806,6 @@ func TestMinDepth(t *testing.T) {
 					want: 3,
 				},
 				{
-					// Repeated values and changing directions do not change path length.
-					// 重复值和左右转向不影响路径长度，每个真实节点都要计数。
 					name: "zigzag equal values",
 					root: &TreeNode{Val: 0, Left: &TreeNode{Val: 0, Right: &TreeNode{Val: 0, Left: &TreeNode{Val: 0}}}},
 					want: 4,
@@ -808,9 +822,10 @@ func TestMinDepth(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. The queue groups levels explicitly, while the recursive version uses depth as an index.
+//     队列版本显式分层，递归版本把深度直接当作结果下标，两者必须给出相同分组。
 func TestLevelOrder(t *testing.T) {
-	// The queue groups levels explicitly, while the recursive version uses depth as an index.
-	// 队列版本显式分层，递归版本把深度直接当作结果下标，两者必须给出相同分组。
 	implementations := []struct {
 		name string
 		fn   func(*TreeNode) [][]int
@@ -832,9 +847,10 @@ func TestLevelOrder(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Every implementation must return root-left-right order.
+//     所有实现都必须返回“根、左、右”的顺序。
 func TestPreorderTraversal(t *testing.T) {
-	// Every implementation must return root-left-right order.
-	// 所有实现都必须返回“根、左、右”的顺序。
 	implementations := []struct {
 		name string
 		fn   func(*TreeNode) []int
@@ -858,9 +874,10 @@ func TestPreorderTraversal(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Every implementation must return left-root-right order.
+//     所有实现都必须返回“左、根、右”的顺序。
 func TestInorderTraversal(t *testing.T) {
-	// Every implementation must return left-root-right order.
-	// 所有实现都必须返回“左、根、右”的顺序。
 	implementations := []struct {
 		name string
 		fn   func(*TreeNode) []int
@@ -884,6 +901,11 @@ func TestInorderTraversal(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Allocate fresh trees per implementation because inversion mutates the input.
+//     每种实现重新创建测试树，避免原地翻转影响下一个实现的输入。
+//     Compare complete structures, including nil children, rather than traversal values alone.
+//     比较包含空孩子位置的完整结构，避免仅比较遍历值而漏掉结构错误。
 func TestInvertTree(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -897,10 +919,6 @@ func TestInvertTree(t *testing.T) {
 	}
 	for _, implementation := range implementations {
 		t.Run(implementation.name, func(t *testing.T) {
-			// Allocate fresh trees per implementation because inversion mutates the input.
-			// 每种实现重新创建测试树，避免原地翻转影响下一个实现的输入。
-			// Compare complete structures, including nil children, rather than traversal values alone.
-			// 比较包含空孩子位置的完整结构，避免仅比较遍历值而漏掉结构错误。
 			tests := []struct {
 				name string
 				root *TreeNode
@@ -949,9 +967,10 @@ func TestInvertTree(t *testing.T) {
 	}
 }
 
+// 步骤与要点 / Steps and notes:
+//  1. Every implementation must return left-right-root order.
+//     所有实现都必须返回“左、右、根”的顺序。
 func TestPostorderTraversal(t *testing.T) {
-	// Every implementation must return left-right-root order.
-	// 所有实现都必须返回“左、右、根”的顺序。
 	implementations := []struct {
 		name string
 		fn   func(*TreeNode) []int

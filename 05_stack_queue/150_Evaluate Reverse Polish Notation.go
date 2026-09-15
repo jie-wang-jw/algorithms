@@ -91,24 +91,34 @@ The only value remaining in the stack is the final answer.
 // 1. 显式栈从前向后求值：推荐；数字入栈，遇到运算符先弹出右操作数再弹出左操作数。
 // Time: O(n), Space: O(n) for the operand stack.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由操作数栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Each binary operator reduces the stack size by one; one final value means operands=operators+1.
+//     Thus (len(tokens)+1)/2 is the exact numeric-token count and an upper bound on stack size.
+//     每个二元运算使栈大小减一，最终剩一个值，因此数字数=运算符数+1。
+//     所以 (len(tokens)+1)/2 恰好是数字 token 数，也是栈大小的上界。
+//  2. The stack top is the right operand.
+//     栈顶元素是右操作数。
+//  3. Remove both operands before pushing the result.
+//     先删除两个操作数，再压入计算结果。
+//  4. Division is the only remaining valid operator.
+//     唯一剩余的合法运算符是除法。
+//  5. Push the intermediate result only once.
+//     统一将中间结果压入栈中。
+//  6. Every non-operator token is guaranteed to be a valid integer.
+//     题目保证所有非运算符 token 都是合法整数。
+//  7. A valid expression leaves exactly one result.
+//     合法表达式最终只留下一个结果。
 func evalRPN(tokens []string) int {
-	// Each binary operator reduces the stack size by one; one final value means operands=operators+1.
-	// Thus (len(tokens)+1)/2 is the exact numeric-token count and an upper bound on stack size.
-	// 每个二元运算使栈大小减一，最终剩一个值，因此数字数=运算符数+1。
-	// 所以 (len(tokens)+1)/2 恰好是数字 token 数，也是栈大小的上界。
 	stack := make([]int, 0, (len(tokens)+1)/2)
 
 	for _, token := range tokens {
 		switch token {
 		case "+", "-", "*", "/":
-			// The stack top is the right operand.
-			// 栈顶元素是右操作数。
 			n := len(stack)
 			left := stack[n-2]
 			right := stack[n-1]
 
-			// Remove both operands before pushing the result.
-			// 先删除两个操作数，再压入计算结果。
 			stack = stack[:n-2]
 
 			var result int
@@ -121,25 +131,17 @@ func evalRPN(tokens []string) int {
 			case "*":
 				result = left * right
 			default:
-				// Division is the only remaining valid operator.
-				// 唯一剩余的合法运算符是除法。
 				result = left / right
 			}
 
-			// Push the intermediate result only once.
-			// 统一将中间结果压入栈中。
 			stack = append(stack, result)
 
 		default:
-			// Every non-operator token is guaranteed to be a valid integer.
-			// 题目保证所有非运算符 token 都是合法整数。
 			number, _ := strconv.Atoi(token)
 			stack = append(stack, number)
 		}
 	}
 
-	// A valid expression leaves exactly one result.
-	// 合法表达式最终只留下一个结果。
 	return stack[0]
 }
 
@@ -147,55 +149,57 @@ func evalRPN(tokens []string) int {
 // 2. 从后向前递归求值：用调用栈代替显式栈，先递归右子表达式再递归左子表达式。
 // Time: O(n), Space: O(d) for the recursion stack, where d is the nesting depth, worst case O(n).
 // 时间复杂度：O(n)，空间复杂度：O(d)，由递归调用栈产生，d 为表达式嵌套深度，最坏 O(n)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. index is the shared cursor; it starts at the last token and only ever moves left.
+//     index 是共享游标，从最后一个 token 开始，且只向左移动。
+//  2. parse consumes exactly one complete subexpression and returns its value.
+//     parse 恰好消耗一个完整子表达式，并返回它的值。
+//  3. Read the token under the cursor, then move past it.
+//     读取游标处的 token，然后让游标越过它。
+//  4. Reverse postfix order is operator, right, left: the right operand comes first.
+//     逆序读取后缀表达式的顺序是“运算符、右、左”，所以先得到右操作数。
+//  5. Only after the whole right subexpression is consumed does the left one begin.
+//     只有整个右子表达式都被消耗完，左子表达式才开始。
+//  6. Operand order matters: this must be left-right, not right-left.
+//     操作数顺序有意义：必须是 left-right，不能写成 right-left。
+//  7. Division is the only remaining valid operator and truncates toward zero.
+//     唯一剩余的合法运算符是除法，Go 的整数除法向零截断。
+//  8. Every non-operator token is guaranteed to be a valid integer.
+//     题目保证所有非运算符 token 都是合法整数。
+//  9. The outermost call consumes the entire expression.
+//     最外层调用消耗整个表达式。
 func evalRPNRecursive(tokens []string) int {
-	// index is the shared cursor; it starts at the last token and only ever moves left.
-	// index 是共享游标，从最后一个 token 开始，且只向左移动。
 	index := len(tokens) - 1
 
-	// parse consumes exactly one complete subexpression and returns its value.
-	// parse 恰好消耗一个完整子表达式，并返回它的值。
 	var parse func() int
 
 	parse = func() int {
-		// Read the token under the cursor, then move past it.
-		// 读取游标处的 token，然后让游标越过它。
 		token := tokens[index]
 		index--
 
 		switch token {
 		case "+", "-", "*", "/":
-			// Reverse postfix order is operator, right, left: the right operand comes first.
-			// 逆序读取后缀表达式的顺序是“运算符、右、左”，所以先得到右操作数。
 			right := parse()
 
-			// Only after the whole right subexpression is consumed does the left one begin.
-			// 只有整个右子表达式都被消耗完，左子表达式才开始。
 			left := parse()
 
 			switch token {
 			case "+":
 				return left + right
 			case "-":
-				// Operand order matters: this must be left-right, not right-left.
-				// 操作数顺序有意义：必须是 left-right，不能写成 right-left。
 				return left - right
 			case "*":
 				return left * right
 			default:
-				// Division is the only remaining valid operator and truncates toward zero.
-				// 唯一剩余的合法运算符是除法，Go 的整数除法向零截断。
 				return left / right
 			}
 
 		default:
-			// Every non-operator token is guaranteed to be a valid integer.
-			// 题目保证所有非运算符 token 都是合法整数。
 			value, _ := strconv.Atoi(token)
 			return value
 		}
 	}
 
-	// The outermost call consumes the entire expression.
-	// 最外层调用消耗整个表达式。
 	return parse()
 }

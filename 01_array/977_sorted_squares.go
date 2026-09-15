@@ -46,6 +46,14 @@ import (
 // 1. 排序法：先原地把每个数平方，再对结果排序。
 // Time: O(n log n), Space: O(log n) for the sort stack; the input slice is modified and reused.
 // 时间复杂度：O(n log n)，空间复杂度：O(log n)，由排序调用栈产生；输入切片被原地修改并直接复用。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Square every element in place; negatives become nonnegative after this step.
+//     原地把每个元素平方；负数平方后也变成非负数。
+//  2. Sorting the squared values restores nondecreasing order.
+//     对平方后的值排序，即可恢复非递减顺序。
+//  3. The modified input slice is returned as the answer.
+//     被原地修改过的输入切片直接作为答案返回。
 func sortedSquares(nums []int) []int {
 	for i, val := range nums {
 		nums[i] *= val
@@ -58,28 +66,30 @@ func sortedSquares(nums []int) []int {
 // 2. 双指针法：最大平方值一定来自当前区间的最左端或最右端。
 // Time: O(n), Space: O(1) auxiliary beyond the O(n) result.
 // 时间复杂度：O(n)，除 O(n) 结果数组外辅助空间 O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. i scans from the left, j scans from the right, and k writes from the end.
+//     i 从左扫描，j 从右扫描，k 从结果数组末尾向前写入。
+//  2. Compare squares because a large negative value may have a larger square.
+//     比较平方值，因为绝对值较大的负数平方后也可能最大。
+//  3. Put the larger square at the current largest unfilled position.
+//     把较大的平方值放到当前尚未填充的最大位置 k。
+//  4. One result position has been filled, so move k to the left.
+//     当前结果位置已经填好，k 向左移动一位。
 func sortedSquares_TwoPointers(nums []int) []int {
 	n := len(nums)
-	// i scans from the left, j scans from the right, and k writes from the end.
-	// i 从左扫描，j 从右扫描，k 从结果数组末尾向前写入。
 	i, j, k := 0, n-1, n-1
 	ans := make([]int, n)
 
 	for i <= j {
-		// Compare squares because a large negative value may have a larger square.
-		// 比较平方值，因为绝对值较大的负数平方后也可能最大。
 		lm, rm := nums[i]*nums[i], nums[j]*nums[j]
 		if lm > rm {
-			// Put the larger square at the current largest unfilled position.
-			// 把较大的平方值放到当前尚未填充的最大位置 k。
 			ans[k] = lm
 			i++
 		} else {
 			ans[k] = rm
 			j--
 		}
-		// One result position has been filled, so move k to the left.
-		// 当前结果位置已经填好，k 向左移动一位。
 		k--
 	}
 	return ans
@@ -89,25 +99,27 @@ func sortedSquares_TwoPointers(nums []int) []int {
 // 3. 分界归并法：把负数段和非负数段看成两个已排序的平方序列，再归并。
 // Time: O(n), Space: O(1) auxiliary beyond the O(n) result; the input is not modified.
 // 时间复杂度：O(n)，除 O(n) 结果数组外辅助空间 O(1)；不修改输入。
+//
+// 步骤与要点 / Steps and notes:
+//  1. right stops at the first nonnegative value, which splits the two sequences.
+//     right 停在第一个非负数上，这个位置把数组分成两段。
+//  2. left walks backwards over the negatives, where squares grow as left decreases.
+//     left 向左遍历负数段，下标越小平方越大，所以反向走才是递增顺序。
+//  3. Keep merging while either sequence still has an unused value.
+//     只要还有一段没用完，就继续归并。
+//  4. Take from the negative side when the nonnegative side is exhausted,
+//     or when its square is the smaller of the two candidates.
+//     非负数段已用完，或负数段的平方更小时，就从负数段取值。
 func sortedSquaresMerge(nums []int) []int {
-	// right stops at the first nonnegative value, which splits the two sequences.
-	// right 停在第一个非负数上，这个位置把数组分成两段。
 	right := 0
 	for right < len(nums) && nums[right] < 0 {
 		right++
 	}
 
-	// left walks backwards over the negatives, where squares grow as left decreases.
-	// left 向左遍历负数段，下标越小平方越大，所以反向走才是递增顺序。
 	left := right - 1
 	result := make([]int, 0, len(nums))
 
-	// Keep merging while either sequence still has an unused value.
-	// 只要还有一段没用完，就继续归并。
 	for left >= 0 || right < len(nums) {
-		// Take from the negative side when the nonnegative side is exhausted,
-		// or when its square is the smaller of the two candidates.
-		// 非负数段已用完，或负数段的平方更小时，就从负数段取值。
 		takeLeft := right == len(nums) ||
 			(left >= 0 && nums[left]*nums[left] <= nums[right]*nums[right])
 

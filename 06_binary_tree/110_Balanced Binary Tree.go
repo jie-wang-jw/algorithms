@@ -88,9 +88,15 @@ All three implementations appear below; write your own version before comparing.
 // 1. 自顶向下递归：先判断当前高度差，再分别判断左右子树；求高度会重复遍历。
 // Time: O(n²) conservative, Space: O(h).
 // 时间复杂度：保守上界 O(n²)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree is balanced.
+//     空树是平衡的。
+//  2. The current node must satisfy the height constraint.
+//     当前节点的左右高度差必须不超过 1。
+//  3. Its descendants must also be balanced.
+//     当前节点满足还不够，左右子树内部也必须平衡。
 func isBalancedTopDown(root *TreeNode) bool {
-	// An empty tree is balanced.
-	// 空树是平衡的。
 	if root == nil {
 		return true
 	}
@@ -99,14 +105,10 @@ func isBalancedTopDown(root *TreeNode) bool {
 	rightHeight := maxDepth(root.Right)
 	diff := leftHeight - rightHeight
 
-	// The current node must satisfy the height constraint.
-	// 当前节点的左右高度差必须不超过 1。
 	if diff > 1 || diff < -1 {
 		return false
 	}
 
-	// Its descendants must also be balanced.
-	// 当前节点满足还不够，左右子树内部也必须平衡。
 	return isBalancedTopDown(root.Left) &&
 		isBalancedTopDown(root.Right)
 }
@@ -115,9 +117,11 @@ func isBalancedTopDown(root *TreeNode) bool {
 // 2. 自底向上后序递归：推荐；辅助函数返回非负高度即整棵树平衡。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Any nonnegative result means the entire tree is balanced.
+//     返回非负高度，说明整棵树平衡。
 func isBalanced(root *TreeNode) bool {
-	// Any nonnegative result means the entire tree is balanced.
-	// 返回非负高度，说明整棵树平衡。
 	return balancedHeight(root) != -1
 }
 
@@ -125,17 +129,23 @@ func isBalanced(root *TreeNode) bool {
 // 后序求高辅助函数：子树平衡时返回真实高度，一旦失衡就返回哨兵 -1，该值不能再当高度使用。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty subtree is balanced and has height 0.
+//     空子树平衡，高度为 0。
+//  2. An unbalanced descendant makes the whole tree unbalanced.
+//     左子树内部已经失衡，整棵树就不可能平衡。
+//  3. Both subtrees are balanced; now check the current node.
+//     两棵子树内部都平衡，再检查当前节点的左右高度差。
+//  4. Return both a valid height and an implicit balance confirmation.
+//     返回真实高度，同时表示这棵子树已通过平衡检查。
 func balancedHeight(root *TreeNode) int {
-	// An empty subtree is balanced and has height 0.
-	// 空子树平衡，高度为 0。
 	if root == nil {
 		return 0
 	}
 
 	leftHeight := balancedHeight(root.Left)
 
-	// An unbalanced descendant makes the whole tree unbalanced.
-	// 左子树内部已经失衡，整棵树就不可能平衡。
 	if leftHeight == -1 {
 		return -1
 	}
@@ -145,15 +155,11 @@ func balancedHeight(root *TreeNode) int {
 		return -1
 	}
 
-	// Both subtrees are balanced; now check the current node.
-	// 两棵子树内部都平衡，再检查当前节点的左右高度差。
 	diff := leftHeight - rightHeight
 	if diff > 1 || diff < -1 {
 		return -1
 	}
 
-	// Return both a valid height and an implicit balance confirmation.
-	// 返回真实高度，同时表示这棵子树已通过平衡检查。
 	return max(leftHeight, rightHeight) + 1
 }
 
@@ -161,25 +167,33 @@ func balancedHeight(root *TreeNode) int {
 // 3. 后序迭代：左右孩子都完成后，用节点指针当 key 的高度表检查差值。
 // Time: O(n) expected, Space: O(n) for the height map plus O(h) for the stack.
 // 时间复杂度：平均 O(n)，空间复杂度：O(n)，由高度表产生，外加 O(h) 的栈。
+//
+// 步骤与要点 / Steps and notes:
+//  1. The root of the most recently completed subtree.
+//     最近完成处理的子树根节点。
+//  2. Descend left and save ancestors for later processing.
+//     先向左深入，保存之后还要处理的祖先节点。
+//  3. Peek without popping: the right subtree may still be pending.
+//     先查看栈顶，不急着弹出，因为右子树可能还没处理。
+//  4. Both children are finished; nil children have height 0.
+//     两个孩子都处理完了；空孩子对应的 map 零值恰好为 0。
+//  5. Save the height for the parent before completing this node.
+//     保存当前高度，供父节点使用，然后完成当前节点。
+//  6. Resume a saved ancestor instead of descending again.
+//     下一轮返回栈中的祖先，不再重复进入当前子树。
 func isBalancedIterative(root *TreeNode) bool {
 	stack := []*TreeNode{}
 	heights := make(map[*TreeNode]int)
 	node := root
 
-	// The root of the most recently completed subtree.
-	// 最近完成处理的子树根节点。
 	var prev *TreeNode
 
 	for node != nil || len(stack) > 0 {
-		// Descend left and save ancestors for later processing.
-		// 先向左深入，保存之后还要处理的祖先节点。
 		for node != nil {
 			stack = append(stack, node)
 			node = node.Left
 		}
 
-		// Peek without popping: the right subtree may still be pending.
-		// 先查看栈顶，不急着弹出，因为右子树可能还没处理。
 		node = stack[len(stack)-1]
 
 		if node.Right != nil && node.Right != prev {
@@ -187,8 +201,6 @@ func isBalancedIterative(root *TreeNode) bool {
 			continue
 		}
 
-		// Both children are finished; nil children have height 0.
-		// 两个孩子都处理完了；空孩子对应的 map 零值恰好为 0。
 		leftHeight := heights[node.Left]
 		rightHeight := heights[node.Right]
 		diff := leftHeight - rightHeight
@@ -197,14 +209,10 @@ func isBalancedIterative(root *TreeNode) bool {
 			return false
 		}
 
-		// Save the height for the parent before completing this node.
-		// 保存当前高度，供父节点使用，然后完成当前节点。
 		heights[node] = max(leftHeight, rightHeight) + 1
 		stack = stack[:len(stack)-1]
 		prev = node
 
-		// Resume a saved ancestor instead of descending again.
-		// 下一轮返回栈中的祖先，不再重复进入当前子树。
 		node = nil
 	}
 

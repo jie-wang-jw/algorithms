@@ -25,13 +25,17 @@ Space is O(n) for the nodes plus the dummy.
 
 // MyLinkedList is a singly linked list with a dummy head, as Carl's article designs it.
 // MyLinkedList 是带虚拟头节点的单链表，对应卡哥文章的写法。
+// dummy.Next is the real head; size counts real nodes only.
+// dummy.Next 才是真实头；size 只统计真实节点。
 type MyLinkedList struct {
 	dummy *ListNode
 	size  int
 }
 
-// Constructor 1. Dummy-head singly linked list: predecessors exist for every real node.
-// 1. 虚拟头节点单链表：每个真实节点都有前驱。
+// Constructor: dummy-head singly linked list
+// 构造：虚拟头节点单链表
+// Predecessors exist for every real node, so head/tail/middle share one insert/delete pattern.
+// 每个真实节点都有前驱，头/尾/中间共用同一套插入删除逻辑。
 // Time: get/addAtIndex/deleteAtIndex O(index), addAtHead O(1), addAtTail O(n); Space: O(n).
 // 时间复杂度：get/addAtIndex/deleteAtIndex 为 O(index)，addAtHead 为 O(1)，addAtTail 为 O(n)；空间复杂度：O(n)。
 func Constructor() MyLinkedList {
@@ -80,6 +84,10 @@ func (l *MyLinkedList) AddAtTail(val int) {
 // AddAtIndex 在下标 index 前插入 val；index 等于长度时尾插。
 // Time: O(index), Space: O(1).
 // 时间复杂度：O(index)，空间复杂度：O(1)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Negative index is treated as insertion at the head.
+//     负数下标按头插处理。
 func (l *MyLinkedList) AddAtIndex(index int, val int) {
 	if index > l.size {
 		return

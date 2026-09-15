@@ -104,59 +104,61 @@ can be processed in the next round.
 // 1. 队列层序：推荐；入队孩子之前先固定 levelSize，用来分隔相邻两层。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has no levels.
+//     空树没有任何层。
+//  2. result stores the values of all completed levels.
+//     result 保存所有已经处理完成的层。
+//  3. Start BFS by adding the root to the queue.
+//     将根节点加入队列，开始广度优先搜索。
+//  4. Continue until every node has been processed.
+//     持续处理，直到队列中没有节点。
+//  5. Save the current queue length before adding any children.
+//     添加子节点之前，先保存当前层的节点数量。
+//  6. level stores the values in the current level.
+//     level 保存当前层的所有节点值。
+//  7. Process exactly the nodes belonging to the current level.
+//     只处理属于当前层的 levelSize 个节点。
+//  8. Remove the node at the front of the queue.
+//     取出并删除队首节点。
+//  9. Save the current node's value.
+//     保存当前节点的值。
+//  10. Add the left child for the next level.
+//     将左子节点加入队列，等待下一层处理。
+//  11. Add the right child for the next level.
+//     将右子节点加入队列，等待下一层处理。
+//  12. The current level is complete.
+//     当前层已经处理完成。
 func levelOrder(root *TreeNode) [][]int {
-	// An empty tree has no levels.
-	// 空树没有任何层。
 	if root == nil {
 		return [][]int{}
 	}
 
-	// result stores the values of all completed levels.
-	// result 保存所有已经处理完成的层。
 	result := make([][]int, 0)
 
-	// Start BFS by adding the root to the queue.
-	// 将根节点加入队列，开始广度优先搜索。
 	queue := []*TreeNode{root}
 
-	// Continue until every node has been processed.
-	// 持续处理，直到队列中没有节点。
 	for len(queue) > 0 {
-		// Save the current queue length before adding any children.
-		// 添加子节点之前，先保存当前层的节点数量。
 		levelSize := len(queue)
 
-		// level stores the values in the current level.
-		// level 保存当前层的所有节点值。
 		level := make([]int, 0, levelSize)
 
-		// Process exactly the nodes belonging to the current level.
-		// 只处理属于当前层的 levelSize 个节点。
 		for range levelSize {
-			// Remove the node at the front of the queue.
-			// 取出并删除队首节点。
 			node := queue[0]
 			queue = queue[1:]
 
-			// Save the current node's value.
-			// 保存当前节点的值。
 			level = append(level, node.Val)
 
-			// Add the left child for the next level.
-			// 将左子节点加入队列，等待下一层处理。
 			if node.Left != nil {
 				queue = append(queue, node.Left)
 			}
 
-			// Add the right child for the next level.
-			// 将右子节点加入队列，等待下一层处理。
 			if node.Right != nil {
 				queue = append(queue, node.Right)
 			}
 		}
 
-		// The current level is complete.
-		// 当前层已经处理完成。
 		result = append(result, level)
 	}
 
@@ -167,37 +169,39 @@ func levelOrder(root *TreeNode) [][]int {
 // 2. 递归按深度分组：深度就是结果下标，第一次到达该层时先追加一个空子数组。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree produces no levels, so the empty result is already correct.
+//     空树没有任何层，空结果就是正确答案。
+//  2. A nil child occupies no position in any level.
+//     空孩子不占据任何一层中的位置。
+//  3. Reaching a new deepest level: create its subarray first.
+//     第一次到达这一层，先为它创建一个空子数组。
+//  4. depth is exactly the result index this node belongs to.
+//     depth 正好是当前节点应该写入的 result 下标。
+//  5. Recurse left first so each level fills from left to right.
+//     先递归左子树，使每一层按从左到右的顺序填充。
+//  6. The root belongs to index 0 because depth is used as a slice index.
+//     根对应下标 0，因为这里的 depth 直接当作切片下标使用。
 func levelOrderRecursive(root *TreeNode) [][]int {
-	// An empty tree produces no levels, so the empty result is already correct.
-	// 空树没有任何层，空结果就是正确答案。
 	result := [][]int{}
 
 	var traverse func(*TreeNode, int)
 	traverse = func(node *TreeNode, depth int) {
-		// A nil child occupies no position in any level.
-		// 空孩子不占据任何一层中的位置。
 		if node == nil {
 			return
 		}
 
-		// Reaching a new deepest level: create its subarray first.
-		// 第一次到达这一层，先为它创建一个空子数组。
 		if depth == len(result) {
 			result = append(result, []int{})
 		}
 
-		// depth is exactly the result index this node belongs to.
-		// depth 正好是当前节点应该写入的 result 下标。
 		result[depth] = append(result[depth], node.Val)
 
-		// Recurse left first so each level fills from left to right.
-		// 先递归左子树，使每一层按从左到右的顺序填充。
 		traverse(node.Left, depth+1)
 		traverse(node.Right, depth+1)
 	}
 
-	// The root belongs to index 0 because depth is used as a slice index.
-	// 根对应下标 0，因为这里的 depth 直接当作切片下标使用。
 	traverse(root, 0)
 
 	return result

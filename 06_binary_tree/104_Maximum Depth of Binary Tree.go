@@ -104,20 +104,22 @@ The three implementations appear below in the order of the numbered methods abov
 // 1. 后序递归求高度：推荐；先求左右高度，再取较大值加一。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree contains no nodes, so its depth is 0.
+//     空树没有节点，深度为 0。
+//  2. Get each subtree's depth, counting from the child itself.
+//     分别求左右子树深度，都从各自的孩子节点开始计数。
+//  3. Choose the longer path and count the current node as well.
+//     选择较长的一边，再算上当前节点自己。
 func maxDepth(root *TreeNode) int {
-	// An empty tree contains no nodes, so its depth is 0.
-	// 空树没有节点，深度为 0。
 	if root == nil {
 		return 0
 	}
 
-	// Get each subtree's depth, counting from the child itself.
-	// 分别求左右子树深度，都从各自的孩子节点开始计数。
 	leftDepth := maxDepth(root.Left)
 	rightDepth := maxDepth(root.Right)
 
-	// Choose the longer path and count the current node as well.
-	// 选择较长的一边，再算上当前节点自己。
 	return max(leftDepth, rightDepth) + 1
 }
 
@@ -125,9 +127,19 @@ func maxDepth(root *TreeNode) int {
 // 2. 层序遍历：每轮固定 levelSize 处理一层，整层结束后深度加一。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has no levels.
+//     空树没有层，深度为 0。
+//  2. At this moment, the queue contains exactly the current level.
+//     此时队列中恰好只有当前层的节点，先固定它们的数量。
+//  3. Remove one node from the current level.
+//     取出当前层的一个节点。
+//  4. Children belong to the next level.
+//     孩子属于下一层，入队等待下一轮处理。
+//  5. One entire level is finished.
+//     一整层处理完成，深度增加 1。
 func maxDepthIterative(root *TreeNode) int {
-	// An empty tree has no levels.
-	// 空树没有层，深度为 0。
 	if root == nil {
 		return 0
 	}
@@ -136,18 +148,12 @@ func maxDepthIterative(root *TreeNode) int {
 	depth := 0
 
 	for len(queue) > 0 {
-		// At this moment, the queue contains exactly the current level.
-		// 此时队列中恰好只有当前层的节点，先固定它们的数量。
 		levelSize := len(queue)
 
 		for range levelSize {
-			// Remove one node from the current level.
-			// 取出当前层的一个节点。
 			node := queue[0]
 			queue = queue[1:]
 
-			// Children belong to the next level.
-			// 孩子属于下一层，入队等待下一轮处理。
 			if node.Left != nil {
 				queue = append(queue, node.Left)
 			}
@@ -156,8 +162,6 @@ func maxDepthIterative(root *TreeNode) int {
 			}
 		}
 
-		// One entire level is finished.
-		// 一整层处理完成，深度增加 1。
 		depth++
 	}
 
@@ -168,31 +172,33 @@ func maxDepthIterative(root *TreeNode) int {
 // 3. 前序回溯记录深度：自顶向下传递层数，并用当前深度更新答案。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree never updates the answer, so 0 remains correct.
+//     空树不会触发任何更新，初始值 0 就是答案。
+//  2. A nil child is not a node and must not be compared.
+//     空孩子不是节点，不参与最大值比较。
+//  3. depth is this node's own level, already counting itself.
+//     depth 就是当前节点所在的层数，已经把它自己算进去了。
+//  4. Each child owns its copy of depth+1, so no manual undo is needed.
+//     两个孩子各自拿到 depth+1 的副本，因此不需要手动撤销。
+//  5. The root lies on level 1 because depth counts nodes, not edges.
+//     根位于第 1 层，因为深度按节点数计算，而不是按边数。
 func maxDepthPreorder(root *TreeNode) int {
-	// An empty tree never updates the answer, so 0 remains correct.
-	// 空树不会触发任何更新，初始值 0 就是答案。
 	answer := 0
 
 	var traverse func(*TreeNode, int)
 	traverse = func(node *TreeNode, depth int) {
-		// A nil child is not a node and must not be compared.
-		// 空孩子不是节点，不参与最大值比较。
 		if node == nil {
 			return
 		}
 
-		// depth is this node's own level, already counting itself.
-		// depth 就是当前节点所在的层数，已经把它自己算进去了。
 		answer = max(answer, depth)
 
-		// Each child owns its copy of depth+1, so no manual undo is needed.
-		// 两个孩子各自拿到 depth+1 的副本，因此不需要手动撤销。
 		traverse(node.Left, depth+1)
 		traverse(node.Right, depth+1)
 	}
 
-	// The root lies on level 1 because depth counts nodes, not edges.
-	// 根位于第 1 层，因为深度按节点数计算，而不是按边数。
 	traverse(root, 1)
 
 	return answer

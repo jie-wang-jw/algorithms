@@ -46,6 +46,14 @@ For n nodes and height h, both take O(n) time and O(h) auxiliary space. The tree
 // 1. 反中序递归：推荐；从大到小累加，当前节点就能加上所有比它大的值。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. sum accumulates every visited (larger-first) value so far.
+//     sum 累加目前已访问过的（从大到小）节点值。
+//  2. Larger values first: finish the right subtree before touching this node.
+//     先处理更大的值：右子树走完再改当前节点。
+//  3. Include the current original value, then overwrite with the greater-sum.
+//     先把当前原值计入累加和，再用累加和覆盖节点。
 func convertBST(root *TreeNode) *TreeNode {
 	sum := 0
 	var traverse func(*TreeNode)
@@ -54,8 +62,6 @@ func convertBST(root *TreeNode) *TreeNode {
 			return
 		}
 
-		// Larger values first: finish the right subtree before touching this node.
-		// 先处理更大的值：右子树走完再改当前节点。
 		traverse(node.Right)
 		sum += node.Val
 		node.Val = sum
@@ -69,13 +75,17 @@ func convertBST(root *TreeNode) *TreeNode {
 // 2. 反中序迭代：先沿右链压栈，弹出时累加改值，再处理左孩子。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 步骤与要点 / Steps and notes:
+//  1. Descend right, mirroring the usual left-descending inorder stack.
+//     向右深入，对称于普通中序向左压栈。
+//  2. Pop order is largest-to-smallest; overwrite with the running greater-sum.
+//     弹出顺序从大到小；用累加和覆盖当前值。
 func convertBSTIterative(root *TreeNode) *TreeNode {
 	sum := 0
 	stack := []*TreeNode{}
 	cur := root
 	for cur != nil || len(stack) > 0 {
-		// Descend right, mirroring the usual left-descending inorder stack.
-		// 向右深入，对称于普通中序向左压栈。
 		for cur != nil {
 			stack = append(stack, cur)
 			cur = cur.Right
@@ -83,8 +93,6 @@ func convertBSTIterative(root *TreeNode) *TreeNode {
 		cur = stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 
-		// Pop order is largest-to-smallest; overwrite with the running greater-sum.
-		// 弹出顺序从大到小；用累加和覆盖当前值。
 		sum += cur.Val
 		cur.Val = sum
 		cur = cur.Left

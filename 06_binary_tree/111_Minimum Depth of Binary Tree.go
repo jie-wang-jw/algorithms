@@ -77,32 +77,34 @@ The two implementations appear below in the order of the numbered methods above.
 // 1. 递归：推荐；先排除缺失的一边，避免 min 把空指针当成已经到达叶子。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has depth 0.
+//     空树深度为 0。
+//  2. No left subtree: the path must continue through the right.
+//     左子树不存在，只能沿右子树寻找叶子。
+//  3. No right subtree: the path must continue through the left.
+//     右子树不存在，只能沿左子树寻找叶子。
+//  4. Both sides contain leaves, so choose the shorter valid path.
+//     两边都有通向叶子的路径，选择较短的一边。
+//  5. Include the current node.
+//     子树深度还没包含当前节点，所以加 1。
 func minDepth(root *TreeNode) int {
-	// An empty tree has depth 0.
-	// 空树深度为 0。
 	if root == nil {
 		return 0
 	}
 
-	// No left subtree: the path must continue through the right.
-	// 左子树不存在，只能沿右子树寻找叶子。
 	if root.Left == nil {
 		return minDepth(root.Right) + 1
 	}
 
-	// No right subtree: the path must continue through the left.
-	// 右子树不存在，只能沿左子树寻找叶子。
 	if root.Right == nil {
 		return minDepth(root.Left) + 1
 	}
 
-	// Both sides contain leaves, so choose the shorter valid path.
-	// 两边都有通向叶子的路径，选择较短的一边。
 	leftDepth := minDepth(root.Left)
 	rightDepth := minDepth(root.Right)
 
-	// Include the current node.
-	// 子树深度还没包含当前节点，所以加 1。
 	return min(leftDepth, rightDepth) + 1
 }
 
@@ -110,9 +112,21 @@ func minDepth(root *TreeNode) int {
 // 2. 层序遍历：第一次遇到左右孩子都为空的节点，当前层数就是最小深度。
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
+//
+// 步骤与要点 / Steps and notes:
+//  1. An empty tree has depth 0.
+//     空树深度为 0。
+//  2. Fix the number of nodes belonging to the current level.
+//     固定当前层的节点数量，避免把孩子算进同一层。
+//  3. BFS reaches shallower levels first, so the first leaf is nearest.
+//     BFS 先检查浅层，因此第一个叶子就是最近的叶子。
+//  4. Children belong to the next level.
+//     孩子属于下一层，入队等待后续处理。
+//  5. Advance only after finishing the entire current level.
+//     当前整层处理完后，才进入下一层。
+//  6. A finite nonempty tree always has a leaf, so this is unreachable.
+//     有限非空二叉树一定有叶子，正常情况下不会执行到这里。
 func minDepthIterative(root *TreeNode) int {
-	// An empty tree has depth 0.
-	// 空树深度为 0。
 	if root == nil {
 		return 0
 	}
@@ -121,22 +135,16 @@ func minDepthIterative(root *TreeNode) int {
 	depth := 1
 
 	for len(queue) > 0 {
-		// Fix the number of nodes belonging to the current level.
-		// 固定当前层的节点数量，避免把孩子算进同一层。
 		levelSize := len(queue)
 
 		for range levelSize {
 			node := queue[0]
 			queue = queue[1:]
 
-			// BFS reaches shallower levels first, so the first leaf is nearest.
-			// BFS 先检查浅层，因此第一个叶子就是最近的叶子。
 			if node.Left == nil && node.Right == nil {
 				return depth
 			}
 
-			// Children belong to the next level.
-			// 孩子属于下一层，入队等待后续处理。
 			if node.Left != nil {
 				queue = append(queue, node.Left)
 			}
@@ -145,12 +153,8 @@ func minDepthIterative(root *TreeNode) int {
 			}
 		}
 
-		// Advance only after finishing the entire current level.
-		// 当前整层处理完后，才进入下一层。
 		depth++
 	}
 
-	// A finite nonempty tree always has a leaf, so this is unreachable.
-	// 有限非空二叉树一定有叶子，正常情况下不会执行到这里。
 	return 0
 }
