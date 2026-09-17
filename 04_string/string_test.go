@@ -5,9 +5,10 @@ import (
 	"testing"
 )
 
-// 步骤与要点 / Steps and notes:
-//  1. Both implementations should remove extra spaces and reverse the word order.
-//     两种实现都应该删除多余空格，并反转单词顺序。
+// TestReverseWords
+//
+// 检查三个实现的单词逆序和空格压缩；各实现共同输入范围是用 ASCII 空格分隔的单词。
+// Check word reversal and space normalization across three implementations, using words separated by ASCII spaces.
 func TestReverseWords(t *testing.T) {
 	tests := []struct {
 		name string

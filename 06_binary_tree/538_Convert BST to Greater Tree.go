@@ -21,25 +21,8 @@ This is the same problem as 1038.
 
 反中序（右→根→左）从大到小：8,7,6,5,4,3,2,1,0；累加和依次覆盖每个节点。
 Reverse inorder (right→root→left) visits 8,7,6,5,4,3,2,1,0 largest-first; the running sum overwrites each node.
-
-关键逻辑 / Key Logic
-BST 的反中序（右、根、左）按从大到小访问。维护累加和 sum：先走右子树把更大的值加完，
-再把当前值加进 sum，并用 sum 覆盖当前节点，最后走左子树。这样每个节点都加上了所有比它大的值。
-Reverse inorder (right-root-left) visits values from largest to smallest. Keep a running sum:
-finish the right subtree first so every greater value is included, add the current value into sum,
-overwrite the node, then visit the left subtree.
-
-解法一：反中序递归（推荐） / Method 1: Reverse-Inorder Recursion (Recommended)
-用闭包保存 sum，按右、根、左递归并原地改值。
-A closure holds sum; recurse right-root-left and overwrite values in place.
-
-解法二：反中序迭代 / Method 2: Iterative Reverse Inorder
-用栈先一路向右压栈，弹出时累加并改值，再转向左孩子。
-Push along the right spine, add and overwrite on pop, then move to the left child.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高。两版时间 O(n)，辅助空间 O(h)。原地修改，不新建树。
-For n nodes and height h, both take O(n) time and O(h) auxiliary space. The tree is updated in place.
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Reverse-inorder recursion (recommended): add values from large to small so each node receives every greater value.
@@ -47,13 +30,10 @@ For n nodes and height h, both take O(n) time and O(h) auxiliary space. The tree
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. sum accumulates every visited (larger-first) value so far.
-//     sum 累加目前已访问过的（从大到小）节点值。
-//  2. Larger values first: finish the right subtree before touching this node.
-//     先处理更大的值：右子树走完再改当前节点。
-//  3. Include the current original value, then overwrite with the greater-sum.
-//     先把当前原值计入累加和，再用累加和覆盖节点。
+// 按右→根→左访问，遇到当前节点时所有更大值已加入 sum；加上当前原值后赋回，就是所需的“大于等于之和”。
+// Visit right→root→left; sum already contains larger original values, so adding the current value yields its greater-or-equal sum.
+// 要求原树是值互异的 BST；原地修改 Val，累计和须在 int 范围内。
+// Require a unique-valued BST; values are mutated in place and cumulative sums must fit in int.
 func convertBST(root *TreeNode) *TreeNode {
 	sum := 0
 	var traverse func(*TreeNode)
@@ -76,11 +56,10 @@ func convertBST(root *TreeNode) *TreeNode {
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Descend right, mirroring the usual left-descending inorder stack.
-//     向右深入，对称于普通中序向左压栈。
-//  2. Pop order is largest-to-smallest; overwrite with the running greater-sum.
-//     弹出顺序从大到小；用累加和覆盖当前值。
+// 按右→根→左访问，遇到当前节点时所有更大值已加入 sum；加上当前原值后赋回，就是所需的“大于等于之和”。
+// Visit right→root→left; sum already contains larger original values, so adding the current value yields its greater-or-equal sum.
+// 要求原树是值互异的 BST；原地修改 Val，累计和须在 int 范围内。
+// Require a unique-valued BST; values are mutated in place and cumulative sums must fit in int.
 func convertBSTIterative(root *TreeNode) *TreeNode {
 	sum := 0
 	stack := []*TreeNode{}

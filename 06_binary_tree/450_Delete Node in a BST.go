@@ -63,26 +63,8 @@ every left value < deleted value < successor, so the BST order holds. Returning 
 lifts that whole side into the deleted node's place without reshaping the right interior.
 Effectively the successor absorbs the left subtree, then the right subtree moves up —
 no separate “copy successor value, then delete the successor node” step.
-
-关键逻辑 / Key Logic
-先按 BST 方向找到目标，再按上面三种情形改接指针。
-父节点通过 `root.Left/Right = delete(...)` 接回返回的子树根；删到原根时，返回值就是新根。
-Walk BST order to the target, then rewire by the three cases above.
-Parents adopt the returned subtree with `root.Left/Right = delete(...)`; deleting the original root makes that return value the new root.
-
-解法一：递归（推荐） / Method 1: Recursion (Recommended)
-按大小进入左或右；命中后交给 deleteRoot 统一处理叶子 / 单孩子 / 双孩子。
-Search by value; on a hit, deleteRoot handles leaf / one-child / two-child uniformly.
-
-解法二：迭代 / Method 2: Iteration
-先找到目标及其父节点，再调用同一套 deleteRoot。删除根时没有父节点，直接返回替换结果。
-Find the target and its parent, then apply the same deleteRoot. Deleting the root has no parent, so return the replacement directly.
-
-时间与空间复杂度 / Time and Space Complexity
-h 为树高。两版找节点 O(h)；双孩子时再沿右子树最左走 O(h)。
-递归辅助空间 O(h)；迭代除最左行走外辅助 O(1)。
-For height h, both find the node in O(h); a two-child delete then walks the right spine leftmost in O(h).
-Recursion uses O(h) space; iteration is O(1) besides that leftmost walk.
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Recursion (recommended): search by BST order, then replace the node with nil, one child, or the rewired right subtree.
@@ -90,15 +72,8 @@ Recursion uses O(h) space; iteration is O(1) besides that leftmost walk.
 // Time: O(h), Space: O(h).
 // 时间复杂度：O(h)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Not found: a nil link is reached; leave it unchanged.
-//     没找到：走到空节点，原样返回。
-//  2. Target is in the left subtree; adopt whatever that call returns.
-//     目标在左子树；把递归返回的子树根接回 Left。
-//  3. Target is in the right subtree; adopt the returned right child.
-//     目标在右子树；把递归返回的子树根接回 Right。
-//  4. root.Val == key: rewire this node according to its children.
-//     命中当前节点：按孩子情况改接后返回替换结果。
+// 按 BST 大小关系只递归可能含 key 的一侧；递归返回删除后的子树根，必须重新接到 root.Left/Right。
+// Use BST ordering to recurse into one side; reconnect the returned subtree root because deletion may replace that root.
 func deleteNode(root *TreeNode, key int) *TreeNode {
 	if root == nil {
 		return nil
@@ -122,15 +97,8 @@ func deleteNode(root *TreeNode, key int) *TreeNode {
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Walk until the key is found or the search falls off the tree.
-//     向下搜索，直到找到 key 或落到空节点。
-//  2. Key absent: the original tree is unchanged.
-//     键不存在：原树不变。
-//  3. Deleting the original root: the replacement becomes the new root.
-//     删除的是原根：替换结果就是新根。
-//  4. Otherwise hang the replacement on the same side the target occupied.
-//     否则把替换结果挂到父节点原先指向目标的那一侧。
+// 搜索时记录 parent；删除后把替代子树接回原父节点对应边。若 parent==nil，删除的是整树根，直接返回替代根。
+// Track parent during search and reconnect the replacement; if parent is nil, the deleted node is the root and its replacement is returned.
 func deleteNodeIterative(root *TreeNode, key int) *TreeNode {
 	var parent *TreeNode
 	cur := root
@@ -167,15 +135,10 @@ func deleteNodeIterative(root *TreeNode, key int) *TreeNode {
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Leaf or right-only: the right child (possibly nil) replaces root.
-//     叶子或只有右孩子：右孩子（可能为 nil）直接顶替。
-//  2. Left-only: the left child replaces root.
-//     只有左孩子：左孩子直接顶替。
-//  3. Two children: leftmost of the right subtree is the inorder successor; its Left is empty.
-//     双孩子：右子树最左节点是中序后继，它的左孩子目前一定为空。
-//  4. Hang the deleted node's left subtree under the successor, then lift the whole right subtree.
-//     把被删节点的左子树挂到后继下面，再让整棵右子树上移顶替被删节点。
+// 要求 root 非空；少于两个孩子时直接返回另一孩子。两孩子都在时，把左树接到右树最左节点的空 Left，再返回右树根。
+// Require nonnil root; return the existing child if one is absent. Otherwise attach the left subtree to the right subtree's leftmost node.
+// 左树所有值都小于原根，也小于右树所有值，因此这个接法仍满足 BST，且不丢失任何其他节点。
+// All left values are smaller than the old root and every right value, preserving BST order without losing other nodes.
 func deleteRoot(root *TreeNode) *TreeNode {
 	if root.Left == nil {
 		return root.Right

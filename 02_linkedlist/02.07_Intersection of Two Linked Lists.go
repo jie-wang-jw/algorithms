@@ -9,22 +9,6 @@ package _2_linkedlist
 不能破坏原链表结构。题目保证无环。
 Return the node where two singly linked lists intersect, or nil if they do not.
 Equality is pointer identity, not node values. Do not modify the lists. The lists are acyclic.
-
-解法一：先对齐再同走 / Method 1: Align Tails, Then Walk Together
-分别求长度。让更长的链表先走 |lenA-lenB| 步，使两个指针距离各自尾部的剩余长度相同。
-再同步前进，第一次指针相等就是交点；走到末尾仍不相等则没有交点。
-Count both lengths. Advance the longer list by |lenA-lenB| so both pointers have the same remaining distance to the tail.
-Then walk together; the first equal pointers are the intersection, or nil if none.
-
-解法二：拼接后同步移动 / Method 2: Switch Heads and Walk Together
-pA 走完 A 后接到 B 的头，pB 走完 B 后接到 A 的头。两条路径长度都是 lenA+lenB，
-因此会在交点相遇；没有交点时同时走到 nil。
-After pA finishes A it continues from B's head, and pB continues from A's head.
-Both walks have length lenA+lenB, so they meet at the intersection, or both become nil if there is none.
-
-时间与空间复杂度 / Time and Space Complexity
-n、m 为两条链表长度。两种解法时间 O(n+m)，辅助空间 O(1)。
-For list lengths n and m, both methods take O(n+m) time and O(1) auxiliary space.
 */
 
 // 1. Align tails by length, then walk together
@@ -33,6 +17,11 @@ For list lengths n and m, both methods take O(n+m) time and O(1) auxiliary space
 // 让较长链表先走 |lenA-lenB|，再同步前进直到指针相等（交点或同为 nil）。
 // Time: O(n+m), Space: O(1).
 // 时间复杂度：O(n+m)，空间复杂度：O(1)。
+//
+// 先让长链走长度差，使两指针到尾部的剩余长度相等，再同步前进；相交时同刻到交点，否则同刻到 nil。
+// Advance the longer list by the length difference; equal remaining distances make pointers meet at the intersection or nil.
+// 比较节点地址而非 Val；前提是两条链表均无环。
+// Compare node addresses, not values; both lists must be acyclic.
 func getIntersectionNode(headA, headB *ListNode) *ListNode {
 	lenA, lenB := 0, 0
 	for cur := headA; cur != nil; cur = cur.Next {
@@ -68,9 +57,10 @@ func getIntersectionNode(headA, headB *ListNode) *ListNode {
 // Time: O(n+m), Space: O(1).
 // 时间复杂度：O(n+m)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. At nil, continue from the other head so both paths have length n+m.
-//     走到空时改从另一条链表头继续，使两条路径长度都是 n+m。
+// pA 走 A 后转 B，pB 走 B 后转 A，交换链头抵消两条非公共前缀的长度差。
+// pA follows A then B while pB follows B then A; switching heads cancels the unequal prefix lengths.
+// 相交就以节点地址相等结束；不相交则都走完两链后在 nil 相遇。前提是无环链表。
+// Equal addresses identify the intersection; disjoint acyclic lists end with both pointers at nil.
 func getIntersectionNodeTwoPointers(headA, headB *ListNode) *ListNode {
 	pA, pB := headA, headB
 	for pA != pB {

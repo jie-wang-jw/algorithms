@@ -12,25 +12,6 @@ into two nonempty blocks. Return the minimum absolute difference of the two bloc
 示例 / Example
 3×3 网格 [[1,2,3],[2,1,3],[1,2,3]] 沿第二、三列之间切开，两侧和都是 9，答案 0。
 The 3 by 3 grid [[1,2,3],[2,1,3],[1,2,3]] can be split between columns 2 and 3 into two sums of 9, so the answer is 0.
-
-解法一：行列前缀和 / Method 1: Row and Column Prefix Sums
-先求总和、每一行和、每一列和。再依次累加前若干行（或前若干列）作为一块，另一块是总和减去这一块。
-差值为 |sum - 2*cut|。每个子区域至少一个区块，因此不在切完整张图之后更新答案。
-Compute the total sum and each row/column sum. Accumulate the first i rows (or first j columns) as one block;
-the other block is total minus that prefix. The difference is |sum - 2*cut|.
-Skip a cut that would leave one side empty.
-
-解法二：遍历时累加（优化暴力） / Method 2: Accumulate While Scanning
-不必单独存行列和。按行扫描，每到行尾用当前累计和更新答案；再按列扫描，每到列尾更新一次。
-There is no need to store row and column sums separately. Scan row-major and update at each row end;
-then scan column-major and update at each column end.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为行数，m 为列数。两种解法都扫描整个矩阵常数次，时间 O(n*m)。
-解法一额外 O(n+m) 存行列和；解法二除输入外 O(1)。返回一个整数。
-For n rows and m columns both methods scan the matrix a constant number of times, so time is O(n*m).
-Method 1 uses O(n+m) extra space for row and column sums; method 2 uses O(1) besides the input.
-Both return a single integer.
 */
 
 import (
@@ -46,11 +27,12 @@ import (
 // Time: O(n*m), Space: O(n+m) for the row and column sums.
 // 时间复杂度：O(n*m)，空间复杂度：O(n+m)，由行列和数组产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Stop before the last row so the bottom block stays nonempty.
-//     不切在最后一行之后，保证下半块至少有一行。
-//  2. |sum-2*cut| == |top-bottom| because bottom = sum - cut.
-//     |sum-2*cut| 等于 |上半-下半|，因为下半 = sum - cut。
+// 按题意输入矩形正数网格，且至少有一条合法分割线。先统计总和 sum、每行和 horizontal、每列和 vertical。
+// For a positive rectangular grid with a legal cut, compute total, row sums, and column sums.
+// cut 为分割线一侧的累计和，另一侧为 sum-cut，差值因此是 |sum-2*cut|。
+// If one side sums to cut, the other is sum-cut, giving difference |sum-2*cut|.
+// 只枚举前 n-1 行和前 m-1 列之后的切线，保证两侧非空；所有合法横切、竖切都被覆盖。
+// Cut only after the first n-1 rows or m-1 columns, covering all cuts with two nonempty sides.
 func landPurchasePrefix(grid [][]int) int {
 	n := len(grid)
 	if n == 0 {
@@ -91,9 +73,10 @@ func landPurchasePrefix(grid [][]int) int {
 // Time: O(n*m), Space: O(1) besides the input grid.
 // 时间复杂度：O(n*m)，空间复杂度：除输入外 O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Valid horizontal cut only when some rows remain below.
-//     只有下面还剩行时，这一行的结束才是合法横向切割。
+// count 累加完整行或完整列；只有到行尾或列尾才对应一条直线分割，差值为 |sum-2*count|。
+// count accumulates whole rows or columns; only their ends define straight cuts, with difference |sum-2*count|.
+// 按列扫描前清零 count；最后一行或列之后不能切，否则另一块为空。沿用正数矩形及可分割的题目约束。
+// Reset count before scanning columns; exclude cuts after the final row or column. Assume a positive, splittable rectangle.
 func landPurchaseScan(grid [][]int) int {
 	n := len(grid)
 	if n == 0 {
@@ -135,6 +118,9 @@ func landPurchaseScan(grid [][]int) int {
 // ACM 输入：读入 n、m 和网格，再打印前缀和解。
 // Time: O(n*m), Space: O(n*m) for the grid plus O(n+m) for the prefix arrays.
 // 时间复杂度：O(n*m)，空间复杂度：网格 O(n*m)，另加行列和 O(n+m)。
+//
+// 按 ACM 格式读取 n、m 和 n*m 个值；输入不足即返回，完整读入后输出最小分割差值。
+// Read n, m and n*m values; stop on incomplete input, otherwise print the minimum partition difference.
 func landPurchase() {
 	in := bufio.NewReader(os.Stdin)
 	var n, m int
@@ -158,6 +144,9 @@ func landPurchase() {
 // 整数绝对值。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
+//
+// 返回整数绝对值；输入范围须保证负数取反不溢出。
+// Return the absolute value; the input range must allow negation without overflow.
 func absInt(x int) int {
 	if x < 0 {
 		return -x

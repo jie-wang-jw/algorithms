@@ -7,44 +7,6 @@ package _4_string
 Given a string s, reverse the order of its words.
 The input may contain extra spaces; the result must use one space
 between words and have no leading or trailing spaces.
-
-解题思路 / Solution Approach
-使用 strings.Fields 提取所有非空单词并自动忽略多余空白，
-再用双指针反转单词切片，最后以单个空格连接。
-Use strings.Fields to extract words while discarding extra whitespace,
-reverse the word slice with two pointers, and join it with single spaces.
-
-手写法 reverseWords2：先清理空格，再反转整个字节切片，最后反转每个单词，使单词内部恢复原顺序。
-The manual reverseWords2 normalizes spaces, reverses the entire byte slice, and reverses each word to restore its internal order.
-
-关键逻辑：为什么这样做 / Why This Works
-reverseWords2 的逻辑是两次反转作用在不同范围：整体反转同时颠倒单词顺序和每个单词的字母顺序；
-再单独反转每个单词，只恢复字母顺序，保留已经倒过来的单词顺序。例如 "the sky" -> "yks eht" -> "sky the"。
-清空格时仅在一个非首单词开始前补一个空格，所以不会有首尾空格，单词间恰好一个。
-扫描单词结束处用 i==len(b) 充当末尾分隔符，并把它放在 || 左侧，短路后不会访问越界的 b[i]。
-reverseWords2 reverses two different scopes: reversing the whole string reverses both word order and letter order;
-reversing each word restores only its letters, preserving reversed word order. Example: "the sky" -> "yks eht" -> "sky the".
-Space cleanup inserts one separator only before non-first words, preventing leading/trailing spaces and
-repeated separators. i==len(b) acts as the last word's delimiter; placing it first in || short-circuits the out-of-bounds b[i] access.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为字符串字节数，w 为单词数。reverseWords：时间 O(n)，Fields 扫描、
-反转单词、Join 总计线性；辅助空间 O(w) 保存单词切片，输出 O(n)。reverseWords2：
-清理空格和两次反转总时间 O(n)，Go 的 []byte(s) 副本占 O(n) 辅助空间；
-仅反转步骤为 O(1) 空间。两者包含输出均为 O(n)。
-For n bytes and w words, reverseWords takes O(n) time, O(w) auxiliary
-space for word slices, and O(n) output space. reverseWords2 takes O(n)
-time for normalization and reversals; its []byte(s) copy uses O(n)
-auxiliary space, though the reversal steps alone use O(1). Total space including output is O(n) for both.
-
-补充解法：从右向左扫描单词 / Alternative: Scan Words Right to Left
-reverseWordsBackward 跳过尾部空格，再向左找到一个完整单词，按原字母顺序追加到结果。
-先遇到原字符串靠后的单词，因此单词顺序自然倒转，不需要先反转字母再恢复。
-只在已有结果后添加分隔空格；本题分隔符为普通空格。时间 O(n)，结果缓冲区 O(n)，其他状态 O(1)。
-Skip spaces from the right, locate a complete word, and append its letters in their original order.
-Later words are discovered first, reversing word order without reversing letters.
-Insert a separator only after an existing word. Uses ordinary spaces as specified.
-Time O(n), result buffer O(n), other state O(1).
 */
 
 import "strings"
@@ -56,9 +18,8 @@ import "strings"
 // Time: O(n), Space: O(w) for the word slice plus O(n) output.
 // 时间复杂度：O(n)，空间复杂度：单词切片 O(w)，输出 O(n)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Prefer Fields over Split: Split keeps empty items for repeated spaces.
-//     用 Fields 而不是 Split：Split 会保留连续空格产生的空串。
+// Fields 提取非空单词并丢弃 Unicode 空白；只反转单词数组，不反转单词内部，最后用一个空格连接。
+// Fields drops Unicode whitespace; reverse the word order, preserve each word, and join with one space.
 func reverseWords(s string) string {
 	words := strings.Fields(s)
 	left, right := 0, len(words)-1
@@ -70,14 +31,6 @@ func reverseWords(s string) string {
 	return strings.Join(words, " ")
 }
 
-/*
-1. Remove extra spaces. / 去掉多余空格。
-2. Reverse the whole string. / 整体反转整个字符串。
-3. Reverse every individual word. / 再反转每一个单词。
-
-Example / 示例:
-"the sky" -> "yks eht" -> "sky the"
-*/
 // 2. Reverse whole string, then reverse each word
 // 2. 整体反转再逐词反转
 // Normalize spaces, reverse all bytes (flips word order and letters), then reverse each word to restore letters.
@@ -85,9 +38,10 @@ Example / 示例:
 // Time: O(n), Space: O(n) for the []byte copy.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由 []byte(s) 副本产生。
 //
-// 步骤与要点 / Steps and notes:
-// 1. i == len(b) also ends a word: the last word has no trailing space.
-//    i == len(b) 也要收尾：最后一个单词后面没有空格。把 i==len(b) 放在 || 左侧可短路，避免越界读 b[i]。
+// 先压缩空格，再整段反转：单词顺序和内部字节顺序都会反转；逐词再反转一次，就只剩词序反转。
+// Normalize spaces, reverse the whole buffer, then reverse each word to restore its bytes while keeping reversed word order.
+// i==len(b) 是最后一个词的结束哨兵，先判定它可避免越界读 b[i]；此版本只把 ASCII 空格当分隔符。
+// i==len(b) closes the final word and is checked before b[i]; only ASCII spaces are separators here.
 func reverseWords2(s string) string {
 	b := []byte(s)
 	b = removeExtraSpaces(b)
@@ -103,11 +57,6 @@ func reverseWords2(s string) string {
 	return string(b)
 }
 
-/*
-1. Remove leading spaces. / 去掉开头空格。
-2. Remove trailing spaces. / 去掉结尾空格。
-3. Keep exactly one space between words. / 单词之间只保留一个空格。
-*/
 // Collapse extra spaces in place
 // 原地清空格
 // fast scans; slow writes. Insert one separator only before non-first words; return b[:slow].
@@ -115,9 +64,10 @@ func reverseWords2(s string) string {
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-// 1. One separator before every word except the first.
-//    除第一个单词外，每个单词前补一个空格。
+// b[:slow] 是已写好的结果；只在第二个及以后单词之前写一个空格，因此同时去掉首尾和多余空格。
+// b[:slow] is the compacted output; write one space only before later words, removing leading, trailing and repeated spaces.
+// slow 不超过读位置 fast，原地写入不会覆盖未读内容；返回缩短的切片。
+// slow never overtakes fast, so writes preserve unread bytes; return the shortened slice.
 func removeExtraSpaces(b []byte) []byte {
 	slow := 0
 	for fast := 0; fast < len(b); fast++ {
@@ -140,6 +90,9 @@ func removeExtraSpaces(b []byte) []byte {
 // 原地反转闭区间 [left, right]。
 // Time: O(right-left+1), Space: O(1).
 // 时间复杂度：O(right-left+1)，空间复杂度：O(1)。
+//
+// 反转闭区间 [left,right]，交换两端后向内收缩；空区间或单字节不动，非空区间下标须有效。
+// Reverse inclusive [left,right] by swapping inward; empty/single-byte ranges are unchanged and nonempty bounds must be valid.
 func reverse(b []byte, left, right int) {
 	for left < right {
 		b[left], b[right] = b[right], b[left]
@@ -155,11 +108,8 @@ func reverse(b []byte, left, right int) {
 // Time: O(n), Space: O(n) for the result buffer.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由结果缓冲区产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Separator only when the result already holds a word (no leading space).
-//     只有结果里已有单词才补分隔空格，避免前导空格。
-//  2. left stopped one before the word, so the slice is s[left+1:right+1].
-//     left 停在单词前一位，因此单词是 s[left+1:right+1]。
+// 从右向左跳过空格并定位整词，按原字节顺序追加 s[left+1:right+1]；只在已有结果后追加分隔空格。
+// Scan backward to locate whole words but append their bytes in original order; add one separator only after prior output.
 func reverseWordsBackward(s string) string {
 	var result strings.Builder
 	for right := len(s) - 1; right >= 0; {

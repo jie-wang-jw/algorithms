@@ -184,10 +184,12 @@ func TestIsAnagram(t *testing.T) {
 	}
 }
 
-// 步骤与要点 / Steps and notes:
-//  1. isAnagram1 and isAnagram2 index a 26-slot array, so only these two solutions accept
-//     characters outside a-z.
-//     isAnagram1 和 isAnagram2 使用 26 格数组下标，因此只有这两种解法能接受 a-z 之外的字符。
+// TestIsAnagramBeyondLowercase
+//
+// 仅对 isAnagramSorted、isAnagramUnicode 检查大小写和非 ASCII 示例；26 槽版本只适用于 a..z。
+// Check mixed-case and non-ASCII examples only with isAnagramSorted and isAnagramUnicode; 26-slot versions require a..z.
+// 排序版比较 UTF-8 字节多重集，这些示例通过不代表它能判定所有 Unicode 字符异位词。
+// The sorted version compares UTF-8 byte multisets; passing these examples does not establish general Unicode anagram support.
 func TestIsAnagramBeyondLowercase(t *testing.T) {
 	tests := []struct {
 		name string

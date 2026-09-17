@@ -9,31 +9,8 @@ package _6_binary_tree
 117 给定任意二叉树。两者都要把每个 next 指向同层右侧节点，没有则置空。
 116 is a perfect binary tree: every parent has two children and all leaves share a depth.
 117 is any binary tree. In both problems, set next to the next right node on the same level, or nil.
-
-解法一：队列层序（116 与 117 相同） / Method 1: Level-Order Queue (Same for 116 and 117)
-102 文章对 117 的说明是：代码、逻辑与 116 的层序写法相同。
-每层固定 levelSize，不是最后一个节点就把 next 指向队首尚未出队的同层节点。
-The 102 article treats 117 as the same queue logic as 116.
-Capture levelSize; if the node is not last on the level, point next at the current queue front.
-
-解法二：前序递归搭线（仅 116） / Method 2: Preorder Wiring (116 Only)
-完美二叉树中：左孩子 next 指向右孩子；右孩子 next 指向 cur.next 的左孩子。
-前序保证访问 cur 时，上一层的 next 已经连好，跨父节点的线才能接到。
-In a perfect tree, left.next = right, and right.next = cur.next.left.
-Preorder visits cur after the previous level's next links exist, so the cross-parent link is available.
-
-解法三：沿已连好的 next 走（仅 116，O(1) 额外空间） / Method 3: Walk Established Next Links (116 Only)
-从每层最左节点出发，用已经连好的 next 横穿该层，连接下一层的左右孩子。
-不使用队列。题目把递归栈不算额外空间；本写法迭代，辅助指针 O(1)。
-Start at the leftmost node of each level and walk next to wire the next level's children.
-No queue. The problem ignores recursion-stack space; this iterative version uses O(1) extra pointers.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数，w 为最大层宽，h 为树高。
-解法一时间 O(n)，队列 O(w)。解法二时间 O(n)，递归栈 O(h)。解法三时间 O(n)，辅助 O(1)。
-For n nodes, width w, and height h:
-method 1 is O(n) time and O(w) queue space; method 2 is O(n) time and O(h) stack space;
-method 3 is O(n) time and O(1) extra pointers.
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Level-order queue: the next node in the captured level is the next-right pointer. Used by 116 and 117.
@@ -41,13 +18,10 @@ method 3 is O(n) time and O(1) extra pointers.
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Nothing to wire on an empty tree.
-//     空树没有需要连接的 next。
-//  2. Capture levelSize so newly enqueued children stay on the next level.
-//     固定 levelSize，保证新入队的孩子属于下一层。
-//  3. After dequeue, queue[0] is the next same-level node still waiting.
-//     出队后，queue[0] 仍是同层下一个尚未出队的节点。
+// 固定 levelSize 后，同层非末节点的 Next 指向出队后的 queue[0]；本层末节点不能指向下一层。
+// Freeze levelSize; each nonfinal node points to the next queue front, while the level's final node must not point into the next level.
+// 适用于普通二叉树；此实现不重置层末 Next，沿用题目“初始所有 Next 为 nil”的前提。
+// Works for general binary trees; this implementation leaves final Next fields unchanged, assuming they initially are nil.
 func connect(root *Node) *Node {
 	if root == nil {
 		return root
@@ -77,9 +51,10 @@ func connect(root *Node) *Node {
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Reuse the identical level-order wiring from connect.
-//     直接复用 connect 的同一套层序连线逻辑。
+// 固定 levelSize 后，同层非末节点的 Next 指向出队后的 queue[0]；本层末节点不能指向下一层。
+// Freeze levelSize; each nonfinal node points to the next queue front, while the level's final node must not point into the next level.
+// 适用于普通二叉树；此实现不重置层末 Next，沿用题目“初始所有 Next 为 nil”的前提。
+// Works for general binary trees; this implementation leaves final Next fields unchanged, assuming they initially are nil.
 func connectII(root *Node) *Node {
 	return connect(root)
 }
@@ -88,6 +63,11 @@ func connectII(root *Node) *Node {
 // 2. 116 的前序搭线：左连右，右连下一个父节点的左孩子；只适用于完美二叉树。
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
+//
+// 仅适用于完美二叉树：左孩子连接右兄弟，右孩子连接父节点 Next 的左孩子；普通缺口树不满足此规则。
+// Require a perfect tree: link left to its sibling and right to the next parent's left child; arbitrary gaps break this rule.
+// 先连好父层，才能借父节点 Next 跨子树连下一层；调用时所有 Next 按题意初始为 nil。
+// Parent-level links must exist before using Next to cross subtrees below; assume all Next links start nil.
 func connectRecursive(root *Node) *Node {
 	connectTraversal(root)
 	return root
@@ -98,13 +78,10 @@ func connectRecursive(root *Node) *Node {
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. In a perfect tree every non-leaf has both children, so left.next is always right.
-//     完美二叉树中每个非叶都有两个孩子，因此左孩子的 next 总是右孩子。
-//  2. Cross-parent link needs cur.Next, which preorder already built on this level.
-//     跨父节点的连线依赖 cur.Next；前序保证本层的 next 已经搭好。
-//  3. Recurse after wiring children so deeper levels see completed parent next links.
-//     先连好孩子再递归，使更深层能看到已完成的父层 next。
+// 仅适用于完美二叉树：左孩子连接右兄弟，右孩子连接父节点 Next 的左孩子；普通缺口树不满足此规则。
+// Require a perfect tree: link left to its sibling and right to the next parent's left child; arbitrary gaps break this rule.
+// 先连好父层，才能借父节点 Next 跨子树连下一层；调用时所有 Next 按题意初始为 nil。
+// Parent-level links must exist before using Next to cross subtrees below; assume all Next links start nil.
 func connectTraversal(cur *Node) {
 	if cur == nil {
 		return
@@ -128,13 +105,10 @@ func connectTraversal(cur *Node) {
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. cur is the leftmost node of the current level; stop when it has no children.
-//     cur 是当前层最左节点；没有左孩子说明已到最底层。
-//  2. Walk the whole level through already-built next pointers.
-//     沿着已经连好的 next 横穿整层。
-//  3. Wire across parents when a right neighbor on this level exists.
-//     若本层右侧还有邻居，就把右孩子连到邻居的左孩子。
+// 仅适用于完美二叉树：左孩子连接右兄弟，右孩子连接父节点 Next 的左孩子；普通缺口树不满足此规则。
+// Require a perfect tree: link left to its sibling and right to the next parent's left child; arbitrary gaps break this rule.
+// 先连好父层，才能借父节点 Next 跨子树连下一层；调用时所有 Next 按题意初始为 nil。
+// Parent-level links must exist before using Next to cross subtrees below; assume all Next links start nil.
 func connectConstant(root *Node) *Node {
 	if root == nil {
 		return root

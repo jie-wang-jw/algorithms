@@ -5,75 +5,17 @@ package _4_string
 给定非空字符串 s，判断它能否由某个非空子串重复多次构成。
 Given a nonempty string s, determine whether it can
 be constructed by repeating one of its nonempty substrings multiple times.
-
-解题思路 / Solution Approach
-文件提供三种方法：枚举可能的重复单元、在 (s+s)[1:2n-1] 中查找 s，
-以及利用 KMP 最长相等前后缀判断字符串长度能否被重复周期整除。
-The file provides enumeration, doubled-string matching,
-and KMP solutions. KMP derives a possible period from the longest
-equal prefix and suffix and checks whether it divides the string length.
-
-关键逻辑：为什么这样做 / Why This Works
-枚举法：重复至少两次，所以单元长度不超过 n/2；长度必须整除 n，否则最后剩下不足一个单元。
-双倍字符串法：从 s+s 的内部起点 p（1<=p<n）取长度 n，就是把 s 循环移动 p 位。若仍等于 s，
-按这个位移反复对应的字符都相等，字符串由长度 gcd(n,p) 的块重复组成；
-去首尾正是排除 p=0、n 这两个任何字符串都能匹配的情况。
-KMP 法：设最长相等真前后缀长度为 L，p=n-L。前后缀相等意味着 s[p:]=s[:n-p]，
-即每个位置与前面相距 p 的位置相等，p 就是最小周期；只有 L>0 且 n%p==0，
-才能把整串切成至少两个完整周期。例如 "ababa" 的 L=3、p=2，但 5%2!=0，最后半个周期不算完整重复。
-Enumeration: at least two copies require block length <=n/2, and the length must divide n.
-Doubling: a length-n match starting at internal offset p (1<=p<n) is a rotation by p.
-Equality forces characters in each repeated-shift orbit to agree, yielding repetition
-of blocks of length gcd(n,p). Removing both ends excludes trivial matches at offsets 0 and n.
-KMP: for longest proper border length L, let p=n-L. Border equality means s[p:]=s[:n-p],
-so characters p positions apart agree; p is the shortest period. L>0 and n%p==0 ensure
-at least two complete copies. For "ababa", L=3 and p=2, but 5%2!=0 leaves an incomplete copy.
-
-时间与空间复杂度 / Time and Space Complexity
-n = len(s)。枚举法 repeatedSubstringPattern：保守时间上界 O(n²)，枚举 O(n) 个长度，
-候选长度最多比较 O(n) 字节；辅助空间 O(1)，子串切片不复制内容。
-双倍字符串法 repeatedSubstringPattern2：构造 O(n) 时间和空间，
-总时间 O(n + 子串搜索成本)，不能仅因调用 Contains 就断言最坏 O(n)；
-朴素搜索分析的保守上界为 O(n²)。KMP 法 repeatedSubstringPattern3：
-时间 O(n)，辅助空间 O(n) 保存前缀表。
-n = len(s). Enumeration has a conservative O(n²) time bound and O(1)
-auxiliary space; substring slices do not copy bytes. The doubled-string
-version uses O(n) construction time and space, plus substring-search time;
-calling Contains alone does not prove worst-case linear time, and naive-search
-analysis gives a conservative O(n²) bound. The KMP version takes O(n)
-time and O(n) auxiliary space for the prefix table.
-
-边界条件 / Edge Cases
-题目保证 s 非空。枚举法对空串天然返回 false；双倍字符串法会切出非法下标 doubled[1:-1]，
-KMP 法会读到越界的 next[n-1]，因此两者都先显式判空，使三种解法对空串结果一致。
-The problem guarantees a nonempty s. Enumeration already returns false for an empty string,
-while doubling would slice doubled[1:-1] and KMP would read next[n-1] out of range,
-so both check for an empty string first and all three solutions now agree.
 */
 
 import "strings"
-
-/*
-Check whether the string can be constructed by repeating one of its substrings.
-判断字符串能否由它的某个非空子串重复多次构成。
-*/
 
 // 1. Enumeration: try every possible repeated-unit length that divides n.
 // 1. 枚举法：尝试每种能整除 n 的重复单元长度。
 // Time: O(n²) conservative, Space: O(1).
 // 时间复杂度：保守上界 O(n²)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Try every possible substring length.
-//     尝试每一种可能的子串长度。
-//  2. The substring length must divide the whole string length.
-//     子串长度必须能整除整个字符串长度。
-//  3. pattern is the candidate repeated substring.
-//     pattern 是候选的重复子串。
-//  4. Check whether every block equals pattern.
-//     检查每一段是否都等于 pattern。
-//  5. Every block matched the candidate pattern.
-//     每一段都与候选 pattern 相同，说明字符串可由它重复构成。
+// 至少重复两次，所以单元长度最多 n/2，且须整除 n；逐块比较是否都等于首块，有一块不同就排除此长度。
+// At least two copies require a block length <=n/2 dividing n; reject a length as soon as any block differs from the first.
 func repeatedSubstringPattern(s string) bool {
 	n := len(s)
 
@@ -100,22 +42,17 @@ func repeatedSubstringPattern(s string) bool {
 	return false
 }
 
-/*
-If s is made of a repeated substring, s appears inside (s+s) after removing the first and last characters.
-如果 s 由重复子串组成，那么在 (s+s) 去掉首尾字符后，仍然能找到完整的 s。
-*/
 // 2. Doubled-string search: s appears inside (s+s) after the first and last characters are removed.
 // 2. 双倍字符串查找：去掉 (s+s) 的首尾后仍能找到 s。
 // Time: O(n²) conservative for naive search, Space: O(n) for the doubled string.
 // 时间复杂度：朴素搜索保守上界 O(n²)，空间复杂度：O(n)，由双倍字符串产生。
 //
-// 步骤与要点 / Steps and notes:
-// 1. An empty string has no nonempty unit to repeat, and doubled[1:len-1] would be an invalid slice.
-//    空串没有可重复的非空单元，而且 doubled[1:len-1] 的下标是非法的。
-// 2. Doubling contains every rotation of s.
-//    s+s 包含 s 的所有循环位移结果。
-// 3. Remove both ends so the two trivial copies of s cannot be matched directly.
-//    去掉首尾字符，避免直接匹配原本位于两端的完整 s。
+// s+s 从位置 p 取长度 n，得到 s 循环移动 p 位的结果；去首尾排除 p=0、n 两个必然匹配的起点。
+// A length-n slice at p in s+s rotates s by p; removing the ends excludes trivial matches at p=0 and p=n.
+// 若某个 0<p<n 仍匹配，反复移动 p 位对应的字符都相等，故由长度 gcd(n,p) 的块重复组成。
+// A match at 0<p<n makes all positions linked by repeated shifts equal, yielding repeated blocks of length gcd(n,p).
+// 先判空，避免 doubled[1:len-1] 构成非法区间。
+// Reject empty input before slicing, which would otherwise create invalid bounds.
 func repeatedSubstringPattern2(s string) bool {
 	if len(s) == 0 {
 		return false
@@ -126,33 +63,17 @@ func repeatedSubstringPattern2(s string) bool {
 	return strings.Contains(middle, s)
 }
 
-/*
-KMP
-The longer the equal prefix and suffix, the more the string overlaps with itself.
-最长相等前后缀越长，说明字符串前后重叠越多。
-
-Pattern length = n - next[n-1]. / 重复单元长度 = n - next[n-1]。
-If n is divisible by that length, the pattern repeats exactly. / 如果 n 能整除该长度，就是重复子串。
-*/
 // 3. KMP longest border: the candidate period is n-L and must divide n.
 // 3. KMP 最长相等前后缀：候选周期为 n-L，且必须整除 n。
 // Time: O(n), Space: O(n) for the prefix table.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由前缀表产生。
 //
-// 步骤与要点 / Steps and notes:
-// 1. An empty string has no last prefix-table entry to read, so next[n-1] would panic.
-//    空串没有前缀表的最后一项可读，直接访问 next[n-1] 会越界。
-// 2. Build the prefix table for s.
-//    给 s 构造前缀表。
-// 3. longestPrefixSuffix is the longest prefix length that is also a suffix.
-//    longestPrefixSuffix 是整个字符串的最长相等前后缀长度。
-//    之所以取最后一个，只因为最后一个位置代表的范围是整个字符串。
-// 4. If there is no repeated prefix/suffix, it cannot be built by repetition.
-//    如果没有相等前后缀，就不可能由重复子串组成。
-// 5. patternLength is the smallest possible repeated block length.
-//    patternLength 是可能的最小重复单元长度。
-// 6. If n can be divided by patternLength, s is repeated by that block.
-//    如果总长度能被 patternLength 整除，说明可以完整重复。
+// L=next[n-1] 对应整串最长相等真前后缀；令 p=n-L，则 s[:L]==s[p:]，即相距 p 的字节相等。
+// L=next[n-1] is the whole string's longest proper border; p=n-L gives s[:L]==s[p:], so bytes p apart agree.
+// 前后缀越长，错开距离越小，因此 p 是最小周期；L>0 确保 p<n，排除只把整串取一次。
+// A longer border means a smaller shift, so p is the shortest period; L>0 ensures p<n rather than one whole-string copy.
+// 还要 n%p==0 才能全由完整单元组成："abab" 成立；"ababa" 虽有周期 2，却剩半个单元，不成立。
+// Require n%p==0 for complete copies: "abab" qualifies, while period-2 "ababa" ends with an incomplete copy.
 func repeatedSubstringPattern3(s string) bool {
 	n := len(s)
 

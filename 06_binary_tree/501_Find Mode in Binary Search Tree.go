@@ -19,28 +19,8 @@ Inorder 1,2,2; 2 appears twice, so the mode list is [2].
 
 若每个值都只出现一次，则所有值都是众数。
 If every value appears once, every value is a mode.
-
-关键逻辑 / Key Logic
-BST 中序把相同值排在一起，所以可以在遍历时统计连续相等值的长度，而不必先建哈希表。
-count 是当前值的连续次数，maxCount 是目前见到的最大次数。
-次数等于 maxCount 时把当前值加入答案；次数更大则清空答案并更新 maxCount。
-BST inorder groups equal values together, so a linear scan of adjacent equals replaces a frequency map.
-count is the run length of the current value; maxCount is the best run seen so far.
-Equal the best: append. Beat the best: replace the answer and raise maxCount.
-
-解法一：中序递归（推荐） / Method 1: Inorder Recursion (Recommended)
-用前驱节点判断当前值是否延续上一段。空前驱表示第一个节点，count 从 1 开始。
-Use the predecessor to decide whether the current value continues a run. A nil predecessor means the first node, so count starts at 1.
-
-解法二：中序迭代 / Method 2: Iterative Inorder
-同样的计数规则，用栈模拟中序。
-The same counting rule with an explicit inorder stack.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高，m 为众数个数。两版时间 O(n)。
-除输出外辅助空间 O(h)；输出 O(m)。
-For n nodes, height h, and m modes, both take O(n) time.
-Auxiliary space is O(h) besides O(m) output.
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Inorder recursion (recommended): equal values form a consecutive run, so update the mode list from that run length.
@@ -48,9 +28,10 @@ Auxiliary space is O(h) besides O(m) output.
 // Time: O(n), Space: O(h) auxiliary plus O(m) output.
 // 时间复杂度：O(n)，空间复杂度：辅助 O(h)，输出另占 O(m)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Visit root between left and right so equal values stay consecutive.
-//     在左右之间访问根，相同值才会在中序中连成一段。
+// BST 中序非递减，相同值必连续；count 是当前连续段长度，prev 是中序前驱，maxCount 是已见最大频次。
+// BST inorder is nondecreasing, making equal values consecutive; count tracks the current run, prev the prior node, maxCount the best run.
+// count 超过历史最大值就清空旧答案并替换，相等则追加；只在访问节点时更新，不能在入栈时更新。
+// Replace answers when count exceeds the maximum and append on equality; update at inorder visitation, not when pushing the node.
 func findMode(root *TreeNode) []int {
 	result := []int{}
 	maxCount := 0
@@ -75,6 +56,11 @@ func findMode(root *TreeNode) []int {
 // 2. 中序迭代：同样按连续相同值计数，改成显式栈。
 // Time: O(n), Space: O(h) auxiliary plus O(m) output.
 // 时间复杂度：O(n)，空间复杂度：辅助 O(h)，输出另占 O(m)。
+//
+// BST 中序非递减，相同值必连续；count 是当前连续段长度，prev 是中序前驱，maxCount 是已见最大频次。
+// BST inorder is nondecreasing, making equal values consecutive; count tracks the current run, prev the prior node, maxCount the best run.
+// count 超过历史最大值就清空旧答案并替换，相等则追加；只在访问节点时更新，不能在入栈时更新。
+// Replace answers when count exceeds the maximum and append on equality; update at inorder visitation, not when pushing the node.
 func findModeIterative(root *TreeNode) []int {
 	result := []int{}
 	maxCount := 0
@@ -100,13 +86,10 @@ func findModeIterative(root *TreeNode) []int {
 // Time: O(1) amortized, Space: O(1) besides the result slice.
 // 时间复杂度：均摊 O(1)，空间复杂度：除结果切片外 O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Same value as predecessor: extend the current run; otherwise start a new run of length 1.
-//     与前驱相同则延续当前段；否则从 1 开始新的一段。
-//  2. Tie for the best frequency: another mode.
-//     与当前最大次数持平：又一个众数。
-//  3. Strictly better frequency: reset the mode list.
-//     次数创新高：清空旧答案，只保留当前值。
+// BST 中序非递减，相同值必连续；count 是当前连续段长度，prev 是中序前驱，maxCount 是已见最大频次。
+// BST inorder is nondecreasing, making equal values consecutive; count tracks the current run, prev the prior node, maxCount the best run.
+// count 超过历史最大值就清空旧答案并替换，相等则追加；只在访问节点时更新，不能在入栈时更新。
+// Replace answers when count exceeds the maximum and append on equality; update at inorder visitation, not when pushing the node.
 func updateMode(node *TreeNode, prev **TreeNode, count, maxCount *int, result *[]int) {
 	if *prev != nil && node.Val == (*prev).Val {
 		*count++

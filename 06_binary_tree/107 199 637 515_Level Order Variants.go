@@ -23,6 +23,8 @@ Track the maximum while scanning one captured level.
 
 429 / 116 / 117 需要不同的节点类型（N 叉孩子表或 Next 指针），本文件只实现仍使用 TreeNode 的四题。
 429, 116, and 117 need different node types (N-ary children or Next pointers); this file covers the four TreeNode variants.
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Bottom-up level order: reuse top-down grouping, then reverse the order of levels.
@@ -30,11 +32,8 @@ Track the maximum while scanning one captured level.
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Reuse the standard top-down level-order result.
-//     复用标准的自上而下分层结果。
-//  2. Reverse only the outer slice; each level stays left-to-right.
-//     只反转外层切片；每一层内部仍保持从左到右。
+// 先用 levelOrder 保证每层从左到右，再只反转外层层序；不能反转层内节点顺序。
+// Build left-to-right levels with levelOrder, then reverse only the outer level order, not nodes within a level.
 func levelOrderBottom(root *TreeNode) [][]int {
 	levels := levelOrder(root)
 	for left, right := 0, len(levels)-1; left < right; left, right = left+1, right-1 {
@@ -48,13 +47,8 @@ func levelOrderBottom(root *TreeNode) [][]int {
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. An empty tree has no visible values from the right.
-//     空树从右侧看不到任何节点。
-//  2. Capture the current level size before enqueuing children.
-//     先固定本层节点数，再入队孩子，避免把下层混进本层。
-//  3. Overwrite last on every dequeue; the final write is the rightmost node.
-//     每次出队都覆盖 last；最后一次写入就是该层最右侧节点。
+// 每层按从左到右出队，最后出队者才是该层最右节点；不要求它一定是父节点的右孩子。
+// Each level leaves the queue left to right, so its final node is visible from the right even if it is a left child.
 func rightSideView(root *TreeNode) []int {
 	if root == nil {
 		return []int{}
@@ -86,11 +80,8 @@ func rightSideView(root *TreeNode) []int {
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. sum accumulates only the nodes already counted in levelSize.
-//     sum 只累加已经计入 levelSize 的本层节点。
-//  2. float64 avoids truncating the average with integer division.
-//     使用 float64，避免整数除法截断平均值。
+// 固定 levelSize 后只累加本层值，再转 float64 相除以保留小数；当前实现的 int 层和须不溢出。
+// Sum only the frozen level and divide as float64 to retain fractions; the int accumulator must not overflow.
 func averageOfLevels(root *TreeNode) []float64 {
 	if root == nil {
 		return []float64{}
@@ -122,9 +113,8 @@ func averageOfLevels(root *TreeNode) []float64 {
 // Time: O(n), Space: O(w).
 // 时间复杂度：O(n)，空间复杂度：O(w)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Seed best with the first node on this level before scanning the rest.
-//     先用本层第一个节点初始化 best，再扫描其余节点。
+// 用本层第一个节点初始化 best，不能用 0，否则全负数层会出错；固定层大小后逐个取最大值。
+// Initialize best from the first node, not zero, to support all-negative levels; scan exactly the frozen layer.
 func largestValues(root *TreeNode) []int {
 	if root == nil {
 		return []int{}

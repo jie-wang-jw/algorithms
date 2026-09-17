@@ -17,24 +17,8 @@ Node values are nonnegative. Empty and single-node trees are not meaningful inpu
   1   3
 中序序列 1,2,3,4,6；相邻差为 1,1,1,2，最小绝对差是 1。
 Inorder values 1,2,3,4,6; adjacent gaps are 1,1,1,2; the minimum is 1.
-
-关键逻辑 / Key Logic
-BST 的中序是非降序（本题值互不相同则为严格递增）。相邻中序值的差是所有节点对里可能最小的差，
-不必比较不相邻节点：递增序列中不相邻差一定不小于夹在中间的相邻差。
-BST inorder is sorted. The minimum difference must occur between neighboring inorder values;
-a non-adjacent pair in a sorted sequence cannot be smaller than the adjacent pairs it spans.
-
-解法一：中序递归记录前驱（推荐） / Method 1: Inorder Recursion with a Predecessor (Recommended)
-中序访问时，用当前值减去前驱值更新答案，再把前驱改成当前节点。
-During inorder, subtract the predecessor from the current value, update the answer, then move the predecessor forward.
-
-解法二：中序迭代 / Method 2: Iterative Inorder
-用栈模拟同样的中序前驱比较。
-The same predecessor comparison, using an explicit inorder stack.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高。两版时间 O(n)，辅助空间 O(h)。
-For n nodes and height h, both take O(n) time and O(h) auxiliary space.
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Inorder recursion with a predecessor (recommended): the minimum gap is between neighboring inorder values.
@@ -42,13 +26,10 @@ For n nodes and height h, both take O(n) time and O(h) auxiliary space.
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Seed with a large sentinel; real nonnegative gaps will replace it.
-//     先用大哨兵占位，真实的非负差值会把它换掉。
-//  2. First visited node has no predecessor; later nodes update the minimum gap.
-//     第一个访问的节点没有前驱；之后每个节点都用与前驱的差更新答案。
-//  3. Empty or single-node tree: no pair exists.
-//     空树或单节点：不存在可比较的一对。
+// BST 中序有序，任意不相邻差值是若干相邻差值之和，因此最小差一定出现在中序相邻节点间。
+// In sorted inorder, a nonadjacent difference sums adjacent differences, so the minimum occurs between neighbors.
+// prev 保存前一个访问节点，先计算差再更新 prev；按题目值域使用，差值不溢出且小于哨兵最大 int。
+// prev is the prior visited node; compare before replacing it. Assume problem bounds keep differences below the max-int sentinel.
 func getMinimumDifference(root *TreeNode) int {
 	minDiff := int(^uint(0) >> 1)
 	var prev *TreeNode
@@ -83,13 +64,10 @@ func getMinimumDifference(root *TreeNode) int {
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Same large sentinel used by the recursive version.
-//     与递归版相同，先用大哨兵占位。
-//  2. Descend left exactly as in classic iterative inorder.
-//     与经典中序迭代一样，先一路向左压栈。
-//  3. Compare with the previous inorder node once a predecessor exists.
-//     有前驱后，用当前值与前驱值的差更新最小绝对差。
+// BST 中序有序，任意不相邻差值是若干相邻差值之和，因此最小差一定出现在中序相邻节点间。
+// In sorted inorder, a nonadjacent difference sums adjacent differences, so the minimum occurs between neighbors.
+// prev 保存前一个访问节点，先计算差再更新 prev；按题目值域使用，差值不溢出且小于哨兵最大 int。
+// prev is the prior visited node; compare before replacing it. Assume problem bounds keep differences below the max-int sentinel.
 func getMinimumDifferenceIterative(root *TreeNode) int {
 	minDiff := int(^uint(0) >> 1)
 	stack := []*TreeNode{}

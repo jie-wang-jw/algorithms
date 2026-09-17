@@ -10,21 +10,8 @@ visit nodes level by level from left to right.
 
 示例 / Example
 根 1，孩子 3、2、4，节点 3 的孩子 5、6 → [[1],[3,2,4],[5,6]]
-
-解法一：队列按层处理 / Method 1: Level-by-Level Queue
-与 102 同一套模板，只是把左右孩子改成遍历 Children。
-Same template as 102; enqueue every child instead of only left and right.
-
-解法二：递归按深度分组 / Method 2: Recursion Grouped by Depth
-深度当作结果下标，第一次到达该层时追加空子数组。先序遍历孩子，层内仍从左到右。
-Use depth as the result index and append a new subarray on first arrival.
-Visit children in order so each level fills left to right.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数，w 为最大层宽，h 为树高。
-解法一时间 O(n)，辅助空间 O(w)。解法二时间 O(n)，辅助空间 O(h)。
-For n nodes, width w, and height h:
-method 1 takes O(n) time and O(w) auxiliary space; method 2 takes O(n) time and O(h) call-stack space.
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Level-by-level queue: capture levelSize, then enqueue every child.
@@ -32,13 +19,10 @@ method 1 takes O(n) time and O(w) auxiliary space; method 2 takes O(n) time and 
 // Time: O(n), Space: O(w) for the queue.
 // 时间复杂度：O(n)，空间复杂度：O(w)，由队列产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. An empty N-ary tree contributes no levels.
-//     空的 N 叉树没有任何层。
-//  2. Capture how many nodes belong to the current level.
-//     固定属于当前层的节点个数。
-//  3. Enqueue every non-nil child; order preserves left-to-right within the next level.
-//     把每个非空孩子入队；顺序保证下一层仍从左到右。
+// 每轮先固定 levelSize=len(queue)，只弹出这些节点；新入队的孩子属于下一层，不能计入本轮。
+// Freeze levelSize before each round; newly enqueued children belong to the next level, not the current one.
+// 按从左到右的孩子顺序入队，确保同层输出顺序；空树返回空层列表。
+// Enqueue children left to right to preserve order within each level; empty input produces no levels.
 func naryLevelOrder(root *NaryNode) [][]int {
 	if root == nil {
 		return [][]int{}
@@ -69,11 +53,10 @@ func naryLevelOrder(root *NaryNode) [][]int {
 // Time: O(n), Space: O(h) for the recursion stack.
 // 时间复杂度：O(n)，空间复杂度：O(h)，由递归栈产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. First visit to this depth allocates the level slice.
-//     第一次到达该深度时，先为这一层分配切片。
-//  2. Children are visited in order, so each level fills left to right.
-//     按顺序递归孩子，因此每一层仍从左到右填充。
+// depth 是从根起的零基层号；首次到达新深度才新增结果层，再把节点值加入 result[depth]。
+// depth is the zero-based level; create a result row on first reaching that depth, then append to result[depth].
+// DFS 不按层访问，但按从左到右递归保证每层加入顺序正确。
+// DFS does not visit by level, but left-to-right recursion preserves order within each result row.
 func naryLevelOrderRecursive(root *NaryNode) [][]int {
 	result := [][]int{}
 

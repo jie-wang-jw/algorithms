@@ -9,25 +9,6 @@ Remove every node whose value equals val and return the new head.
 
 示例 / Example
 head = [1,2,6,3,4,5,6], val = 6 → [1,2,3,4,5]
-
-解法一：直接在原链表上删除 / Method 1: Delete on the Original List
-头节点没有前驱，需要先用 while 把连续等于 val 的头节点摘掉。
-其余节点由前驱 cur 检查 cur.Next：相等则跳过，否则 cur 前进。
-The head has no predecessor, so first drop every leading node equal to val.
-For the rest, predecessor cur inspects cur.Next: skip equals, otherwise advance cur.
-
-解法二：虚拟头节点（推荐） / Method 2: Dummy Head (Recommended)
-给原头补一个 dummy，所有待删节点都有前驱，删除逻辑统一。返回 dummy.Next。
-A dummy in front of the original head gives every target a predecessor, so deletion is uniform. Return dummy.Next.
-
-解法三：递归 / Method 3: Recursion
-空链表返回 nil。头等于 val 则答案是对后续链表递归的结果；否则把头接到递归后的后续链表上。
-An empty list returns nil. If the head equals val, the answer is the recursive result on the suffix;
-otherwise attach the head to that suffix.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数。三种解法时间都是 O(n)。解法一、二辅助空间 O(1)；解法三递归栈 O(n)。
-n is the node count. All three take O(n) time. Methods 1 and 2 use O(1) auxiliary space; method 3 uses O(n) call-stack space.
 */
 
 // 1. Delete on the original list
@@ -37,9 +18,10 @@ n is the node count. All three take O(n) time. Methods 1 and 2 use O(1) auxiliar
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Stay at cur: the successor that slid in may also equal val.
-//     停在 cur：补上来的后继仍可能等于 val。
+// 先连续移除匹配的头节点；随后 cur 始终指向保留节点，检查的是 cur.Next。
+// Remove matching heads first; thereafter cur is retained and the candidate is cur.Next.
+// 删除后 cur 不移动，因为新接上的后继也可能要删；保留后继时才前进。
+// After deletion keep cur fixed to check its new successor; advance only when retaining that successor.
 func removeElementsDirect(head *ListNode, val int) *ListNode {
 	for head != nil && head.Val == val {
 		head = head.Next
@@ -62,6 +44,9 @@ func removeElementsDirect(head *ListNode, val int) *ListNode {
 // 虚拟头让每个真实节点都有前驱，删除只需一套逻辑；跳过后停在 cur。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
+//
+// dummy 为真实头也提供前驱；cur.Next 是待检查节点。删除后 cur 不动，确保连续匹配项都被删除。
+// dummy supplies a predecessor even for the head; inspect cur.Next and keep cur fixed after deletion to catch consecutive matches.
 func removeElements(head *ListNode, val int) *ListNode {
 	dummy := &ListNode{Next: head}
 	cur := dummy
@@ -81,6 +66,9 @@ func removeElements(head *ListNode, val int) *ListNode {
 // 头等于 val 就丢掉；否则保留头并接到清理后的后缀上。
 // Time: O(n), Space: O(n) for the call stack.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由递归栈产生。
+//
+// 递归返回“删除完成后的子链表头”。当前值要删除就直接返回后缀结果，否则接回处理后的后缀再返回 head。
+// Each call returns the filtered sublist head; discard the current node or reconnect the filtered suffix and return head.
 func removeElementsRecursive(head *ListNode, val int) *ListNode {
 	if head == nil {
 		return nil

@@ -11,29 +11,6 @@ Each words[i] contains only lowercase letters.
 
 示例 / Example
 ["bella","label","roller"] → ["e","l","l"]
-
-解法一：26 计数数组取最小值（推荐） / Method 1: 26-Slot Frequency Minima (Recommended)
-用第一个字符串初始化 26 格频次数组。对每个后续字符串再统计一遍，逐格取 min。
-最后把每个字母按其最小次数展开成结果。
-Initialize a 26-slot array from the first string. Count each later string and take min per letter.
-Expand each letter by its surviving count into the answer.
-
-解法二：哈希表取最小值 / Method 2: Hash Map Minima
-用 map 统计第一个字符串，再对其余字符串分别计数并取 min。字母范围仍是 26，只是容器换成 map。
-Count the first string in a map, then take min against each later string. The alphabet is still 26; only the container changes.
-
-关键逻辑：为什么这样做 / Why This Works
-共用字符的可输出次数，等于它在每一串中出现次数的最小值：
-任何一串更少，最终能同时从所有串里“抠”出的份数就更少。
-取 min 后保留的正数，就是答案中该字母应重复出现的次数。
-The shared count of a letter equals the minimum of its counts across all strings:
-any scarcer string caps how many copies can be taken from every string at once.
-Positive values after successive mins are exactly how many times that letter appears in the answer.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为字符串个数，L 为所有字符总数。两种解法时间 O(L)。解法一辅助空间 O(1)；解法二 map 最多 26 个键，也记 O(1)。输出最多 O(minLen)。
-For n strings and L total characters, both take O(L) time. Method 1 uses O(1) auxiliary space;
-method 2 stores at most 26 keys, also O(1). Output is O(minLen).
 */
 
 // 1. 26-slot frequency minima (recommended)
@@ -43,9 +20,10 @@ method 2 stores at most 26 keys, also O(1). Output is O(minLen).
 // Time: O(L) for L total characters, Space: O(1).
 // 时间复杂度：O(L)（L 为全部字符数），空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Shared count cannot exceed what this string can contribute.
-//     公共次数不能超过当前字符串能提供的次数。
+// 仅适用于小写 a-z。hash[c] 是已处理所有单词中 c 次数的最小值；新单词逐字母取 min，得到多重集合交集。
+// For lowercase a-z, hash[c] is the minimum count across processed words; taking minima computes the multiset intersection.
+// 输出 hash[c] 份字母而非一份，才能保留重复公共字符；空输入返回空结果。
+// Emit hash[c] copies, not just one, to preserve repeated common characters; empty input yields no result.
 func commonChars(words []string) []string {
 	if len(words) == 0 {
 		return []string{}
@@ -60,7 +38,7 @@ func commonChars(words []string) []string {
 		for _, c := range words[i] {
 			other[c-'a']++
 		}
-		for k := 0; k < 26; k++ {
+		for k := range 26 {
 			hash[k] = min(hash[k], other[k])
 		}
 	}
@@ -82,9 +60,10 @@ func commonChars(words []string) []string {
 // Time: O(L), Space: O(1) for at most 26 keys.
 // 时间复杂度：O(L)，空间复杂度：O(1)，最多 26 个键。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Only keys already in minCount can remain shared; missing keys read as 0.
-//     只有已在 minCount 中的字母才可能继续共享；本串没有的键读出来是 0。
+// minCount 只需保存首个单词中的字节，因为公共字符不可能来自首词之外；每个词都将次数更新为较小值。
+// Only bytes in the first word can be common; reduce each count to the minimum seen across words.
+// 按次数输出保留重复项；map 遍历顺序不固定。按题目小写字母约束使用，不是 Unicode 字符统计。
+// Emit each retained multiplicity; map order is unspecified. Use the lowercase-letter contract, not Unicode character counting.
 func commonCharsMap(words []string) []string {
 	if len(words) == 0 {
 		return []string{}
@@ -106,7 +85,7 @@ func commonCharsMap(words []string) []string {
 		}
 	}
 
-	result := []string{}
+	var result []string
 	for c, cnt := range minCount {
 		for range cnt {
 			result = append(result, string(c))

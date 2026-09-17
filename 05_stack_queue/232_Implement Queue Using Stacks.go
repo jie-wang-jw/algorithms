@@ -7,80 +7,6 @@ package _5_stack_queue
 只使用栈的标准操作实现一个先进先出的队列，支持 Push、Pop、Peek 和 Empty。
 Implement a first-in-first-out queue using only standard stack operations,
 supporting Push, Pop, Peek, and Empty.
-
-解法一：双栈惰性转移（推荐） / Method 1: Two Stacks, Lazy Transfer (Recommended)
-使用 inStack 接收入队元素，使用 outStack 提供队首。当 outStack 为空时才把
-inStack 的所有元素倒入其中，使最早入队的元素来到栈顶。
-Use inStack for incoming elements and outStack for the queue front.
-Only when outStack is empty, transfer all elements from inStack so the oldest element becomes its top.
-
-关键逻辑：为什么这样做 / Why This Works
-倒栈会反转先后顺序：按 1、2、3 入栈，依次弹出 3、2、1 再压入 outStack，
-顶部就是最早来的 1。必须等 outStack 空了才转移，因为它剩余的元素都比 inStack 的新元素早来；
-提前转移会把新元素压在旧元素上面，让后来者先出队，破坏先进先出。
-Transfer reverses order: pushing 1,2,3 then moving popped values 3,2,1 puts oldest value 1 on top of outStack.
-Transfer only when outStack is empty: its remaining items arrived before every item in inStack.
-An early transfer would put newer values above older ones and violate FIFO.
-
-MyQueue 由 Constructor 创建；它的零值也可以直接使用，因为两个 nil 切片就是空队列。
-Pop 和 Peek 假定队列非空，与题目约定一致。
-MyQueue is created by Constructor; its zero value is also usable, since two nil slices form an empty queue.
-Pop and Peek assume a nonempty queue, matching the problem's guarantee.
-
-解法二：入队时整理顺序 / Method 2: Eager Reordering on Push
-MyQueueEager 只用一个主栈，并始终把最早入队的元素放在栈顶，于是 Pop 和 Peek 都是纯粹的栈顶操作。
-Push 分三步：先把主栈里的旧元素全部弹入临时栈；再把新值压入空主栈，让它成为新的栈底；
-最后按“从临时栈顶弹出、压回主栈”的顺序倒回旧元素。
-倒出再倒回是两次反转，所以旧元素恢复原来的相对顺序，原本的最早值重新回到栈顶。
-全过程只使用压栈、弹栈、读栈顶、查看长度，不从切片头部出队，否则就不是栈接口了。
-MyQueueEager 没有构造函数，直接使用 Go 的零值即可：stack 为 nil 切片，Empty 立即返回 true。
-Pop 和 Peek 同样假定队列非空。
-MyQueueEager uses a single main stack and always keeps the oldest element on top,
-so Pop and Peek are plain stack-top operations.
-Push has three steps: drain every old element into a temporary stack; push the new value onto the now-empty
-main stack so it becomes the new bottom; then restore the old elements by popping the temporary stack back.
-Draining and restoring are two reversals, so the old elements regain their original relative order
-and the previously oldest value returns to the top.
-Only push, pop, top, and length are used, never dequeuing from the slice front, which would not be a stack interface.
-MyQueueEager has no constructor and relies on its usable Go zero value: stack is a nil slice and Empty returns true.
-Pop and Peek likewise assume a nonempty queue.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为当前队列元素数。
-解法一 MyQueue：Push 均摊 O(1)；Pop/Peek 均摊 O(1)、单次最坏 O(n)；Empty O(1)；存储 O(n)。
-每个元素最多从 inStack 转移到 outStack 一次，所以一串操作的总工作量是线性的，
-不存在把同一元素反复搬运的情形。
-解法二 MyQueueEager：Push 每次都是最坏也是确定的 O(n)，两次搬运全部旧元素，
-并额外分配 O(n) 的临时栈；Pop/Peek/Empty O(1)；存储 O(n)。
-解法二不是均摊 O(1)：连续 n 次 Push 的总代价是 O(n²)，而解法一是 O(n)，因此默认优先解法一。
-存储空间 O(n)；切片容量可保留到历史最大规模。
-n is the current queue size.
-Method 1 MyQueue: Push amortized O(1); Pop/Peek amortized O(1) with worst case O(n) per call;
-Empty O(1); storage O(n). Each element transfers from inStack to outStack at most once,
-making aggregate work linear, with no element ever moved twice.
-Method 2 MyQueueEager: Push is a deterministic O(n) every time, moving all old elements twice
-and allocating an O(n) temporary stack; Pop/Peek/Empty O(1); storage O(n).
-Method 2 is not amortized O(1): n consecutive pushes cost O(n²) versus O(n) for Method 1,
-so Method 1 is the default. Storage is O(n); slice capacity may remain at the historical peak size.
-*/
-
-/*
-Use two stacks to simulate a FIFO queue.
-使用两个栈模拟先进先出的队列。
-
-inStack stores newly added elements.
-inStack 保存新加入的元素。
-
-outStack stores elements in queue-removal order.
-outStack 按照队列出队顺序保存元素。
-
-When outStack is empty, move every element from inStack to outStack.
-当 outStack 为空时，将 inStack 中的所有元素转移到 outStack。
-
-The transfer reverses the order, so the oldest element becomes the top
-of outStack and can be removed first.
-转移会反转元素顺序，因此最早加入的元素会来到 outStack 栈顶，
-从而最先被删除。
 */
 
 // 1. Two stacks with lazy transfer (recommended): move inStack into outStack only when outStack is empty.
@@ -107,32 +33,24 @@ func Constructor() MyQueue {
 
 // Push x onto inStack; the front is never rearranged here.
 // 把 x 压入 inStack，入队时不整理队首。
-// Time: amortized O(1), Space: O(1) extra.
-// 时间复杂度：均摊 O(1)，空间复杂度：额外 O(1)。
+// Time: amortized O(1), worst O(n) on reallocation; backing storage O(n).
+// 时间均摊 O(1)，扩容时最坏 O(n)；底层存储 O(n)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. New elements always enter inStack first.
-//     新元素始终先进入 inStack。
+// 追加到输入端，后续的取出操作负责调整顺序；append 均摊 O(1)，扩容时单次 O(n)。
+// Append at the input end; removal handles reordering. append is amortized O(1), with O(n) time on reallocation.
 func (q *MyQueue) Push(x int) {
 	q.inStack = append(q.inStack, x)
 }
 
 // Transfer every inStack element into outStack only when outStack is empty, reversing arrival order.
 // 仅当 outStack 为空时，把 inStack 全部倒入 outStack，从而反转入队顺序。
-// Time: O(n) when a transfer happens, O(1) otherwise. Space: O(1) extra.
-// 时间复杂度：发生转移时 O(n)，否则 O(1)。空间复杂度：额外 O(1)。
+// Amortized O(1), worst-case O(n) time per operation; stack storage O(n), including transfer allocations.
+// 每次均摊 O(1)、最坏 O(n) 时间；两栈存储 O(n)，转移时可能分配输出栈。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Keep the existing order if outStack still has elements.
-//     如果 outStack 中还有元素，保持当前顺序，不进行转移。
-//  2. Move every element from inStack to outStack.
-//     将 inStack 中的所有元素依次转移到 outStack。
-//  3. Find the index of the top element in inStack.
-//     找到 inStack 栈顶元素的下标。
-//  4. Push the top element of inStack into outStack.
-//     将 inStack 的栈顶元素压入 outStack。
-//  5. Remove the top element from inStack.
-//     删除 inStack 的栈顶元素。
+// 仅当 outStack 为空时倒入全部 inStack；反转使最早进入的元素来到 outStack 栈顶。
+// Transfer all of inStack only when outStack is empty; reversal places the oldest value on top.
+// 若 outStack 未空就转移，新元素会挡住更早元素，破坏 FIFO；每项只转移一次，均摊成本为 O(1)。
+// Transferring earlier would put newer values before older ones; each value transfers once, giving amortized O(1) operations.
 func (q *MyQueue) moveToOut() {
 	if len(q.outStack) > 0 {
 		return
@@ -149,16 +67,11 @@ func (q *MyQueue) moveToOut() {
 
 // Ensure the oldest element sits on outStack, then pop that top.
 // 先保证队首已在 outStack 栈顶，再弹出它。
-// Time: amortized O(1), worst O(n). Space: O(1).
-// 时间复杂度：均摊 O(1)，单次最坏 O(n)。空间复杂度：O(1)。
+// Amortized O(1), worst-case O(n) time per operation; stack storage O(n), including transfer allocations.
+// 每次均摊 O(1)、最坏 O(n) 时间；两栈存储 O(n)，转移时可能分配输出栈。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Make sure the front element is on top of outStack.
-//     确保队首元素位于 outStack 的栈顶。
-//  2. The top of outStack is the front of the queue.
-//     outStack 的栈顶就是队首元素。
-//  3. Remove the top element from outStack.
-//     删除 outStack 的栈顶元素。
+// 先在需要时转移，再弹出 outStack 栈顶，即最早入队的值；调用前要求队列非空。
+// Transfer if needed, then remove outStack's top, the oldest value; require a nonempty queue.
 func (q *MyQueue) Pop() int {
 	q.moveToOut()
 
@@ -172,14 +85,11 @@ func (q *MyQueue) Pop() int {
 
 // Ensure the oldest element sits on outStack, then read that top without removing it.
 // 先保证队首已在 outStack 栈顶，再只读不删。
-// Time: amortized O(1), worst O(n). Space: O(1).
-// 时间复杂度：均摊 O(1)，单次最坏 O(n)。空间复杂度：O(1)。
+// Amortized O(1), worst-case O(n) time per operation; stack storage O(n), including transfer allocations.
+// 每次均摊 O(1)、最坏 O(n) 时间；两栈存储 O(n)，转移时可能分配输出栈。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Make sure the front element is on top of outStack.
-//     确保队首元素位于 outStack 的栈顶。
-//  2. Read the top element without modifying the stack.
-//     读取栈顶元素，但不修改栈。
+// 与 Pop 共用惰性转移，但只读不删；返回最早入队值，要求队列非空。
+// Use the same lazy transfer as Pop but read without removal; return the oldest value from a nonempty queue.
 func (q *MyQueue) Peek() int {
 	q.moveToOut()
 
@@ -190,6 +100,9 @@ func (q *MyQueue) Peek() int {
 // 只有两个栈都为空时，队列才为空。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
+//
+// 元素可能在任一栈中，因此必须两个栈都空才能判队列为空。
+// Values may be in either stack, so the queue is empty only when both stacks are empty.
 func (q *MyQueue) Empty() bool {
 	return len(q.inStack) == 0 && len(q.outStack) == 0
 }
@@ -211,17 +124,10 @@ type MyQueueEager struct {
 // Time: O(n), Space: O(n) for the temporary stack.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由临时栈产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. temp holds the existing elements while the new bottom is installed.
-//     temp 在安放新栈底期间暂存原有元素。
-//  2. Step 1: drain the main stack, which reverses the order once.
-//     第一步：倒空主栈，这一步把顺序反转了一次。
-//  3. Step 2: the new value goes in first, so it becomes the bottom, that is the queue back.
-//     第二步：新值最先压入空主栈，于是成为栈底，也就是队尾。
-//  4. Step 3: restore the old elements, reversing a second time to recover their order.
-//     第三步：把旧元素倒回来，第二次反转使它们恢复原来的相对顺序。
-//  5. The previously oldest element is back on top; only an empty queue leaves x on top.
-//     原本最早的元素重新回到栈顶；只有队列原本为空时，栈顶才是 x。
+// 目标是让最旧元素始终在栈顶；先把旧值全部移到 temp，把新值压到空栈底，再倒回旧值。
+// Keep the oldest value on top: move old values to temp, place the newest at the bottom, then restore the old values.
+// 每次 Push 都搬动全部旧元素，单次 O(n)，不是惰性转移的均摊 O(1)。
+// Every Push moves all existing values, so it is O(n), unlike amortized lazy transfer.
 func (q *MyQueueEager) Push(x int) {
 	temp := make([]int, 0, len(q.stack))
 
@@ -246,11 +152,8 @@ func (q *MyQueueEager) Push(x int) {
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Push already arranged the oldest element on top, so no transfer is needed here.
-//     Push 已经把最早的元素安排在栈顶，这里不需要任何转移。
-//  2. Removing the top preserves the invariant for the next-oldest element.
-//     删除栈顶后，次早的元素自然成为新的栈顶，不变量继续成立。
+// 栈顶保持为最早入队元素，直接弹出切片末项；要求队列非空。
+// The oldest value is kept at the stack top; remove the final slice entry, requiring a nonempty queue.
 func (q *MyQueueEager) Pop() int {
 	last := len(q.stack) - 1
 	value := q.stack[last]
@@ -265,9 +168,8 @@ func (q *MyQueueEager) Pop() int {
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Reading the top does not modify the stack, so the invariant is untouched.
-//     读取栈顶不修改栈，因此不变量保持不变。
+// 只读栈顶即最早入队值；要求队列非空。
+// Read the stack top, the oldest queued value; require a nonempty queue.
 func (q *MyQueueEager) Peek() int {
 	return q.stack[len(q.stack)-1]
 }
@@ -276,10 +178,6 @@ func (q *MyQueueEager) Peek() int {
 // 所有元素都在一个栈里，只看它的长度。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
-//
-// 步骤与要点 / Steps and notes:
-//  1. A single stack holds everything, so one length check is enough.
-//     所有元素都在一个栈里，所以只需检查一个长度。
 func (q *MyQueueEager) Empty() bool {
 	return len(q.stack) == 0
 }

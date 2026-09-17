@@ -6,30 +6,6 @@ package _4_string
 并返回替换后的结果。
 Given a string containing only lowercase letters and digit characters,
 replace every digit character with the word "number" and return the resulting string.
-
-解题思路 / Solution Approach
-从左到右遍历字符串，使用 strings.Builder 构造结果。
-遇到 '0' 到 '9' 时写入 "number"，否则保留原字符。
-Scan the string from left to right and build the result
-with strings.Builder. Write "number" for digits from '0' to '9';
-otherwise keep the original character.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为输入长度，d 为数字字符数量，输出长度为 n+5d，最多 6n。时间 O(n)，
-每个字符最多写入 6 个字节。Builder 的结果缓冲区占 O(n)，包含输出总空间 O(n)，
-除此以外仅用 O(1) 状态。
-For input length n and d digit characters, output length is n+5d,
-at most 6n. Time O(n), writing at most six bytes per input character.
-The Builder result buffer uses O(n) space; other state is O(1), so total space including output is O(n).
-
-补充解法：扩容后从后向前写 / Alternative: Expand and Fill Backward
-replaceNumberBackward 先数 d 个数字，结果长度为 n+5d，因为每个数字由 1 字节变成 6 字节。
-复制原文到扩容缓冲区，read 从原文末尾读，write 从新末尾写；数字写入 number 的逆向字节。
-写指针始终不在读指针左侧，因此不会覆盖尚未读取的原文。时间 O(n)，Go 中缓冲区 O(n)。
-“反向填充用 O(1) 状态”不代表整个接收 string 的函数只用 O(1) 空间。
-Count d digits and allocate n+5d bytes. Read backward from the original end and write backward from the new end.
-Write "number" backward so the final word reads forward. The writer never overwrites unread bytes.
-Time O(n), buffer space O(n) in Go; O(1) pointer state does not make the whole string function constant-space.
 */
 
 import (
@@ -41,19 +17,8 @@ import (
 // Time: O(n), Space: O(n) for the Builder buffer.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由 Builder 缓冲区产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Builder appends output efficiently without repeatedly creating new strings.
-//     Builder 可以高效追加内容，避免反复创建新的字符串。
-//  2. The problem contains only lowercase ASCII letters and digits, so byte iteration is enough.
-//     题目只有小写 ASCII 字母和数字，因此按 byte 遍历即可。
-//  3. ASCII digits are in the continuous range from '0' to '9'.
-//     ASCII 数字字符位于连续区间 '0' 到 '9' 中。
-//  4. Replace one digit character with the whole word "number".
-//     遇到一个数字字符，就写入完整单词 "number"。
-//  5. Keep lowercase letters unchanged.
-//     小写字母保持不变，直接写入结果。
-//  6. Build and return the final string.
-//     生成并返回最终字符串。
+// 仅将 ASCII '0'..'9' 替换为 "number"，其他字节原样写入；Builder 避免每次拼接都复制已有结果。
+// Replace only ASCII digits with "number" and preserve other bytes; Builder avoids copying prior output on each append.
 func replaceNumber(s string) string {
 	var builder strings.Builder
 
@@ -75,21 +40,10 @@ func replaceNumber(s string) string {
 // Time: O(n), Space: O(n) for the expanded buffer.
 // 时间复杂度：O(n)，空间复杂度：O(n)，由扩容缓冲区产生。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Count the digits first so the final length is known before any writing.
-//     先统计数字个数，这样在写入之前就能知道结果的最终长度。
-//  2. Each digit grows from 1 byte to the 6 bytes of "number", so the result needs 5 extra bytes per digit.
-//     每个数字由 1 个字节变成 "number" 的 6 个字节，因此每个数字多占 5 个字节。
-//  3. read consumes the original text from its end; write fills the enlarged buffer from its end.
-//     read 从原文末尾向前读取，write 从扩容后的末尾向前写入。
-//  4. Write "number" backward so that it reads forward in the finished buffer.
-//     逆序写入 "number" 的字节，最终在缓冲区中读出来才是正序。
-//  5. Letters are copied unchanged to the current write position.
-//     字母原样复制到当前写入位置。
-//  6. write stays at or ahead of read: the gap equals 5 times the digits still unread,
-//     so filling backward never overwrites original bytes that have not been read yet.
-//     write 始终不在 read 左侧：两者的距离等于尚未读取部分中数字的个数乘以 5，
-//     因此从后向前填充不会覆盖还没读过的原文字节。
+// 每个数字从 1 字节变为 6 字节，故新长度为 len(s)+5*digits；从后向前写使 write>=read，不覆盖未读内容。
+// Each digit expands by five bytes, giving len(s)+5*digits; backward filling keeps write>=read and preserves unread input.
+// 写指针向左走，所以 "number" 也必须倒序写入，最终字符串中的顺序才正确。
+// Because write moves left, emit "number" backward so it appears in the correct final order.
 func replaceNumberBackward(s string) string {
 	digits := 0
 	for i := 0; i < len(s); i++ {

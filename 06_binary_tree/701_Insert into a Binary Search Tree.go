@@ -19,30 +19,8 @@ The insertion site is not unique; these implementations attach the new node at t
 
 搜索 5：4 < 5 → 右到 7；7 > 5 → 左为空，把 5 接到 7.Left。
 Search for 5: 4 < 5 → right to 7; 7 > 5 → left is empty, attach 5 as 7.Left.
-
-关键逻辑 / Key Logic
-插入 = 按 BST 搜索，走到本应放置 val 的空链接，新建节点挂上。
-不会替换已有节点；题目保证 val 不与现有值冲突。
-插入后树可能更不平衡，本题不要求旋转维护平衡。
-Insertion is a BST search that stops at the empty link where val belongs, then allocates a node there.
-Existing nodes are never replaced; val is guaranteed distinct.
-The tree may become more skewed; this problem does not require rebalancing rotations.
-
-解法一：递归 / Method 1: Recursion
-空位置就是插入点，新建节点返回给父节点接上。
-当前值大于 val 则插入左子树，否则插入右子树，并把返回的子树根赋回孩子指针。
-An empty child is the insertion site: allocate a node and return it to the parent.
-Insert left when the current value is greater than val, otherwise right, and assign the returned subtree.
-
-解法二：迭代（推荐） / Method 2: Iteration (Recommended)
-先记住父节点，再按大小向下走。走到空时把新节点接到父节点对应的一侧。
-空树直接返回新节点。
-Keep walking left or right. When the next child is nil, attach the new node there.
-An empty tree returns the new node itself.
-
-时间与空间复杂度 / Time and Space Complexity
-h 为树高。两版时间 O(h)。递归辅助空间 O(h)；迭代 O(1)。
-For height h, both take O(h) time. Recursion uses O(h) space; iteration uses O(1).
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Recursion: replace a nil child with the new node, otherwise recurse into the ordered side and assign the result.
@@ -50,11 +28,10 @@ For height h, both take O(h) time. Recursion uses O(h) space; iteration uses O(1
 // Time: O(h), Space: O(h).
 // 时间复杂度：O(h)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Empty link: this is the insertion site.
-//     空链接：这里就是插入点。
-//  2. Attach on the side that preserves BST order, then return the unchanged root.
-//     挂到能保持 BST 有序的一侧，再返回（子树根仍是）当前根。
+// 按 BST 比较沿唯一搜索路径找空位，只新增叶子，不重排原节点；递归版必须接回子调用返回的新根。
+// Follow the BST search path to an empty slot and add one leaf; recursive calls must reconnect the returned subtree root.
+// 按题意待插入值原先不存在；当前代码未单独处理重复值。
+// Assume the inserted value is absent as required by the problem; duplicate values are not separately handled.
 func insertIntoBST(root *TreeNode, val int) *TreeNode {
 	if root == nil {
 		return &TreeNode{Val: val}
@@ -73,13 +50,10 @@ func insertIntoBST(root *TreeNode, val int) *TreeNode {
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Empty tree: the new node is the root.
-//     空树：新节点就是根。
-//  2. Next left is empty: attach here; otherwise keep walking left.
-//     左孩子为空则挂上；否则继续向左。
-//  3. Symmetric case on the right spine.
-//     右链上的对称情况。
+// 按 BST 比较沿唯一搜索路径找空位，只新增叶子，不重排原节点；递归版必须接回子调用返回的新根。
+// Follow the BST search path to an empty slot and add one leaf; recursive calls must reconnect the returned subtree root.
+// 按题意待插入值原先不存在；当前代码未单独处理重复值。
+// Assume the inserted value is absent as required by the problem; duplicate values are not separately handled.
 func insertIntoBSTIterative(root *TreeNode, val int) *TreeNode {
 	node := &TreeNode{Val: val}
 

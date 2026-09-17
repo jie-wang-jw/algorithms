@@ -22,28 +22,8 @@ val=2 → 返回以 2 为根的子树：
   1   3
 val=5 → 沿 4→7 后落到空，返回 nil。
 val=2 returns the subtree rooted at 2; val=5 walks 4→7 then falls off to nil.
-
-关键逻辑 / Key Logic
-普通二叉树搜索最坏要看整棵树；BST 每次比较后只进入一侧，路径唯一。
-当前值 > val → 只可能在左；当前值 < val → 只可能在右；相等则找到。
-递归时必须 return 递归调用的结果，否则找到的子树根会在返回途中丢失。
-A plain binary-tree search may scan the whole tree; a BST enters only one child after each comparison.
-Larger current value → go left; smaller → go right; equal → found.
-Recursive calls must return their results, or a found subtree root is discarded on the way up.
-
-解法一：递归（推荐） / Method 1: Recursion (Recommended)
-空节点或当前值等于 val 时返回当前节点；否则只搜一侧并返回该侧结果。
-Return the current node when it is nil or equals val; otherwise search only one side and return that result.
-
-解法二：迭代 / Method 2: Iteration
-不需要栈：按大小原地走向左或右，相等返回，走到空则失败。
-No stack: walk left or right in place, return on a match, fail when the walk hits nil.
-
-时间与空间复杂度 / Time and Space Complexity
-h 为树高。两版时间 O(h)：平衡约 O(log n)，链状最坏 O(n)。
-递归辅助空间 O(h)；迭代 O(1)。
-For height h, both take O(h) time: about O(log n) when balanced, O(n) when skewed.
-Recursion uses O(h) space; iteration uses O(1).
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Recursion (recommended): search only the child that can contain val, and return that call's result.
@@ -51,13 +31,8 @@ Recursion uses O(h) space; iteration uses O(1).
 // Time: O(h), Space: O(h).
 // 时间复杂度：O(h)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Miss (nil) or hit: both are valid stopping points.
-//     没找到（空）或命中：两种都是合法终止。
-//  2. Current value is too large; every right-side value is even larger.
-//     当前值偏大，右子树只会更大，只搜左边。
-//  3. Current value is too small; search only the right subtree.
-//     当前值偏小，只搜右子树。
+// BST 的整棵左树小于根、整棵右树大于根，故比较一次就可排除一侧；命中返回该节点，走到 nil 表示不存在。
+// BST order excludes one whole side per comparison; return the matched node or nil if the search path ends.
 func searchBST(root *TreeNode, val int) *TreeNode {
 	if root == nil || root.Val == val {
 		return root
@@ -75,9 +50,8 @@ func searchBST(root *TreeNode, val int) *TreeNode {
 // Time: O(h), Space: O(1).
 // 时间复杂度：O(h)，空间复杂度：O(1)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Equal: return the subtree rooted here.
-//     相等：返回以当前节点为根的子树。
+// BST 的整棵左树小于根、整棵右树大于根，故比较一次就可排除一侧；命中返回该节点，走到 nil 表示不存在。
+// BST order excludes one whole side per comparison; return the matched node or nil if the search path ends.
 func searchBSTIterative(root *TreeNode, val int) *TreeNode {
 	for root != nil {
 		if root.Val > val {

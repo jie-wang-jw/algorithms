@@ -5,14 +5,14 @@ import (
 	"sync"
 )
 
-// 步骤与要点 / Steps and notes:
-// 1. 用来等待每个数字打印完成
-// 2. 100 个协程对应 100 个 channel
-// 3. 开启 100 个协程
-// 4. 顺序发送 1 到 1000
-// 5. 把数字发送给对应协程
-// 6. 等待这个数字打印完成
-// 7. 关闭所有 channel，让协程退出
+// main
+//
+// 100 个协程各监听一个 channel，数字按 num%100 分配，余数 0 对应第 100 个协程。
+// Each of 100 workers receives from its own channel; num%100 chooses the worker, with remainder zero mapped to worker 100.
+// 主协程发送一个数字后等待 done，打印完成才能发送下一个，因此输出顺序确定为 1..1000。
+// The sender waits for done after each number, so printing finishes before the next send and output stays ordered from 1 to 1000.
+// 最后由发送方关闭全部输入 channel，再用 WaitGroup 等待所有协程退出。
+// The sender closes every input channel after the final acknowledgment, then waits for all workers to exit.
 func main() {
 	done := make(chan struct{})
 

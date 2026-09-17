@@ -27,26 +27,8 @@ For p=5,q=1 the ancestor is 3; for p=5,q=4 it is 5.
 本题是普通二叉树，没有大小关系可用，必须在两侧都搜索，后序合并左右结果，时间 O(n)。
 235 uses BST order and walks only one child per step: O(h).
 This problem is an ordinary binary tree with no value order, so both sides are searched and merged in postorder: O(n).
-
-解法一：后序递归（推荐） / Method 1: Postorder Recursion (Recommended)
-在一个节点处先看左右子树有没有找到 p 或 q。
-左右都非空：p、q 分居两侧，当前节点就是 LCA。
-只有一侧非空：两个目标都在这一侧，把这一侧的返回值继续向上传。
-当前节点本身就是 p 或 q：即使另一侧还没看完，这个节点也已经是候选祖先。
-Search both children first.
-Both nonempty: p and q sit on different sides, so the current node is the LCA.
-Only one nonempty: both targets are in that subtree; propagate that result upward.
-If the current node is p or q, it is already an ancestor candidate.
-
-解法二：父指针迭代 / Method 2: Parent Pointers
-先遍历整棵树记录每个节点的父指针，再把 p 到根的路径放入集合，沿 q 的父链向上，第一个已出现的节点就是 LCA。
-Record parent pointers, store the path from p to the root, then walk from q until a recorded ancestor is found.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高。递归时间 O(n)，辅助空间 O(h)。
-父指针法时间 O(n)，辅助空间 O(n)。
-For n nodes and height h, recursion takes O(n) time and O(h) space.
-The parent-pointer version takes O(n) time and O(n) space.
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Postorder recursion (recommended): a node is the LCA iff p and q are discovered in different subtrees, or it is p or q itself.
@@ -54,13 +36,10 @@ The parent-pointer version takes O(n) time and O(n) space.
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Empty branch, or this node is p/q: stop and report upward.
-//     空分支，或当前就是 p/q：停止并向上回报。
-//  2. Targets found on both sides: this node is the lowest common ancestor.
-//     左右都找到目标：当前节点就是最近公共祖先。
-//  3. Only one side hit: both targets lie in that subtree (or only one was under this node).
-//     只有一侧非空：两个目标都在那一侧（或本子树只覆盖其中一个）。
+// 要求 p、q 都在树中；递归返回该子树找到的目标或已确定的祖先，nil 表示未找到。
+// Require both targets in the tree; return a found target or established ancestor, with nil meaning neither was found.
+// 左右都非空说明目标分居两侧，当前根就是祖先；仅一侧非空就向上传递该结果，命中自身也直接返回。
+// Two nonnil child results split the targets at the current root; propagate a single result, and return immediately on a target node.
 func lowestCommonAncestor(root, p, q *TreeNode) *TreeNode {
 	if root == nil || root == p || root == q {
 		return root
@@ -84,11 +63,10 @@ func lowestCommonAncestor(root, p, q *TreeNode) *TreeNode {
 // Time: O(n), Space: O(n).
 // 时间复杂度：O(n)，空间复杂度：O(n)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. BFS/level walk to record every node's parent until both p and q are known.
-//     层序记录每个节点的父指针，直到 p、q 都已入表。
-//  2. Mark the path from p to the root, then climb from q until a marked ancestor appears.
-//     先标记 p 到根的路径，再从 q 向上爬，遇到已标记的祖先即为 LCA。
+// 先建立节点地址→父节点映射，标记 p 到根的祖先链；q 从自身向上遇到的第一个已标记节点就是最近公共祖先。
+// Build parent links by node identity and mark p's ancestor chain; the first marked node on q's upward path is the LCA.
+// 按题意要求 p、q 均存在且非空，值相同不能代替节点身份。
+// Assume both targets exist and are nonnil; equal values do not replace node identity.
 func lowestCommonAncestorParents(root, p, q *TreeNode) *TreeNode {
 	if root == nil {
 		return nil

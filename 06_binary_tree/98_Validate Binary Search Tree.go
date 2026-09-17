@@ -25,26 +25,8 @@ In the right tree, 4 looks like a larger right child of 5, yet 3 sits in 5's rig
 中序遍历 BST 会得到严格递增序列，验证就变成检查这个顺序。
 Do not only compare a node with its immediate children.
 Inorder traversal of a BST is strictly increasing, so validation checks that order.
-
-解法一：中序写入数组 / Method 1: Inorder Array
-中序收集全部节点值，再检查是否严格递增。最直观，额外 O(n) 数组。
-Collect every inorder value, then check that the slice is strictly increasing.
-
-解法二：中序递归比较前驱（推荐） / Method 2: Inorder Recursion with a Predecessor (Recommended)
-中序过程中保存上一个访问的节点。当前值必须严格大于前驱，否则立刻失败。
-用节点指针而不是 int 最小值作初始前驱，避免根值等于 int 最小值时误判。
-Keep the previously visited node during inorder. The current value must be strictly greater than that predecessor.
-Use a node pointer, not a minimum int, so a root equal to math.MinInt still works.
-
-解法三：中序迭代 / Method 3: Iterative Inorder
-用栈模拟中序，同样用前驱指针检查严格递增。
-Simulate inorder with a stack and the same predecessor check.
-
-时间与空间复杂度 / Time and Space Complexity
-n 为节点数，h 为树高。三版时间都是 O(n)。
-数组版辅助空间 O(n)；递归版 O(h)；迭代版 O(h)。
-For n nodes and height h, all three take O(n) time.
-The array version uses O(n) extra space; recursion and iteration use O(h).
+复杂度记号：n 为节点数，h 为树高，w 为最大层宽；辅助空间不含返回结果。
+Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
 // 1. Inorder array: convert the tree to values, then reject any non-increasing adjacent pair.
@@ -52,9 +34,10 @@ The array version uses O(n) extra space; recursion and iteration use O(h).
 // Time: O(n), Space: O(n).
 // 时间复杂度：O(n)，空间复杂度：O(n)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Adjacent equals or inversions both invalidate a BST.
-//     相邻相等或逆序都不是合法 BST。
+// 严格 BST 等价于中序严格递增；必须比较相邻中序值，而不是只看每个节点与直接孩子的大小。
+// A strict BST has strictly increasing inorder; compare neighboring inorder values, not only each parent with its immediate children.
+// 相等也判非法；prev 节点是否为空标记“还没前驱”，避免用某个整数哨兵误排除极值。
+// Equal values are invalid too; predecessor-node presence avoids numeric sentinels that could reject extreme values.
 func isValidBST(root *TreeNode) bool {
 	values := make([]int, 0)
 	collectInorder(root, &values)
@@ -71,6 +54,9 @@ func isValidBST(root *TreeNode) bool {
 // 中序收集：按左、根、右的顺序把节点值写入切片。
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
+//
+// 按左→根→右写入同一个结果切片；指针参数使追加后的切片头能回传给调用方。
+// Append left→root→right into one slice; the pointer parameter propagates its updated slice header to the caller.
 func collectInorder(node *TreeNode, values *[]int) {
 	if node == nil {
 		return
@@ -85,11 +71,10 @@ func collectInorder(node *TreeNode, values *[]int) {
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Left subtree must already be a valid increasing sequence.
-//     左子树必须已经构成合法递增序列。
-//  2. Current value must be strictly greater than the previous inorder value.
-//     当前值必须严格大于中序前驱。
+// 严格 BST 等价于中序严格递增；必须比较相邻中序值，而不是只看每个节点与直接孩子的大小。
+// A strict BST has strictly increasing inorder; compare neighboring inorder values, not only each parent with its immediate children.
+// 相等也判非法；prev 节点是否为空标记“还没前驱”，避免用某个整数哨兵误排除极值。
+// Equal values are invalid too; predecessor-node presence avoids numeric sentinels that could reject extreme values.
 func isValidBSTInorder(root *TreeNode) bool {
 	var prev *TreeNode
 	var valid func(*TreeNode) bool
@@ -116,9 +101,10 @@ func isValidBSTInorder(root *TreeNode) bool {
 // Time: O(n), Space: O(h).
 // 时间复杂度：O(n)，空间复杂度：O(h)。
 //
-// 步骤与要点 / Steps and notes:
-//  1. Descend left, saving ancestors to visit after the left subtree.
-//     先向左深入，祖先稍后在左子树完成后访问。
+// 严格 BST 等价于中序严格递增；必须比较相邻中序值，而不是只看每个节点与直接孩子的大小。
+// A strict BST has strictly increasing inorder; compare neighboring inorder values, not only each parent with its immediate children.
+// 相等也判非法；prev 节点是否为空标记“还没前驱”，避免用某个整数哨兵误排除极值。
+// Equal values are invalid too; predecessor-node presence avoids numeric sentinels that could reject extreme values.
 func isValidBSTIterative(root *TreeNode) bool {
 	stack := []*TreeNode{}
 	var prev *TreeNode

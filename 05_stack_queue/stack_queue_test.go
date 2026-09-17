@@ -208,22 +208,12 @@ type queueUnderTest interface {
 	Empty() bool
 }
 
-// 步骤与要点 / Steps and notes:
-//  1. Both implementations must agree; one defers the O(n) work to Pop, the other pays it on Push.
-//     两种实现的外部行为必须一致：一种把 O(n) 推迟到 Pop，另一种在 Push 时就付出代价。
-//  2. This one has no constructor and must work straight from its zero value.
-//     这种实现没有构造函数，必须直接从零值开始就能工作。
-//  3. Verify FIFO order, including pushes performed while outStack still has data.
-//     验证先进先出顺序，包括 outStack 尚有元素时继续入队的情况。
-//  4. Peek must not consume the front element.
-//     Peek 不能消耗队首元素。
-//  5. Pushing here leaves the out-stack nonempty, so a premature refill would
-//     bury the older value 2 underneath the newer value 3 and break FIFO.
-//     此时 outStack 非空，如果提前转移，就会把较新的 3 压在较旧的 2 上面，破坏先进先出。
-//  6. A single element exercises the smallest nonempty transfer.
-//     单个元素用于检验最小规模的转移。
-//  7. Interleave pushes and pops so a refill happens with items still pending on both sides.
-//     交错入队和出队，让转移发生在两侧都还有元素的时刻。
+// TestMyQueue
+//
+// 检查两种队列的 FIFO 顺序，以及 Peek 不移除元素。
+// Check FIFO behavior and non-removing Peek for both queue implementations.
+// 交错 Push/Pop 验证惰性版只在输出栈为空时转移，避免新元素插到尚未出队的旧元素前面。
+// Interleaved Push/Pop checks that the lazy queue transfers only when its output stack is empty, preserving older entries first.
 func TestMyQueue(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -420,26 +410,12 @@ func TestEvalRPN(t *testing.T) {
 	}
 }
 
-// 步骤与要点 / Steps and notes:
-//  1. Cover the standard case, boundary window sizes, decreasing input,
-//     and duplicate maximum values.
-//     覆盖标准情况、窗口边界、递减数组和重复最大值。
-//  2. The maximum leaves the window, so front eviction must actually happen.
-//     最大值会离开窗口，因此队首过期删除必须真正生效。
-//  3. Nothing is ever displaced from the back, so the deque and the lazy heap both grow.
-//     队尾元素从不被挤掉，因此单调队列和惰性堆都会不断增长。
-//  4. Every push clears the entire back, so the deque never holds more than one index.
-//     每次入队都会清空整个队尾，因此单调队列始终只保存一个下标。
-//  5. Back popping uses <=, so an equal newer value replaces the older one.
-//     队尾弹出条件是 <=，因此数值相等时用更晚的下标替换更早的下标。
-//  6. All-negative input rules out a zero-valued neutral initial maximum.
-//     全负数输入可以排除把初值误设为 0 的写法。
-//  7. A window length that does not divide the input exercises the trailing partial block.
-//     窗口长度不能整除输入长度，用来检验末尾不足一整块的情况。
-//  8. Give each implementation its own copy so a mutation cannot leak between them.
-//     每种实现使用独立副本，避免某种实现误改输入后影响其他实现。
-//  9. None of the four methods may modify the input array.
-//     四种解法都不允许修改输入数组。
+// TestMaxSlidingWindow
+//
+// 覆盖最大值过期、重复值、单调序列和尾部不足整块；同时检查输入未被修改。
+// Cover expired maxima, duplicates, monotone inputs and a partial trailing block, also checking input preservation.
+// 递增输入会使惰性堆积累非堆顶的过期小值；单调队列及时淘汰候选，最多保存 k 个下标。
+// Increasing input lets a lazy heap retain expired smaller entries below its root; the deque removes dominated candidates and keeps at most k indices.
 func TestMaxSlidingWindow(t *testing.T) {
 	implementations := []struct {
 		name string
@@ -552,12 +528,10 @@ func TestWindowMaxHeap(t *testing.T) {
 	}
 }
 
-// repeatedValues builds an input in which value i+1 occurs counts[i] times.
-// repeatedValues 构造输入：第 i 个值恰好出现 counts[i] 次。
+// repeatedValues
 //
-// Distinct counts give every value a distinct rank, so the expected answer set
-// stays uniquely determined no matter where the k boundary falls.
-// 各值出现次数互不相同，因此每个值的名次唯一，无论 k 取在哪里，期望答案集合都唯一确定。
+// 生成测试数据：数值 i+1 重复 counts[i] 次，便于直接指定每个值的频率。
+// Generate value i+1 exactly counts[i] times so tests can specify frequencies directly.
 func repeatedValues(counts ...int) []int {
 	nums := []int{}
 	for i, count := range counts {
@@ -568,38 +542,12 @@ func repeatedValues(counts ...int) []int {
 	return nums
 }
 
-// 步骤与要点 / Steps and notes:
+// TestTopKFrequent
 //
-//  1. Result order is not part of the contract, so each result and expected
-//     slice is sorted before comparison.
-//     题目不要求结果顺序，因此比较前分别对实际结果和预期结果排序。
-//
-//     Every case has a uniquely determined answer set: no tied frequency straddles the
-//     k boundary, which would make several different return values equally correct
-//     and leave nothing for the test to compare against.
-//     每个用例的答案集合都唯一确定：没有并列频次跨越第 k 名边界，
-//     否则多个不同的返回值都算正确，测试就失去了可比较的期望值。
-//
-//  2. One distinct value repeated: the bucket index reaches len(nums), the highest slot.
-//     只有一个不同的值且重复出现：桶下标会取到 len(nums)，也就是最高的那一格。
-//
-//  3. k covers the whole array, so every distinct value must be returned.
-//     k 覆盖整个数组，因此所有不同的值都必须返回。
-//
-//  4. Eight distinct frequency levels force quickselect through several partition rounds
-//     and make the bucket scan walk down from len(nums) to the highest occupied bucket.
-//     八个互不相同的频次会让快速选择经过多轮划分，
-//     也让桶扫描从 len(nums) 一直向下走到真正有元素的最高桶。
-//
-//  5. A high k puts the target rank near the least frequent end, so quickselect must
-//     advance past the equal band into the lower-frequency side.
-//     k 较大时目标名次靠近最低频端，快速选择必须越过等频段进入低频一侧。
-//
-//  6. Quickselect reorders its own working slice, so verify the input survives.
-//     快速选择会重排自己的工作切片，因此要确认输入本身没有被改动。
-//
-//  7. Copy want so sorting does not modify the table entry.
-//     复制 want，避免排序修改表格中的原始测试数据。
+// 结果顺序不限，因此排序后比较；用例选取确定的前 k 项集合，并检查输入未修改。
+// Sort results before comparison because order is unspecified; cases use an unambiguous top-k set and check input preservation.
+// 多频率层级覆盖不同 k 的选择，但随机枢轴仍可能一次命中，不能保证执行多轮快速选择。
+// Several frequency levels exercise different k values, but a random pivot may hit immediately and does not guarantee multiple quickselect rounds.
 func TestTopKFrequent(t *testing.T) {
 	implementations := []struct {
 		name string
