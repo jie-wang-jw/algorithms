@@ -12,6 +12,8 @@ The article asks for in-string reversals without an extra n-length workspace.
 Go strings are immutable, so a []byte copy is still required.
 */
 
+// 面试首选 / Interview first choice：卡码 55 右旋字符串。
+//
 // 1. Reverse all, then reverse each part
 // 1. 先整体反转，再反转两段
 // Full reverse swaps the two blocks; then reverse each block to restore letter order inside them.

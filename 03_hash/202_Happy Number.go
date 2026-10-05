@@ -8,6 +8,8 @@ Repeatedly replace a positive integer n with the sum of the squares of its digit
 Return whether this process eventually reaches 1 rather than entering a cycle.
 */
 
+// 面试首选 / Interview first choice：202 快乐数。
+//
 // 1. Hash set of seen values: a repeated intermediate number means the sequence is cycling.
 // 1. 哈希集合判重：中间结果再次出现即进入循环。
 // Time: O(d) for d decimal digits, Space: O(d) for the hash set.

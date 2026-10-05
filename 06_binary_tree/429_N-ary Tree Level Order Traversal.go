@@ -14,6 +14,8 @@ visit nodes level by level from left to right.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：429 N 叉树的层序遍历。
+//
 // 1. Level-by-level queue: capture levelSize, then enqueue every child.
 // 1. 队列层序：先固定 levelSize，再把每个孩子入队。
 // Time: O(n), Space: O(w) for the queue.

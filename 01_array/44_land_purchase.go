@@ -66,6 +66,8 @@ func landPurchasePrefix(grid [][]int) int {
 	return result
 }
 
+// 面试首选 / Interview first choice：卡码 44 开发商购买土地。
+//
 // 2. Accumulate while scanning
 // 2. 遍历时累加
 // Update at each row end and each column end without storing separate row/column sums.

@@ -30,6 +30,8 @@ func removeElementBruteForce(nums []int, val int) int {
 	return size
 }
 
+// 面试首选 / Interview first choice：27 移除元素。
+//
 // 2. Fast and slow pointers: fast reads every element, slow writes only the kept ones.
 // 2. 快慢指针法：fast 读取每个元素，slow 只写入需要保留的元素。
 // Time: O(n), Space: O(1).
@@ -39,6 +41,8 @@ func removeElementBruteForce(nums []int, val int) int {
 // nums[:slow] holds retained values; fast scans once and copies each non-val value to the next output position.
 // slow<=fast 保证写入不覆盖未读元素，保留相对顺序；返回 slow，尾部内容不属于答案。
 // slow<=fast protects unread values and preserves order; only the returned prefix belongs to the result.
+//
+// 边界：空数组返回 0；原地改写，只有返回长度以内的前缀有效。
 func removeElementFastSlow(nums []int, val int) int {
 	slow := 0
 

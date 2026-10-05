@@ -10,6 +10,8 @@ Given two lowercase English strings s and t, determine whether t is an anagram o
 meaning both contain exactly the same characters with the same frequencies.
 */
 
+// 面试首选 / Interview first choice：242 有效的字母异位词。
+//
 // 1. Fixed 26-slot frequency array: count s, then decrement with t.
 // 1. 固定 26 计数数组：分两次遍历。
 // Time: O(n+m), Space: O(1).

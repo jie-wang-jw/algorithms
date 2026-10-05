@@ -10,6 +10,8 @@ Given an integer array nums and an integer target, return the indices of two dis
 Exactly one answer is guaranteed.
 */
 
+// 面试首选 / Interview first choice：1 两数之和。
+//
 // 1. Hash map in one pass: store every seen value with its index and look up target-num. Recommended.
 // 1. 哈希表一次遍历：把见过的数字连同下标存入哈希表，再查找 target-num。推荐。
 // Time: O(n) expected, Space: O(n) for the hash map.
@@ -17,6 +19,8 @@ Exactly one answer is guaranteed.
 //
 // seen 保存当前下标之前的“值→下标”；先查 target-num 再存 num，避免同一元素被使用两次。
 // seen maps earlier values to indices; look up target-num before insertion to avoid using one element twice.
+//
+// 边界：按题意有唯一解；相同数值必须来自两个不同下标，例如 [3,3] 配成 6。
 func twoSum(nums []int, target int) []int {
 	seen := map[int]int{}
 

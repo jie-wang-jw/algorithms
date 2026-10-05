@@ -7,6 +7,8 @@ Given a linked list, swap every two adjacent nodes and return the resulting head
 Nodes themselves must be swapped rather than merely changing their values.
 */
 
+// 面试首选 / Interview first choice：24 两两交换链表中的节点。
+//
 // 1. Dummy-head iteration: reconnect three links per pair and advance to the next pair.
 // 1. 虚拟头节点迭代：每对节点重连三条指针，然后移动到下一对。
 // Time: O(n), Space: O(1).

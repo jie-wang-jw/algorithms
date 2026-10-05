@@ -11,6 +11,8 @@ Given an integer array nums and a window size k, move the window one position at
 time from left to right and return the maximum value in every window.
 */
 
+// 面试首选 / Interview first choice：239 滑动窗口最大值。
+//
 // 1. Monotonic decreasing deque (recommended): drop expired fronts and weaker backs so the front is the window max.
 // 1. 单调递减队列：推荐；删除过期队首和不大于当前值的队尾，队首始终是窗口最大值。
 // Time: O(n), Space: O(k) for the deque plus O(n-k+1) output.

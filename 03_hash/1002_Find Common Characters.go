@@ -13,12 +13,14 @@ Each words[i] contains only lowercase letters.
 ["bella","label","roller"] → ["e","l","l"]
 */
 
+// 面试首选 / Interview first choice：1002 查找共用字符。
+//
 // 1. 26-slot frequency minima (recommended)
 // 1. 26 计数数组取最小值（推荐）
 // Seed from the first string, then take per-letter min against every later string; expand surviving counts into the answer.
 // 用第一个字符串初始化频次，再对其余串逐字母取 min；把幸存次数展开成结果。
-// Time: O(L) for L total characters, Space: O(1).
-// 时间复杂度：O(L)（L 为全部字符数），空间复杂度：O(1)。
+// Time: O(L) for L total characters; auxiliary space O(1), output O(r) for r common characters.
+// 时间复杂度：O(L)（L 为全部字符数）；辅助空间 O(1)，输出 r 个公共字符另占 O(r)。
 //
 // 仅适用于小写 a-z。hash[c] 是已处理所有单词中 c 次数的最小值；新单词逐字母取 min，得到多重集合交集。
 // For lowercase a-z, hash[c] is the minimum count across processed words; taking minima computes the multiset intersection.

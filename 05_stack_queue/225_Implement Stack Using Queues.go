@@ -19,10 +19,17 @@ type MyStack struct {
 	queue []int
 }
 
+// StackConstructor 面试首选 / Interview first choice：225 用队列实现栈。
+//
 // StackConstructor Create an empty stack backed by one queue already stored in stack order.
 // 创建一个空栈，底层单个队列已按栈序准备好。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
+//
+// 状态：queue 从队首到队尾保存栈顶到栈底；每次 Push 后仍保持此顺序。
+// 正确性：新值先入队，再把原有元素逐个转到队尾，新值便成为队首，旧元素的相对顺序不变。
+// 边界：Pop/Top 要求非空；整套实现包括 MyStack 的 Push、Pop、Top、Empty。
+// 整套操作：Push O(n)，Pop/Top/Empty O(1)，底层队列存储 O(n)；上面的 O(1) 仅指构造。
 func StackConstructor() MyStack {
 	return MyStack{
 		queue: make([]int, 0),

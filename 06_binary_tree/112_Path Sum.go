@@ -27,6 +27,8 @@ For targetSum=9, prefix 5->4 is not enough: node 4 is not a leaf.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：112 路径总和。
+//
 // 1. Recursion with a remaining target: subtract the current value, then succeed only at a leaf whose remainder is 0.
 // 1. 递归传递剩余目标：先扣除当前值，只有到达叶子且剩余为 0 才成功。
 // Time: O(n), Space: O(h).

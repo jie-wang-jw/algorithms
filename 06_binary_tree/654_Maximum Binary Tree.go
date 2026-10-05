@@ -23,6 +23,8 @@ nums = [3,2,1,6,0,5]
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：654 最大二叉树。
+//
 // 1. Recursive slicing: scan the current slice for the maximum, then recurse on the left and right subarrays.
 // 1. 递归切片：在当前切片中找最大值，再对左右两侧子数组递归构造。
 // Time: O(n²) worst case, Space: O(h) plus O(n) for the output tree.

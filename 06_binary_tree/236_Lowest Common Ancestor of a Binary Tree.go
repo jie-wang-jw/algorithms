@@ -31,6 +31,8 @@ This problem is an ordinary binary tree with no value order, so both sides are s
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：236 二叉树的最近公共祖先。
+//
 // 1. Postorder recursion (recommended): a node is the LCA iff p and q are discovered in different subtrees, or it is p or q itself.
 // 1. 后序递归：推荐；左右都找到目标，或当前节点就是 p/q，则当前节点是 LCA。
 // Time: O(n), Space: O(h).

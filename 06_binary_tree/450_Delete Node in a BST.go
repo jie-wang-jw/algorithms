@@ -67,6 +67,8 @@ no separate “copy successor value, then delete the successor node” step.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：450 删除二叉搜索树中的节点。
+//
 // 1. Recursion (recommended): search by BST order, then replace the node with nil, one child, or the rewired right subtree.
 // 1. 递归：推荐；按 BST 找到目标后，用空、单孩子或改接后的右子树替换它。
 // Time: O(h), Space: O(h).
@@ -74,6 +76,9 @@ Notation: n nodes, height h, maximum width w; auxiliary space excludes returned 
 //
 // 按 BST 大小关系只递归可能含 key 的一侧；递归返回删除后的子树根，必须重新接到 root.Left/Right。
 // Use BST ordering to recurse into one side; reconnect the returned subtree root because deletion may replace that root.
+//
+// 关键操作：双孩子时把左子树接到右子树最左节点的空左侧，再返回右子树根；左树所有值更小，因此仍满足 BST。
+// 边界：叶子返回 nil，只有一个孩子时返回该孩子；key 不存在时保留原树。
 func deleteNode(root *TreeNode, key int) *TreeNode {
 	if root == nil {
 		return nil

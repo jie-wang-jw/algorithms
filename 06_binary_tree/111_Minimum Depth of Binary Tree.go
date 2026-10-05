@@ -47,6 +47,8 @@ func minDepth(root *TreeNode) int {
 	return min(leftDepth, rightDepth) + 1
 }
 
+// 面试首选 / Interview first choice：111 二叉树的最小深度。
+//
 // 2. Breadth-first search: return the current depth at the first node whose both children are nil.
 // 2. 层序遍历：第一次遇到左右孩子都为空的节点，当前层数就是最小深度。
 // Time: O(n), Space: O(w) for the queue.
@@ -54,6 +56,8 @@ func minDepth(root *TreeNode) int {
 //
 // BFS 按深度递增处理，第一次遇到左右孩子都空的叶子，其深度就是最短深度。
 // BFS processes increasing depths; the first node with no children is a leaf at minimum depth.
+//
+// 边界：空树深度为 0；只有一个孩子的节点不是叶子，不能在缺失的一侧提前结束。
 func minDepthIterative(root *TreeNode) int {
 	if root == nil {
 		return 0

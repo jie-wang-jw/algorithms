@@ -26,6 +26,8 @@ func sortedSquares(nums []int) []int {
 	return nums
 }
 
+// 面试首选 / Interview first choice：977 有序数组的平方。
+//
 // 2. Two pointers: the largest square must come from one of the two ends.
 // 2. 双指针法：最大平方值一定来自当前区间的最左端或最右端。
 // Time: O(n), Space: O(1) auxiliary beyond the O(n) result.

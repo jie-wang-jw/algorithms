@@ -9,6 +9,8 @@ Each triplet must use elements at three distinct indices.
 
 import "sort"
 
+// 面试首选 / Interview first choice：15 三数之和。
+//
 // 1. Sort + two pointers: fix the first value, then search the rest from both ends. Recommended.
 // 1. 排序 + 双指针：固定第一个数，再在右侧用左右指针寻找另外两个数。推荐。
 // Time: O(n²), Space: O(log n+r) including the sort stack and r triplets.

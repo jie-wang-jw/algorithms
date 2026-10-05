@@ -50,10 +50,12 @@ func getIntersectionNode(headA, headB *ListNode) *ListNode {
 	return fast
 }
 
+// 面试首选 / Interview first choice：面试题 02.07 链表相交。
+//
 // 2. Switch to the other list at nil
 // 2. 走到空时改走另一条链表
-// Both pointers travel n+m nodes and meet at the intersection, or both become nil if none.
-// 两个指针都走 n+m 个节点，在交点相遇；没有交点时同时变成 nil。
+// Switching lists equalizes the distances to the intersection; disjoint lists end at nil together.
+// 换链抵消到交点前的长度差；无交点时最终同时到达 nil，不是固定走满 n+m 个节点才相遇。
 // Time: O(n+m), Space: O(1).
 // 时间复杂度：O(n+m)，空间复杂度：O(1)。
 //

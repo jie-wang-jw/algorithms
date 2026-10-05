@@ -23,6 +23,8 @@ The maximum depth is 3: for example, path 3 -> 20 -> 15 contains three nodes.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：104 二叉树的最大深度。
+//
 // 1. Postorder recursion on heights (recommended): take the larger child height and add one for the current node.
 // 1. 后序递归求高度：推荐；先求左右高度，再取较大值加一。
 // Time: O(n), Space: O(h) for the recursion stack.

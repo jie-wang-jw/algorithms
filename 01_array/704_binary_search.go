@@ -6,6 +6,8 @@ package _1_array
 Given an integer array nums sorted in ascending order and a target value, return the target's index or -1 if it is absent.
 */
 
+// 面试首选 / Interview first choice：704 二分查找。
+//
 // 1. Closed interval [left, right]: both boundaries may contain the target.
 // 1. 左闭右闭区间 [left, right]：左右边界都可能是答案。
 // Time: O(log n), Space: O(1).
@@ -15,6 +17,8 @@ Given an integer array nums sorted in ascending order and a target value, return
 // The candidate interval is inclusive [left,right]; equality still leaves one candidate, hence <=.
 // 有序性保证可排除 mid 及其错误一侧：偏大取 right=mid-1，偏小取 left=mid+1；区间为空返回 -1。
 // Sorted order excludes mid and the wrong side: use mid-1 or mid+1; return -1 when the interval is empty.
+//
+// 边界：要求升序数组；空数组或目标不存在返回 -1，有重复值时不保证返回第一次出现的位置。
 func search2(nums []int, target int) int {
 	left := 0
 	right := len(nums) - 1

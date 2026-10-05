@@ -23,6 +23,8 @@ If every value appears once, every value is a mode.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：501 二叉搜索树中的众数。
+//
 // 1. Inorder recursion (recommended): equal values form a consecutive run, so update the mode list from that run length.
 // 1. 中序递归：推荐；相同值在中序中连成一段，用这一段的长度更新众数列表。
 // Time: O(n), Space: O(h) auxiliary plus O(m) output.

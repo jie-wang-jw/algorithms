@@ -10,6 +10,8 @@ Given four integer arrays nums1, nums2, nums3, and nums4,
 count index tuples satisfying nums1[i] + nums2[j] + nums3[k] + nums4[l] = 0.
 */
 
+// 面试首选 / Interview first choice：454 四数相加 II。
+//
 // 1. Split-group hashing: store every A+B sum in a map, then look up -(C+D). Recommended.
 // 1. 分组哈希：前两数和存 map，再查找后两数和的相反数。推荐。
 // Time: O(n²) expected, Space: O(n²) for the pair-sum map.
@@ -75,13 +77,13 @@ func fourSumCountSorted(a, b, c, d []int) int {
 		} else if sum > 0 {
 			j--
 		} else {
-			x, y := leftSums[i], rightSums[j]
+			leftSum, rightSum := leftSums[i], rightSums[j]
 			startI, startJ := i, j
 
-			for i < len(leftSums) && leftSums[i] == x {
+			for i < len(leftSums) && leftSums[i] == leftSum {
 				i++
 			}
-			for j >= 0 && rightSums[j] == y {
+			for j >= 0 && rightSums[j] == rightSum {
 				j--
 			}
 

@@ -35,6 +35,8 @@ func canConstructBruteForce(ransomNote string, magazine string) bool {
 	return len(note) == 0
 }
 
+// 面试首选 / Interview first choice：383 赎金信。
+//
 // 2. 26-slot frequency array (recommended)
 // 2. 26 计数数组（推荐）
 // Count magazine letters into a 26-slot array, then spend them for ransomNote; a negative count means shortfall.

@@ -70,6 +70,8 @@ func countNodesIterative(root *TreeNode) int {
 	return count
 }
 
+// 面试首选 / Interview first choice：222 完全二叉树的节点个数。
+//
 // 3. Perfect-subtree shortcut (recommended): equal left/right boundary heights yield 2^h-1 without visiting the interior.
 // 3. 满子树公式：推荐；最左、最右路径等高即可直接返回 2^h-1，不必再进入内部。
 // Time: O(log² n), Space: O(log n) for the recursion stack.
@@ -79,6 +81,8 @@ func countNodesIterative(root *TreeNode) int {
 // Only for a complete tree do equal outer-spine heights prove a perfect subtree with 2^h-1 nodes.
 // 否则递归两边；每层至少一边是满子树而可直接计数，因此总时间 O(log² n)，普通二叉树不能套用。
 // Otherwise recurse; at least one child subtree is perfect at each level, yielding O(log² n), not a rule for arbitrary trees.
+//
+// 边界：空树返回 0，单节点返回 1；公式中的高度按节点数计，结果须能用 int 表示。
 func countNodesOptimized(root *TreeNode) int {
 	if root == nil {
 		return 0

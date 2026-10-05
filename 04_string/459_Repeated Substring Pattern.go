@@ -63,6 +63,8 @@ func repeatedSubstringPattern2(s string) bool {
 	return strings.Contains(middle, s)
 }
 
+// 面试首选 / Interview first choice：459 重复的子字符串。
+//
 // 3. KMP longest border: the candidate period is n-L and must divide n.
 // 3. KMP 最长相等前后缀：候选周期为 n-L，且必须整除 n。
 // Time: O(n), Space: O(n) for the prefix table.
@@ -74,6 +76,8 @@ func repeatedSubstringPattern2(s string) bool {
 // A longer border means a smaller shift, so p is the shortest period; L>0 ensures p<n rather than one whole-string copy.
 // 还要 n%p==0 才能全由完整单元组成："abab" 成立；"ababa" 虽有周期 2，却剩半个单元，不成立。
 // Require n%p==0 for complete copies: "abab" qualifies, while period-2 "ababa" ends with an incomplete copy.
+//
+// 边界：先排除空串，避免访问 next[-1]；单字节串没有非空真前后缀，因此返回 false。
 func repeatedSubstringPattern3(s string) bool {
 	n := len(s)
 

@@ -26,6 +26,8 @@ Important details:
 
 import "strconv"
 
+// 面试首选 / Interview first choice：150 逆波兰表达式求值。
+//
 // 1. Explicit stack, forward scan (recommended): push numbers, and each operator pops the right operand then the left.
 // 1. 显式栈从前向后求值：推荐；数字入栈，遇到运算符先弹出右操作数再弹出左操作数。
 // Time: O(n), Space: O(n) for the operand stack.
@@ -56,7 +58,7 @@ func evalRPN(tokens []string) int {
 				result = left - right
 			case "*":
 				result = left * right
-			default:
+			case "/":
 				result = left / right
 			}
 
@@ -95,16 +97,18 @@ func evalRPNRecursive(tokens []string) int {
 
 			left := parse()
 
+			var result int
 			switch token {
 			case "+":
-				return left + right
+				result = left + right
 			case "-":
-				return left - right
+				result = left - right
 			case "*":
-				return left * right
-			default:
-				return left / right
+				result = left * right
+			case "/":
+				result = left / right
 			}
+			return result
 
 		default:
 			value, _ := strconv.Atoi(token)

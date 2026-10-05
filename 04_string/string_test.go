@@ -232,12 +232,27 @@ func TestReverseStr(t *testing.T) {
 		{name: "single character", s: "a", k: 2, want: "a"},
 		{name: "empty string", s: "", k: 2, want: ""},
 		{name: "nonpositive k returns input", s: "abcdef", k: 0, want: "abcdef"},
+		{name: "negative k returns input", s: "abcdef", k: -2, want: "abcdef"},
+		{name: "short final reversed group", s: "abcdefgh", k: 3, want: "cbadefhg"},
+		{name: "multiple complete blocks", s: "abcdefghijkl", k: 3, want: "cbadefihgjkl"},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := reverseStr(tt.s, tt.k); got != tt.want {
-				t.Fatalf("reverseStr(%q, %d) = %q, want %q", tt.s, tt.k, got, tt.want)
+	implementations := []struct {
+		name string
+		fn   func(string, int) string
+	}{
+		{name: "two pointers", fn: reverseStr},
+		{name: "alternating groups", fn: reverseStrAlternating},
+	}
+
+	for _, implementation := range implementations {
+		t.Run(implementation.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					if got := implementation.fn(tt.s, tt.k); got != tt.want {
+						t.Fatalf("%s(%q, %d) = %q, want %q", implementation.name, tt.s, tt.k, got, tt.want)
+					}
+				})
 			}
 		})
 	}

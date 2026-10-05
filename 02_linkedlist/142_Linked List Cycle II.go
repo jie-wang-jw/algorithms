@@ -7,6 +7,8 @@ Given the head of a linked list, return the node where a cycle begins, or nil if
 The list must not be modified.
 */
 
+// 面试首选 / Interview first choice：142 环形链表 II。
+//
 // 1. Floyd's slow and fast pointers: find the meeting point, then walk to the entrance.
 // 1. Floyd 快慢指针：先找到相遇点，再从头和相遇点同速走到入环点。
 // Time: O(n), Space: O(1).
@@ -18,6 +20,8 @@ The list must not be modified.
 // Let a be the entry distance, b the entry-to-meeting distance and c the cycle length; slow travels t=a+b+k*c and fast gains t, a multiple of c.
 // 因此 a+b≡0(mod c)：从头和相遇点各走 a 步都会到入口；两者改为每次一步，首次相遇即入口。
 // Thus a+b is divisible by c; moving one pointer from the head and one from the meeting point at equal speed finds the entry.
+//
+// 边界：快指针遇到 nil 即无环，返回 nil；空链和单节点自环也按同一逻辑处理。
 func detectCycle(head *ListNode) *ListNode {
 	slow, fast := head, head
 

@@ -96,6 +96,8 @@ func generateMatrixSimulation(n int) [][]int {
 	return result
 }
 
+// 面试首选 / Interview first choice：59 螺旋矩阵 II。
+//
 // 3. Ring by ring: fill four half-open edges per ring, then the center when n is odd.
 // 3. 逐圈填充法：每圈填四条左闭右开的边，n 为奇数时最后单独填中心格。
 // Time: O(n²), Space: O(1) auxiliary beyond the O(n²) output matrix.

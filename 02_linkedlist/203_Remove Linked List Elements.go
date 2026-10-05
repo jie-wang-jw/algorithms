@@ -38,6 +38,8 @@ func removeElementsDirect(head *ListNode, val int) *ListNode {
 	return head
 }
 
+// 面试首选 / Interview first choice：203 移除链表元素。
+//
 // 2. Dummy head (recommended)
 // 2. 虚拟头节点（推荐）
 // Dummy gives every real node a predecessor so deletion uses one loop; stay at cur after a skip.
@@ -47,6 +49,8 @@ func removeElementsDirect(head *ListNode, val int) *ListNode {
 //
 // dummy 为真实头也提供前驱；cur.Next 是待检查节点。删除后 cur 不动，确保连续匹配项都被删除。
 // dummy supplies a predecessor even for the head; inspect cur.Next and keep cur fixed after deletion to catch consecutive matches.
+//
+// 边界：空链返回 nil；连续删除头节点或删除全部节点，都通过 dummy.Next 返回新头。
 func removeElements(head *ListNode, val int) *ListNode {
 	dummy := &ListNode{Next: head}
 	cur := dummy

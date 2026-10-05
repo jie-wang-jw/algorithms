@@ -26,6 +26,8 @@ import (
 	"strings"
 )
 
+// 面试首选 / Interview first choice：257 二叉树的所有路径。
+//
 // 1. Recursion with a path string: append the current value onto an immutable prefix; each call owns its own string.
 // 1. 递归传递路径字符串：把当前值拼到不可变前缀上，每次调用拥有自己的字符串。
 // Time: O(nh), Space: O(h²) auxiliary for retained prefixes plus O(S) output, where S is the total output character count.
@@ -35,6 +37,8 @@ import (
 // Append the current value and save only at leaves; immutable string concatenation isolates recursive branches.
 // 路径越深，重复复制的前缀越长，复杂度须计入字符串复制和输出长度。
 // Deeper paths repeatedly copy longer prefixes, so complexity includes string-copy and output lengths.
+//
+// 边界：空树没有路径，单节点本身就是一条路径；只在左右孩子都为空时输出。
 func binaryTreePaths(root *TreeNode) []string {
 	result := []string{}
 

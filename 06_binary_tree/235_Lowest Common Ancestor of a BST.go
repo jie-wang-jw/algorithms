@@ -53,6 +53,8 @@ func lowestCommonAncestorBST(root, p, q *TreeNode) *TreeNode {
 	return root
 }
 
+// 面试首选 / Interview first choice：235 二叉搜索树的最近公共祖先。
+//
 // 2. Iteration (recommended): walk left or right in place until the current node sits between p and q.
 // 2. 迭代：推荐；按大小原地走向左或右，直到当前节点夹在 p 与 q 之间。
 // Time: O(h), Space: O(1).

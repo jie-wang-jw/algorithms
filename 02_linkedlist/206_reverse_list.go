@@ -6,6 +6,8 @@ package _2_linkedlist
 Given the head of a singly linked list, reverse the list and return its new head.
 */
 
+// 面试首选 / Interview first choice：206 反转链表。
+//
 // 1. Iterative two pointers: prev heads the reversed part, cur heads the rest, flipping one link per step.
 // 1. 迭代双指针：prev 是已反转部分的头，cur 是未处理部分的头，每轮反转一条指针。
 // Time: O(n), Space: O(1).
@@ -15,6 +17,8 @@ Given the head of a singly linked list, reverse the list and return its new head
 // prev heads the reversed part and cur the untouched part; save next before reversing the link, then advance both fronts.
 // 不先保存 next 就会丢失原后缀；cur==nil 时 prev 是整条反转链的头。
 // Saving next preserves the original suffix; when cur becomes nil, prev heads the complete reversed list.
+//
+// 边界：要求无环链表；空链返回 nil，单节点无需改接，原链指针会被修改。
 func reverseList(head *ListNode) *ListNode {
 	var prev *ListNode
 	cur := head

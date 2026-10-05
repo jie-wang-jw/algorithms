@@ -12,6 +12,8 @@ import (
 	"os"
 )
 
+// 面试首选 / Interview first choice：卡码 58 区间和。
+//
 // 1. Prefix sums: build prefix once, then answer each query with a single subtraction.
 // 1. 前缀和：预处理出 prefix 数组，之后每次查询只做一次减法。
 // Time: O(n+q) for n values and q queries, Space: O(n) for the nums and prefix arrays.

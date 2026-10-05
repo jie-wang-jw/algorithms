@@ -30,6 +30,8 @@ In the second tree, both 3 nodes are right children. Their values match, but the
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：101 对称二叉树。
+//
 // 1. Recursively compare mirrored positions (recommended): start from the two children and cross outer with inner.
 // 1. 递归比较镜像位置：推荐；从根的两个孩子出发，交叉比较外侧与内侧。
 // Time: O(n), Space: O(h) for the recursion stack.

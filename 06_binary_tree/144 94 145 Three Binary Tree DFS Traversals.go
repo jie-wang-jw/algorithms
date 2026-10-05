@@ -54,6 +54,8 @@ func preorderTraversal(root *TreeNode) []int {
 	return result
 }
 
+// 面试首选 / Interview first choice：144 二叉树的前序遍历。
+//
 // 2. Preorder recursion: record the root before the two child calls.
 // 2. 前序递归：在两次递归之前记录根。
 // Time: O(n), Space: O(h) for the recursion stack.
@@ -61,6 +63,8 @@ func preorderTraversal(root *TreeNode) []int {
 //
 // 三种 DFS 的区别只在写入根值的时机：前序在两个递归前，中序在其间，后序在其后；空节点直接返回。
 // The DFS orders differ only in when the root is emitted: before, between, or after child calls; nil ends recursion.
+//
+// 状态：一次递归处理以 node 为根的整棵子树，result 按根、左、右收集值；两棵子树互不重叠，每个节点恰好访问一次。
 func preorderTraversalRecursive(root *TreeNode) []int {
 	result := make([]int, 0)
 
@@ -118,6 +122,8 @@ func inorderTraversal(root *TreeNode) []int {
 	return result
 }
 
+// 面试首选 / Interview first choice：94 二叉树的中序遍历。
+//
 // 2. Inorder recursion: record the root between the two child calls.
 // 2. 中序递归：在两次递归之间记录根。
 // Time: O(n), Space: O(h) for the recursion stack.
@@ -125,6 +131,8 @@ func inorderTraversal(root *TreeNode) []int {
 //
 // 三种 DFS 的区别只在写入根值的时机：前序在两个递归前，中序在其间，后序在其后；空节点直接返回。
 // The DFS orders differ only in when the root is emitted: before, between, or after child calls; nil ends recursion.
+//
+// 状态：一次递归处理以 node 为根的整棵子树，result 按左、根、右收集值；两棵子树互不重叠，每个节点恰好访问一次。
 func inorderTraversalRecursive(root *TreeNode) []int {
 	result := make([]int, 0)
 
@@ -188,6 +196,8 @@ func postorderTraversal(root *TreeNode) []int {
 	return result
 }
 
+// 面试首选 / Interview first choice：145 二叉树的后序遍历。
+//
 // 2. Postorder recursion: record the root after both child calls return.
 // 2. 后序递归：在两次递归之后记录根。
 // Time: O(n), Space: O(h) for the recursion stack.
@@ -195,6 +205,8 @@ func postorderTraversal(root *TreeNode) []int {
 //
 // 三种 DFS 的区别只在写入根值的时机：前序在两个递归前，中序在其间，后序在其后；空节点直接返回。
 // The DFS orders differ only in when the root is emitted: before, between, or after child calls; nil ends recursion.
+//
+// 状态：一次递归处理以 node 为根的整棵子树，result 按左、右、根收集值；两棵子树互不重叠，每个节点恰好访问一次。
 func postorderTraversalRecursive(root *TreeNode) []int {
 	result := make([]int, 0)
 

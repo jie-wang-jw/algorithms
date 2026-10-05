@@ -14,6 +14,8 @@ Inversion produces a left-right mirror, not an upside-down tree or merely swappe
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：226 翻转二叉树。
+//
 // 1. Preorder recursion (recommended): swap the two child pointers first, then invert each relocated subtree.
 // 1. 前序递归：推荐；先交换左右孩子指针，再分别翻转换位后的两棵子树。
 // Time: O(n), Space: O(h) for the recursion stack; auxiliary space is not O(1).

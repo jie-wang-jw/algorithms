@@ -13,4 +13,8 @@ func main() {
 	for i := 1; i <= 5; i++ {
 		fmt.Println("i =", 100/i)
 	}
+
+	nums := []int{0, 1, 2, 3, 4, 5}
+
+	fmt.Printf("nums: %v\n", nums[0:2])
 }

@@ -21,6 +21,8 @@ Inorder values 1,2,3,4,6; adjacent gaps are 1,1,1,2; the minimum is 1.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：530 二叉搜索树的最小绝对差。
+//
 // 1. Inorder recursion with a predecessor (recommended): the minimum gap is between neighboring inorder values.
 // 1. 中序递归记录前驱：推荐；最小差只可能出现在中序相邻的两个值之间。
 // Time: O(n), Space: O(h).
@@ -30,6 +32,8 @@ Notation: n nodes, height h, maximum width w; auxiliary space excludes returned 
 // In sorted inorder, a nonadjacent difference sums adjacent differences, so the minimum occurs between neighbors.
 // prev 保存前一个访问节点，先计算差再更新 prev；按题目值域使用，差值不溢出且小于哨兵最大 int。
 // prev is the prior visited node; compare before replacing it. Assume problem bounds keep differences below the max-int sentinel.
+//
+// 边界：题目保证至少两个节点；第一次中序访问没有前驱，只记录 prev，不计算差值。
 func getMinimumDifference(root *TreeNode) int {
 	minDiff := int(^uint(0) >> 1)
 	var prev *TreeNode

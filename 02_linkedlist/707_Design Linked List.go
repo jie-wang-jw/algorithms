@@ -20,6 +20,8 @@ type MyLinkedList struct {
 	size  int
 }
 
+// 面试首选 / Interview first choice：707 设计链表。
+//
 // Constructor: dummy-head singly linked list
 // 构造：虚拟头节点单链表
 // Predecessors exist for every real node, so head/tail/middle share one insert/delete pattern.
@@ -28,6 +30,9 @@ type MyLinkedList struct {
 //
 // 创建不存有效数据的虚拟头节点；首个有效节点始终是 dummy.Next，使头部插删也能统一操作前驱。
 // Create a dummy head; the first real node is dummy.Next, so head insertion and deletion use the same predecessor logic.
+// 状态：dummy.Next 是真实头，size 只计真实节点；定位前驱后，插删都只改变前驱与后继之间的连接。
+// 边界：先用 Constructor 初始化；Get/Delete 接受 [0,size)，插入允许 index==size，负下标按头插处理。
+// 整套操作：头插 O(1)，尾插、按下标访问/插删最坏 O(n)；链表存储 O(n)，每次操作辅助空间 O(1)。
 func Constructor() MyLinkedList {
 	return MyLinkedList{dummy: &ListNode{}}
 }

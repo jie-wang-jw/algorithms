@@ -73,6 +73,8 @@ func (h *frequencyHeap) Pop() any {
 	return item
 }
 
+// 面试首选 / Interview first choice：347 前 K 个高频元素。
+//
 // 1. Min-heap of size k (recommended): count frequencies, then evict the least frequent root whenever the heap exceeds k.
 // 1. 大小为 k 的小顶堆：推荐；先统计频次，堆超过 k 就删除频率最低的堆顶。
 // Time: O(n + m log(k+1)) average, Space: O(m+k) for the map and the heap.
@@ -213,7 +215,7 @@ func topKFrequentQuickselect(nums []int, k int) []int {
 				items[i], items[less] = items[less], items[i]
 				less--
 
-			default:
+			case items[i][1] == pivot:
 				i++
 			}
 		}

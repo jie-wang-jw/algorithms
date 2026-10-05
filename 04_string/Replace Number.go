@@ -12,6 +12,8 @@ import (
 	"strings"
 )
 
+// 面试首选 / Interview first choice：卡码 54 替换数字。
+//
 // 1. Scan left to right and build the result with strings.Builder.
 // 1. 从左向右用 Builder 构造结果。
 // Time: O(n), Space: O(n) for the Builder buffer.
@@ -19,6 +21,8 @@ import (
 //
 // 仅将 ASCII '0'..'9' 替换为 "number"，其他字节原样写入；Builder 避免每次拼接都复制已有结果。
 // Replace only ASCII digits with "number" and preserve other bytes; Builder avoids copying prior output on each append.
+//
+// 状态与边界：Builder 保存已扫描前缀的替换结果；空串返回空串，连续数字逐个替换。
 func replaceNumber(s string) string {
 	var builder strings.Builder
 

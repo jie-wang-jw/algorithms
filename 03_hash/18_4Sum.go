@@ -10,6 +10,8 @@ return all unique quadruplets whose sum equals target, using four distinct indic
 
 import "sort"
 
+// 面试首选 / Interview first choice：18 四数之和。
+//
 // 1. Sort + two nested loops + two pointers + pruning: fix two values, then search the rest from both ends. Recommended.
 // 1. 排序 + 双层循环 + 双指针 + 剪枝：固定前两个数，再在剩余区间用左右指针寻找另外两个数。推荐。
 // Time: O(n³), Space: O(log n+r) including the sort stack and r quadruplets.

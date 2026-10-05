@@ -34,6 +34,8 @@ Root 3 exceeds high, so the answer can only come from the left; further trimming
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：669 修剪二叉搜索树。
+//
 // 1. Recursion (recommended): drop the whole left or right subtree when the root is outside [low, high].
 // 1. 递归：推荐；根落在区间外时整侧子树都可以丢掉，只修剪可能合法的一侧。
 // Time: O(n), Space: O(h).

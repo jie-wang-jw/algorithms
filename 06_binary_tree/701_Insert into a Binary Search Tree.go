@@ -23,6 +23,8 @@ Search for 5: 4 < 5 → right to 7; 7 > 5 → left is empty, attach 5 as 7.Left.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：701 二叉搜索树中的插入操作。
+//
 // 1. Recursion: replace a nil child with the new node, otherwise recurse into the ordered side and assign the result.
 // 1. 递归：空孩子处新建节点，否则进入有序的一侧并把返回的子树接回去。
 // Time: O(h), Space: O(h).

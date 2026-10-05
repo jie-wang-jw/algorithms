@@ -41,6 +41,8 @@ func strStr(haystack string, needle string) int {
 	return -1
 }
 
+// 面试首选 / Interview first choice：28 找出字符串中第一个匹配项的下标。
+//
 // 2. KMP prefix table: reuse matched prefix information so the text pointer never retreats.
 // 2. KMP 前缀表：主串指针不回退。
 // Time: O(n+m), Space: O(m) for the prefix table.

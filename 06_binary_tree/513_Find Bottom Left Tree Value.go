@@ -31,6 +31,8 @@ The answer is 7, not 4: node 4 is farther left, but node 7 is deeper.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：513 找树左下角的值。
+//
 // 1. Standard BFS (recommended): save the queue front at each level start so later levels overwrite with a deeper leftmost value.
 // 1. 正常层序遍历：推荐；每层开始时保存队首，更深层会覆盖答案，最终就是最深层最左值。
 // Time: O(n), Space: O(w) for the queue.

@@ -25,6 +25,8 @@ Although 15 lies in the whole tree's right subtree, it is the left child of 20, 
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：404 左叶子之和。
+//
 // 1. Recursion: identify a left leaf from its parent, then always search the right subtree as well.
 // 1. 递归：从父节点判断左孩子是否为叶子，并且右子树也要继续找左叶子。
 // Time: O(n), Space: O(h) for the recursion stack.

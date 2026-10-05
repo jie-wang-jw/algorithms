@@ -19,6 +19,8 @@ Merging starts at the roots. The in-place versions mutate root1 and return it.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：617 合并二叉树。
+//
 // 1. Preorder recursion reusing root1 (recommended): add into root1, then merge both children onto it.
 // 1. 前序递归复用 root1：推荐；把值加到 root1，再把左右孩子的合并结果接回去。
 // Time: O(n), Space: O(h).

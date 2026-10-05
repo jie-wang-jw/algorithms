@@ -31,6 +31,8 @@ func reverseWords(s string) string {
 	return strings.Join(words, " ")
 }
 
+// 面试首选 / Interview first choice：151 反转字符串中的单词。
+//
 // 2. Reverse whole string, then reverse each word
 // 2. 整体反转再逐词反转
 // Normalize spaces, reverse all bytes (flips word order and letters), then reverse each word to restore letters.

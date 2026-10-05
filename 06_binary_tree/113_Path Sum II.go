@@ -29,6 +29,8 @@ For targetSum=22, return [[5,4,11,2],[5,8,4,5]].
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：113 路径总和 II。
+//
 // 1. Recursive backtracking (recommended): append on entry, copy a matching leaf path, then undo before returning.
 // 1. 递归回溯：推荐；进入时加入路径，叶子且剩余为 0 时复制答案，返回前撤销。
 // Time: O(n+S), Space: O(h) auxiliary plus O(S) output, where S is the total number of integers in all returned paths.
@@ -38,6 +40,8 @@ Notation: n nodes, height h, maximum width w; auxiliary space excludes returned 
 // path holds the current root-to-node route and remaining the unmet sum; append on entry and pop on exit to isolate branches.
 // 仅在叶子且 remaining==0 时保存 path 的副本；不复制会让后续回溯覆盖已保存答案。
 // At matching leaves save a copy of path; otherwise later backtracking can overwrite stored answers.
+//
+// 边界：空树返回空结果；允许负值，不能因为剩余目标为负就剪枝。
 func pathSum(root *TreeNode, targetSum int) [][]int {
 	result := [][]int{}
 	path := []int{}

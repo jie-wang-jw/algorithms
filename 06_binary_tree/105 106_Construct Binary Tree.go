@@ -112,6 +112,8 @@ func buildPostorderIndex(inorder []int, inLeft, inRight int, postorder []int, po
 	return root
 }
 
+// 面试首选 / Interview first choice：106 从中序与后序遍历序列构造二叉树。
+//
 // 3. Index map and ranges (recommended): locate the root in average O(1), then split half-open intervals by leftSize = k-inLeft.
 // 3. 哈希表 + 区间递归：优化查找；平均 O(1) 定位根，再用 leftSize = k-inLeft 切分左闭右开区间。
 // Time: O(n) expected, Space: O(n+h) = O(n) for the map and the recursion stack.
@@ -279,6 +281,8 @@ func buildPreorderIndex(preorder []int, preLeft, preRight int, inorder []int, in
 	return root
 }
 
+// 面试首选 / Interview first choice：105 从前序与中序遍历序列构造二叉树。
+//
 // 3. Index map and ranges: the root is preorder[preLeft]; skip it and take leftSize = k-inLeft preorder elements.
 // 3. 哈希表 + 区间递归：根是 preorder[preLeft]，跳过它再取 leftSize = k-inLeft 个前序元素。
 // Time: O(n) expected, Space: O(n+h) = O(n) for the map and the recursion stack.

@@ -21,6 +21,8 @@ Given the root of a binary tree, return its level-order traversal,
 visiting nodes level by level from left to right.
 */
 
+// 面试首选 / Interview first choice：102 二叉树的层序遍历。
+//
 // 1. Level-by-level queue (recommended): save levelSize before enqueuing children so adjacent levels stay separated.
 // 1. 队列层序：推荐；入队孩子之前先固定 levelSize，用来分隔相邻两层。
 // Time: O(n), Space: O(w) for the queue.

@@ -27,6 +27,8 @@ Track the maximum while scanning one captured level.
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：107 二叉树的层序遍历 II。
+//
 // 1. Bottom-up level order: reuse top-down grouping, then reverse the order of levels.
 // 1. 自底向上层序：先按从上到下分层，再反转层与层的顺序。
 // Time: O(n), Space: O(w).
@@ -34,6 +36,8 @@ Notation: n nodes, height h, maximum width w; auxiliary space excludes returned 
 //
 // 先用 levelOrder 保证每层从左到右，再只反转外层层序；不能反转层内节点顺序。
 // Build left-to-right levels with levelOrder, then reverse only the outer level order, not nodes within a level.
+//
+// 边界：空树返回空结果；只反转层的顺序，单层树保持原顺序。
 func levelOrderBottom(root *TreeNode) [][]int {
 	levels := levelOrder(root)
 	for left, right := 0, len(levels)-1; left < right; left, right = left+1, right-1 {
@@ -42,6 +46,8 @@ func levelOrderBottom(root *TreeNode) [][]int {
 	return levels
 }
 
+// 面试首选 / Interview first choice：199 二叉树的右视图。
+//
 // 2. Right side view: the last node of each captured level is the rightmost value on that level.
 // 2. 右视图：每一层固定数量中的最后一个节点，就是该层最右侧的值。
 // Time: O(n), Space: O(w).
@@ -49,6 +55,8 @@ func levelOrderBottom(root *TreeNode) [][]int {
 //
 // 每层按从左到右出队，最后出队者才是该层最右节点；不要求它一定是父节点的右孩子。
 // Each level leaves the queue left to right, so its final node is visible from the right even if it is a left child.
+//
+// 状态与边界：queue 保存待处理节点，每轮固定层大小；空树返回空结果，单链每层也只有一个可见节点。
 func rightSideView(root *TreeNode) []int {
 	if root == nil {
 		return []int{}
@@ -75,6 +83,8 @@ func rightSideView(root *TreeNode) []int {
 	return result
 }
 
+// 面试首选 / Interview first choice：637 二叉树的层平均值。
+//
 // 3. Level averages: divide each level's sum by the captured level size using float64.
 // 3. 层平均值：用 float64 把该层总和除以固定的层节点数。
 // Time: O(n), Space: O(w).
@@ -82,6 +92,8 @@ func rightSideView(root *TreeNode) []int {
 //
 // 固定 levelSize 后只累加本层值，再转 float64 相除以保留小数；当前实现的 int 层和须不溢出。
 // Sum only the frozen level and divide as float64 to retain fractions; the int accumulator must not overflow.
+//
+// 状态与边界：sum 只累计当前层，levelSize 是该层节点数；空树直接返回，不做除零运算。
 func averageOfLevels(root *TreeNode) []float64 {
 	if root == nil {
 		return []float64{}
@@ -108,6 +120,8 @@ func averageOfLevels(root *TreeNode) []float64 {
 	return result
 }
 
+// 面试首选 / Interview first choice：515 在每个树行中找最大值。
+//
 // 4. Largest value in each row: compare every node in the captured level against a running maximum.
 // 4. 每行最大值：在固定的一层里用当前最大值逐个比较。
 // Time: O(n), Space: O(w).
@@ -115,6 +129,8 @@ func averageOfLevels(root *TreeNode) []float64 {
 //
 // 用本层第一个节点初始化 best，不能用 0，否则全负数层会出错；固定层大小后逐个取最大值。
 // Initialize best from the first node, not zero, to support all-negative levels; scan exactly the frozen layer.
+//
+// 状态与边界：best 是当前层已出队节点的最大值；空树返回空结果，全负数层仍取真实最大值。
 func largestValues(root *TreeNode) []int {
 	if root == nil {
 		return []int{}

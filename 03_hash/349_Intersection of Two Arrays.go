@@ -9,6 +9,8 @@ Given two integer arrays nums1 and nums2, return their intersection.
 Every result value must be unique, and the order does not matter.
 */
 
+// 面试首选 / Interview first choice：349 两个数组的交集。
+//
 // 1. Hash set: store nums1, then record a nums2 hit and delete it so each value appears once. Recommended.
 // 1. 哈希集合：先存 nums1，再扫 nums2，命中后删除以保证结果唯一。推荐。
 // Time: O(n+m) expected, Space: O(n) for the set.
@@ -16,6 +18,8 @@ Every result value must be unique, and the order does not matter.
 //
 // set 保存 nums1 中尚未输出的值；命中后删除，使 nums2 的重复值不会产生重复答案。
 // set contains nums1 values not yet emitted; deletion after a match suppresses duplicates from nums2.
+//
+// 边界：任一数组为空则交集为空；每个公共值只输出一次，结果无需排序。
 func intersection(nums1 []int, nums2 []int) []int {
 	set := map[int]bool{}
 	result := []int{}

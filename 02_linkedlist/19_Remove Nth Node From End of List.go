@@ -6,6 +6,8 @@ package _2_linkedlist
 Given the head of a linked list and an integer n, remove the nth node from the end and return the resulting head.
 */
 
+// 面试首选 / Interview first choice：19 删除链表的倒数第 N 个节点。
+//
 // 1. Fast and slow pointers: one pass, with fast kept exactly n links ahead of slow.
 // 1. 快慢指针：一次遍历，让 fast 始终领先 slow 恰好 n 条边。
 // Time: O(L), Space: O(1).

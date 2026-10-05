@@ -8,36 +8,40 @@ Given a positive integer target and an array nums of positive integers,
 return the minimum length of a contiguous subarray whose sum is at least target; return 0 if none exists.
 */
 
+// 面试首选 / Interview first choice：209 长度最小的子数组。
+//
 // 1. Sliding window: expand the right boundary, then shrink the left one while the sum qualifies.
 // 1. 滑动窗口：右边界不断扩张，窗口和达标后再收缩左边界。
 // Time: O(n), Space: O(1).
 // 时间复杂度：O(n)，空间复杂度：O(1)。
 //
-// i、j 是窗口两端，sum 是 nums[i:j+1] 的和。元素均为正数：右扩使和增加，左缩使和减少。
-// i and j bound the window; positive values make expansion increase its sum and shrinking decrease it.
+// left、right 是窗口两端，sum 是 nums[left:right+1] 的和。元素均为正数：右扩使和增加，左缩使和减少。
+// left and right bound the window; positive values make expansion increase its sum and shrinking decrease it.
 // 每次达标先记录长度再左缩，直到不达标；已舍弃的左端再配更远的右端只会更长，不会漏掉更优解。
 // Record each valid length before shrinking; extending a discarded start later cannot yield a shorter answer.
-// result=l+1 表示尚未找到答案；左右指针各最多走 n 次，所以内外循环合计 O(n)。
-// result=l+1 means no answer yet; each pointer advances at most n times, giving O(n) total work.
+// result=n+1 表示尚未找到答案；左右指针各最多走 n 次，所以内外循环合计 O(n)。
+// result=n+1 means no answer yet; each pointer advances at most n times, giving O(n) total work.
+//
+// 边界：要求 target>0 且元素为正；空数组或总和不足时返回 0，含负数时不能套用此窗口。
 func minSubArrayLen(target int, nums []int) int {
-	i := 0
-	l := len(nums)
+	left := 0
+	n := len(nums)
 	sum := 0
-	result := l + 1
+	result := n + 1
 
-	for j := range l {
-		sum += nums[j]
+	for right := range n {
+		sum += nums[right]
 		for sum >= target {
-			subLength := j - i + 1
+			subLength := right - left + 1
 			if subLength < result {
 				result = subLength
 			}
 
-			sum -= nums[i]
-			i++
+			sum -= nums[left]
+			left++
 		}
 	}
-	if result == l+1 {
+	if result == n+1 {
 		return 0
 	}
 	return result

@@ -66,6 +66,8 @@ func collectInorder(node *TreeNode, values *[]int) {
 	collectInorder(node.Right, values)
 }
 
+// 面试首选 / Interview first choice：98 验证二叉搜索树。
+//
 // 2. Inorder recursion with a predecessor (recommended): each value must exceed the previously visited node.
 // 2. 中序递归比较前驱：推荐；每个值都必须严格大于刚刚访问过的节点。
 // Time: O(n), Space: O(h).

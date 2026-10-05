@@ -49,6 +49,8 @@ func isBalancedTopDown(root *TreeNode) bool {
 		isBalancedTopDown(root.Right)
 }
 
+// 面试首选 / Interview first choice：110 平衡二叉树。
+//
 // 2. Bottom-up postorder recursion (recommended): a nonnegative helper result means the whole tree is balanced.
 // 2. 自底向上后序递归：推荐；辅助函数返回非负高度即整棵树平衡。
 // Time: O(n), Space: O(h).

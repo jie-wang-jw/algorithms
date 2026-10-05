@@ -11,6 +11,8 @@ repeatedly remove adjacent equal character pairs until no
 more removals are possible, and return the final string.
 */
 
+// 面试首选 / Interview first choice：1047 删除字符串中的所有相邻重复项。
+//
 // 1. Byte slice as a stack (recommended): pop when the current character equals the top, otherwise push it.
 // 1. 字节切片模拟栈：推荐；当前字符与栈顶相同就弹栈，否则入栈，连锁删除自然完成。
 // Time: O(n), Space: O(n) for the stack, and the result is also at most O(n).
@@ -20,6 +22,8 @@ more removals are possible, and return the final string.
 // The stack is the reduced scanned prefix; a new byte can form a new duplicate pair only with its top.
 // 相同就弹出抵消，不同就入栈；弹出暴露的新栈顶会与后续字符继续比较，从而处理连锁消除。
 // Pop equal pairs or push a different byte; later comparisons against the exposed top handle cascading removals.
+//
+// 边界：按题意使用单字节字符；空串或全部抵消都返回空串。
 func removeDuplicates(s string) string {
 	stack := make([]byte, 0, len(s))
 

@@ -45,6 +45,8 @@ func searchBST(root *TreeNode, val int) *TreeNode {
 	return searchBST(root.Right, val)
 }
 
+// 面试首选 / Interview first choice：700 二叉搜索树中的搜索。
+//
 // 2. Iteration: walk left or right in place; the ordered BST path needs no backtracking stack.
 // 2. 迭代：按大小原地走向左或右，有序性已确定路径，不需要回溯栈。
 // Time: O(h), Space: O(1).

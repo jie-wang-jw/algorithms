@@ -13,6 +13,8 @@ package _6_binary_tree
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：116 填充每个节点的下一个右侧节点指针。
+//
 // 1. Level-order queue: the next node in the captured level is the next-right pointer. Used by 116 and 117.
 // 1. 队列层序：当前层固定区间里的下一个节点就是 next；116 与 117 共用。
 // Time: O(n), Space: O(w) for the queue.
@@ -46,6 +48,8 @@ func connect(root *Node) *Node {
 	return root
 }
 
+// 面试首选 / Interview first choice：117 填充每个节点的下一个右侧节点指针 II。
+//
 // connectII is 117: the 102 article uses the same queue logic as 116.
 // connectII 对应 117：102 文章与 116 使用同一套层序逻辑。
 // Time: O(n), Space: O(w) for the queue.

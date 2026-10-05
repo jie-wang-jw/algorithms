@@ -20,10 +20,17 @@ type MyQueue struct {
 	outStack []int
 }
 
+// 面试首选 / Interview first choice：232 用栈实现队列。
+//
 // Create an empty queue with two empty stacks.
 // 用两个空栈创建一个空队列。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
+//
+// 状态：inStack 接收新元素，outStack 栈顶是最早待取元素；空队列要求两栈都空。
+// 正确性：只在 outStack 为空时整体转移，倒序后最早入队者在栈顶；提前转移会让新元素挡住旧元素。
+// 边界：Pop/Peek 要求队列非空；整套实现包括 MyQueue 的 Push、moveToOut、Pop、Peek、Empty。
+// 整套操作：Push/Pop/Peek 均摊 O(1)、单次最坏 O(n)，Empty O(1)；两栈存储 O(n)。每项至多转移一次。
 func Constructor() MyQueue {
 	return MyQueue{
 		inStack:  make([]int, 0),

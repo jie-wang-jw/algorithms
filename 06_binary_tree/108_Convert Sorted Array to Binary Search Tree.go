@@ -20,6 +20,8 @@ Midpoint 0 is the root; left half [-10,-3] and right half [5,9] each pick their 
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：108 将有序数组转换为二叉搜索树。
+//
 // 1. Index recursion (recommended): the midpoint of [left, right) is the root of a balanced subtree.
 // 1. 下标递归：推荐；左闭右开区间 [left, right) 的中点就是当前平衡子树的根。
 // Time: O(n), Space: O(log n) plus O(n) for the output tree.

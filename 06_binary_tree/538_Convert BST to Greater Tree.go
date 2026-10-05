@@ -25,6 +25,8 @@ Reverse inorder (right→root→left) visits 8,7,6,5,4,3,2,1,0 largest-first; th
 Notation: n nodes, height h, maximum width w; auxiliary space excludes returned results.
 */
 
+// 面试首选 / Interview first choice：538 把二叉搜索树转换为累加树。
+//
 // 1. Reverse-inorder recursion (recommended): add values from large to small so each node receives every greater value.
 // 1. 反中序递归：推荐；从大到小累加，当前节点就能加上所有比它大的值。
 // Time: O(n), Space: O(h).

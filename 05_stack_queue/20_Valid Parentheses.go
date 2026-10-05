@@ -11,6 +11,8 @@ and braces, determine whether every bracket has the correct type,
 closing order, and matching partner.
 */
 
+// 面试首选 / Interview first choice：20 有效的括号。
+//
 // 1. Stack of expected closing brackets: push the closer an opening bracket demands, then compare bytes directly.
 // 1. 栈保存期待的右括号：直接比较；入栈时换成对应的右括号，之后只做一次字节相等判断。
 // Time: O(n), Space: O(n) for the stack.
@@ -40,7 +42,7 @@ func isValid(s string) bool {
 		case '{':
 			stack = append(stack, '}')
 
-		default:
+		case ')', ']', '}':
 			if len(stack) == 0 {
 				return false
 			}
@@ -51,6 +53,8 @@ func isValid(s string) bool {
 			}
 
 			stack = stack[:len(stack)-1]
+		default:
+			return false
 		}
 	}
 
@@ -88,11 +92,9 @@ func isValidWithMap(s string) bool {
 			continue
 		}
 
-		if len(stack) == 0 {
-			return false
-		}
-
-		if stack[len(stack)-1] != expected {
+		// Reject a closing bracket without a matching stack top.
+		// 栈为空，或栈顶不是对应的左括号，都说明匹配失败。
+		if len(stack) == 0 || stack[len(stack)-1] != expected {
 			return false
 		}
 

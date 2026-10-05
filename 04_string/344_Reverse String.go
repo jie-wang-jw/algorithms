@@ -6,6 +6,8 @@ package _4_string
 Given a character array s, reverse its characters in place using O(1) extra space.
 */
 
+// 面试首选 / Interview first choice：344 反转字符串。
+//
 // 1. Two-pointer in-place byte swap (recommended)
 // 1. 字节双指针原地交换（推荐）
 // Swap from both ends until left meets right. Correct for printable ASCII (one byte per character).
