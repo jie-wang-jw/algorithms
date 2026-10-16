@@ -73,7 +73,7 @@ func (s *MyStack) Pop() int {
 	return top
 }
 
-// Read the queue front without removing it; that front is the stack top.
+// Top Read the queue front without removing it; that front is the stack top.
 // 只读队首、不删除；队首就是栈顶。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
@@ -84,7 +84,7 @@ func (s *MyStack) Top() int {
 	return s.queue[0]
 }
 
-// Report emptiness from the queue length alone.
+// Empty Report emptiness from the queue length alone.
 // 只看队列长度判断栈是否为空。
 // Time: O(1), Space: O(1).
 // 时间复杂度：O(1)，空间复杂度：O(1)。
@@ -92,7 +92,7 @@ func (s *MyStack) Empty() bool {
 	return len(s.queue) == 0
 }
 
-// 2. Rotate on Pop: keep arrival order and defer the O(n) rotation until removal.
+// MyStackLazy 2. Rotate on Pop: keep arrival order and defer the O(n) rotation until removal.
 // 2. 出栈时旋转：队列按入栈先后保存，把 O(n) 成本推迟到 Pop。
 // Time: Push amortized O(1), Pop/Top O(n), Empty O(1). Space: O(n).
 // 时间复杂度：Push 均摊 O(1)，Pop/Top O(n)，Empty O(1)。空间复杂度：O(n)。
@@ -104,7 +104,7 @@ type MyStackLazy struct {
 	queue []int
 }
 
-// Append x at the back; the back is the stack top, so Push does not rotate.
+// Push Append x at the back; the back is the stack top, so Push does not rotate.
 // 直接追加到队尾：队尾就是栈顶，入栈不必旋转。
 // Time: amortized O(1), worst O(n) on reallocation; backing storage O(n).
 // 时间均摊 O(1)，扩容时最坏 O(n)；底层存储 O(n)。
@@ -115,7 +115,7 @@ func (s *MyStackLazy) Push(x int) {
 	s.queue = append(s.queue, x)
 }
 
-// Rotate the oldest n-1 elements to the back, then dequeue the newest value at the front.
+// Pop Rotate the oldest n-1 elements to the back, then dequeue the newest value at the front.
 // 把前 n-1 个旧元素转到队尾，再从队首弹出最新入栈的值。
 // Time: O(n); storage O(n) for slice-backed queues, including possible append reallocations.
 // 时间 O(n)；切片队列及可能的扩容需要 O(n) 存储，不能把底层队列空间也算成 O(1)。
@@ -139,7 +139,7 @@ func (s *MyStackLazy) Pop() int {
 	return value
 }
 
-// Reuse Pop then Push so the newest value is read without accessing the queue back.
+// Top Reuse Pop then Push so the newest value is read without accessing the queue back.
 // 复用 Pop 取出栈顶，再用 Push 加回队尾，避免直接读队尾。
 // Time: O(n); storage O(n) for slice-backed queues, including possible append reallocations.
 // 时间 O(n)；切片队列及可能的扩容需要 O(n) 存储，不能把底层队列空间也算成 O(1)。

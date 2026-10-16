@@ -9,7 +9,7 @@ Implement a first-in-first-out queue using only standard stack operations,
 supporting Push, Pop, Peek, and Empty.
 */
 
-// 1. Two stacks with lazy transfer (recommended): move inStack into outStack only when outStack is empty.
+// MyQueue 1. Two stacks with lazy transfer (recommended): move inStack into outStack only when outStack is empty.
 // 1. 双栈惰性转移：推荐；仅当 outStack 为空时才把 inStack 全部倒入其中。
 // Time: Push amortized O(1); Pop/Peek amortized O(1), worst O(n); Empty O(1). Space: O(n).
 // 时间复杂度：Push 均摊 O(1)；Pop/Peek 均摊 O(1)、单次最坏 O(n)；Empty O(1)。空间复杂度：O(n)。
@@ -20,7 +20,7 @@ type MyQueue struct {
 	outStack []int
 }
 
-// 面试首选 / Interview first choice：232 用栈实现队列。
+// Constructor 面试首选 / Interview first choice：232 用栈实现队列。
 //
 // Create an empty queue with two empty stacks.
 // 用两个空栈创建一个空队列。
@@ -72,7 +72,7 @@ func (q *MyQueue) moveToOut() {
 	}
 }
 
-// Ensure the oldest element sits on outStack, then pop that top.
+// Pop Ensure the oldest element sits on outStack, then pop that top.
 // 先保证队首已在 outStack 栈顶，再弹出它。
 // Amortized O(1), worst-case O(n) time per operation; stack storage O(n), including transfer allocations.
 // 每次均摊 O(1)、最坏 O(n) 时间；两栈存储 O(n)，转移时可能分配输出栈。
