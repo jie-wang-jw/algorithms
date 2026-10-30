@@ -2,6 +2,7 @@ package _3_hash
 
 import (
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 )
@@ -477,6 +478,48 @@ func TestCanConstruct(t *testing.T) {
 						t.Fatalf("%s(%q, %q) = %v, want %v", cf.name, tt.ransomNote, tt.magazine, got, tt.want)
 					}
 				})
+			}
+		})
+	}
+}
+
+// Compare groups without relying on either group order or word order; retain duplicate words.
+// 忽略组间、组内顺序，但保留重复词的次数。
+func normalizeAnagramGroups(groups [][]string) [][]string {
+	for _, group := range groups {
+		slices.Sort(group)
+	}
+	sort.Slice(groups, func(i, j int) bool {
+		return slices.Compare(groups[i], groups[j]) < 0
+	})
+	return groups
+}
+
+func TestGroupAnagrams(t *testing.T) {
+	tests := []struct {
+		name string
+		strs []string
+		want [][]string
+	}{
+		{"example", []string{"eat", "tea", "tan", "ate", "nat", "bat"}, [][]string{{"eat", "tea", "ate"}, {"tan", "nat"}, {"bat"}}},
+		{"empty string", []string{""}, [][]string{{""}}},
+		{"single letter", []string{"a"}, [][]string{{"a"}}},
+		{"duplicates and empty strings", []string{"", "ab", "ba", "ab", ""}, [][]string{{"", ""}, {"ab", "ba", "ab"}}},
+		{"counts distinguish groups", []string{"aab", "abb", "baa", "bba"}, [][]string{{"aab", "baa"}, {"abb", "bba"}}},
+		{"alphabet endpoints", []string{"az", "za", "zz", "aa"}, [][]string{{"az", "za"}, {"zz"}, {"aa"}}},
+		{"empty input", []string{}, [][]string{}},
+		{"nil input", nil, [][]string{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			original := slices.Clone(tt.strs)
+			got := normalizeAnagramGroups(groupAnagrams(tt.strs))
+			want := normalizeAnagramGroups(tt.want)
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("groupAnagrams(%v) = %v, want %v", tt.strs, got, want)
+			}
+			if !slices.Equal(tt.strs, original) {
+				t.Fatal("groupAnagrams modified its input")
 			}
 		})
 	}

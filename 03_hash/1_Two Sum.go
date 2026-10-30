@@ -31,7 +31,6 @@ func twoSum(nums []int, target int) []int {
 		}
 		seen[num] = i
 	}
-
 	return nil
 }
 
@@ -43,7 +42,7 @@ func twoSum(nums []int, target int) []int {
 // j 从 i+1 开始，既保证下标不同，也避免重复检查同一无序对；找到即返回原下标。
 // Start j at i+1 to keep indices distinct and check each unordered pair once; return original indices on a match.
 func twoSumBruteForce(nums []int, target int) []int {
-	for i := 0; i < len(nums); i++ {
+	for i := range nums {
 		for j := i + 1; j < len(nums); j++ {
 			if nums[i]+nums[j] == target {
 				return []int{i, j}
